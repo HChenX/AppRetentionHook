@@ -6,7 +6,7 @@ android {
     Properties properties = new Properties()
     InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream()
     properties.load(inputStream)
-    
+
     def keyKeyStoreFile = file(properties.getProperty('keyStoreFile'))
     def keyKeyStorePassword = properties.getProperty('keyStorePassword')
     def keyKeyAlias = properties.getProperty('keyAlias')
@@ -29,8 +29,8 @@ android {
         minSdk 26
         //noinspection OldTargetApi
         targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        versionCode 5
+        versionName "3.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release
