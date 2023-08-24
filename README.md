@@ -56,9 +56,9 @@
 
 - The module code has referenced the following project, and we sincerely appreciate it:
 
-| Project Name |                            Project Link                             | 
-|:------------:|:-------------------------------------------------------------------:|
-|  Cemiuiler   | ![Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
-|  Don't Kill  |         ![Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
+| Project Name |                            Project Link                            | 
+|:------------:|:------------------------------------------------------------------:|
+|  Cemiuiler   | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
+|  Don't Kill  |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
 
 This is a Lsp module, Achieving app retention by modifying the system kill logic through Hook.
