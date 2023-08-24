@@ -75,4 +75,16 @@
 |  Cemiuiler   | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 |  Don't Kill  |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
 
-This is a Lsp module, Achieving app retention by modifying the system kill logic through Hook.
+# 📢Statement
+
+- Any use of this project must indicate the author and source, and plagiarism is not acceptable!!
+- Plagiarism of this project may lead to project closure!!
+
+# 🌏Disclaimers
+
+- If you use this module, you are agreeing to accept all consequences.
+- This project holds no responsibility for any projects derived from it.
+
+# 🎉Conclusion
+
+- Thank you for using this module. Enjoy your day! ♥️
