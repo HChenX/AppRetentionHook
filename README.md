@@ -52,6 +52,20 @@
 - If you can accept these possible issues will give you a very surprising experience with the
   module.
 
+# 🔍Frequently Asked Questions
+
+- Q: How to use?
+- A: Please read carefully the README.md.
+- Q: Will it conflict with other Lsp modules with similar functions?
+- A: That's for sure. Please don't use with Don-t-Kill, Same functionality in Cemiuiler, A1 Lsp
+  module, and other.
+- Q: Why is my phone stuck?
+- A: Because change system kill logic, so please pay attention to the usage of phone memory.
+- Q: Why my phone power consumption increase?
+- A: This is normal, and a reasonable range is acceptable.
+- Q: Why me phone can't turn on?
+- A: It may be caused by some changes, please uninstall and provide feedback.
+
 # 🙏Acknowledgments
 
 - The module code has referenced the following project, and we sincerely appreciate it:
