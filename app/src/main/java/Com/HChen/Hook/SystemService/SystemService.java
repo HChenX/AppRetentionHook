@@ -21,8 +21,8 @@ public class SystemService extends HookMode {
                 }
         );//
 
-        /*禁用killPids*/
-        findAndHookMethod("com.android.server.am.ActivityManagerService",
+        /*禁用killPids_此方法牵扯过多且不适合Hook。方法可用于处理表面内存不足的情况，但这是合理的*/
+        /*findAndHookMethod("com.android.server.am.ActivityManagerService",
                 "killPids", int[].class, String.class, boolean.class,
                 new HookAction() {
                     @Override
@@ -31,7 +31,7 @@ public class SystemService extends HookMode {
                         param.setResult(true);
                     }
                 }
-        );
+        );*/
 
         /*禁止killProcessesBelowForeground*/
         /*findAndHookMethod("com.android.server.am.ActivityManagerService",
@@ -57,8 +57,8 @@ public class SystemService extends HookMode {
                 }
         );
 
-        /*禁止清理空进程_待考虑*/
-        findAndHookMethod("com.android.server.am.ActivityManagerService",
+        /*禁止清理空进程_空进程不包含任何活动，清理是合理的*/
+        /*findAndHookMethod("com.android.server.am.ActivityManagerService",
                 "trimApplicationsLocked", boolean.class, String.class,
                 new HookAction() {
                     @Override
@@ -67,7 +67,7 @@ public class SystemService extends HookMode {
                         param.setResult(null);
                     }
                 }
-        );
+        );*/
 
         /*禁止空闲清理*/
         findAndHookMethod("com.android.server.am.ActivityManagerService",
@@ -92,8 +92,8 @@ public class SystemService extends HookMode {
                 }
         );
 
-        /*禁止停止后台空闲服务*/
-        findAndHookMethod("com.android.server.am.ActiveServices",
+        /*禁止停止后台空闲服务_与getAppStartModeLOSP的Hook重复*/
+       /* findAndHookMethod("com.android.server.am.ActiveServices",
                 "stopInBackgroundLocked", int.class,
                 new HookAction() {
                     @Override
@@ -102,7 +102,7 @@ public class SystemService extends HookMode {
                         param.setResult(null);
                     }
                 }
-        );//
+        );//*/
 
         /*禁止停止后台受限和缓存的app*/
         hookAllMethods("com.android.server.am.ProcessList",
@@ -317,7 +317,7 @@ public class SystemService extends HookMode {
                 }
         );//*/
 
-        /*拒绝重新设置压力等*/
+        /*拒绝根据压力trim进程*/
         findAndHookMethod("com.android.server.am.AppProfiler"
                 , "updateLowMemStateLSP", int.class, int.class, int.class,
                 new HookAction() {
