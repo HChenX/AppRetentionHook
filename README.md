@@ -21,7 +21,7 @@
     * Last: Select ` Android `. And now must reboot.
 
 - The module achieving app retention by modifying the system kill logic through Hook.
-- The module is designed for the Miui of Android 13 ` Miui14`. Android 12 and 11 can also be
+- The module is designed for the Miui of Android 13 `Miui14`. Android 12 and 11 can also be
   used, but the effect is unknown.
 - But please note that non Miui system Android 13 is also my recommended option. Can be used
   normally.
