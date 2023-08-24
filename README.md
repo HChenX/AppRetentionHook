@@ -21,6 +21,10 @@
     * Last: Select ` Android `. And now must reboot.
 
 - The module achieving app retention by modifying the system kill logic through Hook.
+- The module is designed for the Miui of Android 13 ` Miui14`. Android 12 and 11 can also be
+  used, but the effect is unknown.
+- But please note that non Miui system Android 13 is also my recommended option. Can be used
+  normally.
 
 # 🌟Module Effect
 
@@ -41,8 +45,20 @@
     * 3.The most serious thing is that it may cause the phone to not turn on. So you must be fully
       prepared.
 
+- And if you use non Miui Android 13 system and non AOSP system.But use like Flyme,ColorOs...
+  manufacturer's custom system, they may contain vendor custom kill logic, Has a certain impact on
+  the
+  effectiveness of the module.
 - If you can accept these possible issues will give you a very surprising experience with the
   module.
 
+# 🙏Acknowledgments
 
-  This is a Lsp module, Achieving app retention by modifying the system kill logic through Hook.
+- The module code has referenced the following project, and we sincerely appreciate it:
+
+| Project Name |                            Project Link                             | 
+|:------------:|:-------------------------------------------------------------------:|
+|  Cemiuiler   | ![Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
+|  Don't Kill  |         ![Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
+
+This is a Lsp module, Achieving app retention by modifying the system kill logic through Hook.
