@@ -15,7 +15,7 @@
 # ✨Module Introduction
 
 * This is a Lsp module,You need pass Lsp to use it.
-* #### Usage
+* #### Usage:
     * First: install the Lsp module on your phone.
     * Next: open Lsp app, and activation the module.
     * Last: Select ` Android `. And now must reboot.
