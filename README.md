@@ -16,9 +16,9 @@
 
 * This is a Lsp module,You need pass Lsp to use it.
  * #### Usage
-  * First: install the Lsp module on your phone.
-  * Next: open Lsp app, and activation the module.
-  * Last: Select Android. And now must reboot.
+   * First: install the Lsp module on your phone.
+   * Next: open Lsp app, and activation the module.
+   * Last: Select Android. And now must reboot.
 - The module achieving app retention by modifying the system kill logic through Hook.
 
 # 🌟Module Effect
