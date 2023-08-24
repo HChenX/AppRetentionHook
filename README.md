@@ -1,5 +1,5 @@
 <div align="center">
-<ar>AppRetentionHook</ar>
+<h1>AppRetentionHook</h1>
 ![stars](https://img.shields.io/github/stars/HChenX/AppRetentionHook?style=flat)
 ![downloads](https://img.shields.io/github/downloads/HChenX/AppRetentionHook/total)
 ![Github repo size](https://img.shields.io/github/repo-size/HChenX/AppRetentionHook)
