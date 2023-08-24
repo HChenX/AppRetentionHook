@@ -7,6 +7,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/HChenX/AppRetentionHook)](https://github.com/HChenX/AppRetentionHook/releases)
 [![GitHub Release Date](https://img.shields.io/github/release-date/HChenX/AppRetentionHook)](https://github.com/HChenX/AppRetentionHook/releases)
 ![last commit](https://img.shields.io/github/last-commit/HChenX/AppRetentionHook?style=flat)
+![language](https://img.shields.io/badge/language-java-purple)
 
 <p><b><a href="README.md">English</a> | <a href="README-zh.md">简体中文</a></b></p>
 <p>This is a Lsp module, Achieving app retention by modifying the system kill logic through Hook.</p>
@@ -75,7 +76,7 @@
 |  Cemiuiler   | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 |  Don't Kill  |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
 
-# 📢Statement
+# 📢Project Statement
 
 - Any use of this project must indicate the author and source, and plagiarism is not acceptable!!
 - Plagiarism of this project may lead to project closure!!

@@ -7,6 +7,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/HChenX/AppRetentionHook)](https://github.com/HChenX/AppRetentionHook/releases)
 [![GitHub Release Date](https://img.shields.io/github/release-date/HChenX/AppRetentionHook)](https://github.com/HChenX/AppRetentionHook/releases)
 ![last commit](https://img.shields.io/github/last-commit/HChenX/AppRetentionHook?style=flat)
+![language](https://img.shields.io/badge/language-java-purple)
 
 <p><b><a href="README.md">English</a> | <a href="README-zh.md">简体中文</a></b></p>
 <p>本模块通过Hook系统kill逻辑来实现后台保活，这是一个Lsp模块。</p>
@@ -66,7 +67,7 @@
 | Cemiuiler  | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 | Don't Kill |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
 
-# 📢声明
+# 📢项目声明
 
 - 任何对本项目的使用必须注明作者，抄袭是不可接受的！
 - 抄袭可能导致本项目的闭源！
