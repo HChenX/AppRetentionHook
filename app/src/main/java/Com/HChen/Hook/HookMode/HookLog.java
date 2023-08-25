@@ -7,6 +7,14 @@ import de.robv.android.xposed.XposedBridge;
 public class HookLog {
     String Tag = "[ HChenHook ]: ";
 
+    public void setLog(String classLog, String nameLog) {
+        logSI("Hook Class: " + classLog + " methodName: " + nameLog);
+    }
+
+    public void setLog(String classLog) {
+        logSI("Hook Class: " + classLog);
+    }
+
     public void logI(String Log) {
         XposedBridge.log(Tag + "I: " + Log);
     }

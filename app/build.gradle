@@ -31,7 +31,7 @@ android {
         targetSdk 33
         //noinspection HighAppVersionCode
         versionCode 2023082406
-        versionName "3.2"
+        versionName "3.3"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release

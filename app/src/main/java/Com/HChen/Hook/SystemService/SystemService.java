@@ -1,5 +1,8 @@
 package Com.HChen.Hook.SystemService;
 
+import static Com.HChen.Hook.HookName.SystemName.*;
+import static Com.HChen.Hook.HookValue.SystemValue.*;
+
 import android.content.Context;
 import android.os.Handler;
 
@@ -10,12 +13,12 @@ public class SystemService extends HookMode {
     @Override
     public void init() {
         /*关闭Cpu超时检查*/
-        hookAllMethods("com.android.server.am.ActivityManagerService",
-                "checkExcessivePowerUsage",
+        hookAllMethods(ActivityManagerService,
+                checkExcessivePowerUsage,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook checkExcessivePowerUsage");
+                        setLog(ActivityManagerService, checkExcessivePowerUsage);
                         param.setResult(null);
                     }
                 }
@@ -46,12 +49,12 @@ public class SystemService extends HookMode {
         );*/
 
         /*禁止杀死adj低的进程*/
-        findAndHookMethod("com.android.server.am.ActivityManagerService"
-                , "killProcessesBelowAdj", int.class, String.class,
+        findAndHookMethod(ActivityManagerService
+                , killProcessesBelowAdj, int.class, String.class,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook killProcessesBelowAdj");
+                        setLog(ActivityManagerService, killProcessesBelowAdj);
                         param.setResult(true);
                     }
                 }
@@ -70,23 +73,23 @@ public class SystemService extends HookMode {
         );*/
 
         /*禁止空闲清理*/
-        findAndHookMethod("com.android.server.am.ActivityManagerService",
-                "performIdleMaintenance", new HookAction() {
+        findAndHookMethod(ActivityManagerService,
+                performIdleMaintenance, new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook performIdleMaintenance");
+                        setLog(ActivityManagerService, performIdleMaintenance);
                         param.setResult(null);
                     }
                 }
         );
 
         /*关闭后台服务限制*/
-        findAndHookMethod("com.android.server.am.ActivityManagerService",
-                "getAppStartModeLOSP", int.class, String.class, int.class, int.class, boolean.class, boolean.class, boolean.class, String.class,
+        findAndHookMethod(ActivityManagerService,
+                getAppStartModeLOSP, int.class, String.class, int.class, int.class, boolean.class, boolean.class, boolean.class, String.class,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook getAppStartModeLOSP");
+                        setLog(ActivityManagerService, getAppStartModeLOSP);
                         param.setResult(0);
                     }
                 }
@@ -105,60 +108,60 @@ public class SystemService extends HookMode {
         );//*/
 
         /*禁止停止后台受限和缓存的app*/
-        hookAllMethods("com.android.server.am.ProcessList",
-                "killAppIfBgRestrictedAndCachedIdleLocked",
+        hookAllMethods(ProcessList,
+                killAppIfBgRestrictedAndCachedIdleLocked,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook killAppIfBgRestrictedAndCachedIdleLocked");
+                        setLog(ProcessList, killAppIfBgRestrictedAndCachedIdleLocked);
                         param.setResult(0L);
                     }
                 }
         );
 
         /*禁止使用命令停止全部活动*/
-        hookAllMethods("com.android.server.am.ActivityManagerShellCommand",
-                "runKillAll",
+        hookAllMethods(ActivityManagerShellCommand,
+                runKillAll,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook runKillAll");
+                        setLog(ActivityManagerShellCommand, runKillAll);
                         param.setResult(null);
                     }
                 }
         );//
 
         /*禁止检查是否应该停止活动*/
-        hookAllMethods("com.android.server.am.OomAdjuster",
-                "shouldKillExcessiveProcesses",
+        hookAllMethods(OomAdjuster,
+                shouldKillExcessiveProcesses,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook shouldKillExcessiveProcesses");
+                        setLog(OomAdjuster, shouldKillExcessiveProcesses);
                         param.setResult(false);
                     }
                 }
         );//
 
         /*禁止修剪进程*/
-        hookAllMethods("com.android.server.am.OomAdjuster",
-                "updateAndTrimProcessLSP",
+        hookAllMethods(OomAdjuster,
+                updateAndTrimProcessLSP,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook updateAndTrimProcessLSP");
+                        setLog(OomAdjuster, updateAndTrimProcessLSP);
                         param.args[2] = 0;
                     }
                 }
         );
 
         /*禁止修剪虚幻进程*/
-        hookAllMethods("com.android.server.am.PhantomProcessList",
-                "trimPhantomProcessesIfNecessary",
+        hookAllMethods(PhantomProcessList,
+                trimPhantomProcessesIfNecessary,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook trimPhantomProcessesIfNecessary");
+                        setLog(PhantomProcessList, trimPhantomProcessesIfNecessary);
                         param.setResult(null);
                     }
                 }
@@ -190,24 +193,24 @@ public class SystemService extends HookMode {
         );*/
 
         /*禁止修剪最近任务卡片*/
-        hookAllMethods("com.android.server.wm.RecentTasks",
-                "trimInactiveRecentTasks",
+        hookAllMethods(RecentTasks,
+                trimInactiveRecentTasks,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook trimInactiveRecentTasks");
+                        setLog(RecentTasks, trimInactiveRecentTasks);
                         param.setResult(null);
                     }
                 }
         );//
 
         /*设置最近任务可见*/
-        hookAllMethods("com.android.server.wm.RecentTasks",
-                "isInVisibleRange",
+        hookAllMethods(RecentTasks,
+                isInVisibleRange,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook isInVisibleRange");
+                        setLog(RecentTasks, isInVisibleRange);
                         param.args[2] = 0;
                     }
                 }
@@ -235,71 +238,72 @@ public class SystemService extends HookMode {
         );*/
 
         /*谎报内存压力*/
-        findAndHookConstructor("com.android.server.am.LowMemDetector",
-                findClass("com.android.server.am.ActivityManagerService"),
+        findAndHookConstructor(LowMemDetector,
+                findClass(ActivityManagerService),
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook LowMemDetector mPressureState");
+                        setLog(LowMemDetector, "mPressureState");
                         getDeclaredField(param, "mPressureState", 0);
                     }
                 }
         );
 
         /*禁止更新压力*/
-        findAndHookMethod("com.android.server.am.LowMemDetector$LowMemThread",
-                "run",
+        findAndHookMethod(LowMemDetector + "$LowMemThread",
+                run,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook LowMemDetector$LowMemThread run");
+                        setLog(LowMemDetector + "$LowMemThread", run);
                         param.setResult(null);
                     }
                 }
         );
 
         /*设置最大进程限制*/
-        findAndHookMethod("com.android.server.am.ActivityManagerConstants",
-                "getDefaultMaxCachedProcesses",
+        findAndHookMethod(ActivityManagerConstants,
+                getDefaultMaxCachedProcesses,
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook getDefaultMaxCachedProcesses");
+                        setLog(ActivityManagerConstants, getDefaultMaxCachedProcesses);
                         param.setResult(Integer.MAX_VALUE);
                     }
                 }
         );//
 
         /*阻止更新最大进程限制*/
-        findAndHookMethod("com.android.server.am.ActivityManagerConstants",
-                "updateMaxCachedProcesses",
+        findAndHookMethod(ActivityManagerConstants,
+                updateMaxCachedProcesses,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook updateMaxCachedProcesses");
+                        setLog(ActivityManagerConstants, updateMaxCachedProcesses);
                         param.setResult(null);
                     }
                 }
         );//
 
         /*设置最大幻影进程数量*/
-        findAndHookConstructor("com.android.server.am.ActivityManagerConstants", Context.class,
-                findClass("com.android.server.am.ActivityManagerService"), Handler.class,
+        findAndHookConstructor(ActivityManagerConstants, Context.class,
+                findClass(ActivityManagerService), Handler.class,
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
+                        setLog(ActivityManagerConstants, "MAX_PHANTOM_PROCESSES");
                         setInt(param.thisObject, "MAX_PHANTOM_PROCESSES", Integer.MAX_VALUE);
                     }
                 }
         );
 
         /*禁止kill受限的缓存*/
-        findAndHookMethod("com.android.server.am.ActivityManagerConstants",
-                "updateKillBgRestrictedCachedIdle",
+        findAndHookMethod(ActivityManagerConstants,
+                updateKillBgRestrictedCachedIdle,
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook updateKillBgRestrictedCachedIdle");
+                        setLog(ActivityManagerConstants, updateKillBgRestrictedCachedIdle);
                         setBoolean(param.thisObject, "mKillBgRestrictedAndCachedIdle", false);
                     }
                 }
@@ -318,12 +322,12 @@ public class SystemService extends HookMode {
         );//*/
 
         /*拒绝根据压力trim进程*/
-        findAndHookMethod("com.android.server.am.AppProfiler"
-                , "updateLowMemStateLSP", int.class, int.class, int.class,
+        findAndHookMethod(AppProfiler,
+                updateLowMemStateLSP, int.class, int.class, int.class,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook updateLowMemStateLSP");
+                        setLog(AppProfiler, updateLowMemStateLSP);
                         param.setResult(false);
 
                     }
@@ -350,12 +354,12 @@ public class SystemService extends HookMode {
                 });*/
 
         /*设置自定义最大缓存数量*/
-        findAndHookMethod("com.android.server.am.ActivityManagerConstants",
-                "setOverrideMaxCachedProcesses", int.class,
+        findAndHookMethod(ActivityManagerConstants,
+                setOverrideMaxCachedProcesses, int.class,
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook setOverrideMaxCachedProcesses");
+                        setLog(ActivityManagerConstants, setOverrideMaxCachedProcesses);
                         param.args[0] = Integer.MAX_VALUE;
                     }
                 }

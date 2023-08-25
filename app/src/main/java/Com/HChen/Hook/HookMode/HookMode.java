@@ -125,7 +125,7 @@ public abstract class HookMode extends HookLog {
             Class<?> hookClass = findClassIfExists(className);
             if (hookClass != null) {
                 int Num = XposedBridge.hookAllMethods(hookClass, methodName, callback).size();
-                logI("Hook The: " + hookClass + " Num is: " + Num);
+                logI("Hook The: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
             } else {
                 logE("Hook Methods is null: " + className);
             }
@@ -137,7 +137,7 @@ public abstract class HookMode extends HookLog {
     public void hookAllMethods(Class<?> hookClass, String methodName, XC_MethodHook callback) {
         try {
             int Num = XposedBridge.hookAllMethods(hookClass, methodName, callback).size();
-            logI("Hook The: " + hookClass + " Num is: " + Num);
+            logI("Hook The: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
         } catch (Throwable e) {
             logE("Hook The: " + e + " Error");
         }
@@ -145,6 +145,10 @@ public abstract class HookMode extends HookLog {
 
     public void callMethod(Object obj, String methodName, Object... args) {
         XposedHelpers.callMethod(obj, methodName, args);
+    }
+
+    public void callStaticMethod(Class<?> clazz, String methodName, Object... args) {
+        XposedHelpers.callStaticMethod(clazz, methodName, args);
     }
 
     public void getDeclaredField(XC_MethodHook.MethodHookParam param, String iNeedString, Object iNeedTo) {
