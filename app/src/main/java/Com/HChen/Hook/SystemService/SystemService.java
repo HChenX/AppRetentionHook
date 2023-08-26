@@ -24,19 +24,20 @@ public class SystemService extends HookMode {
                 }
         );//
 
-        /*禁用killPids_此方法牵扯过多且不适合Hook。方法可用于处理表面内存不足的情况，但这是合理的*/
-        /*findAndHookMethod("com.android.server.am.ActivityManagerService",
-                "killPids", int[].class, String.class, boolean.class,
+        /*禁用killPids_根据adj计算最差类型pid并kill
+        X此方法牵扯过多且不适合Hook。方法可用于处理表面内存不足的情况，但这是合理的X*/
+        findAndHookMethod(ActivityManagerService,
+                killPids, int[].class, String.class, boolean.class,
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        logSI("Hook killPids");
+                        setLog(ActivityManagerService, killPids);
                         param.setResult(true);
                     }
                 }
-        );*/
+        );
 
-        /*禁止killProcessesBelowForeground*/
+        /*禁止killProcessesBelowForeground_和下面重复*/
         /*findAndHookMethod("com.android.server.am.ActivityManagerService",
                 "killProcessesBelowForeground", String.class,
                 new HookAction() {
@@ -56,6 +57,18 @@ public class SystemService extends HookMode {
                     protected void before(XC_MethodHook.MethodHookParam param) {
                         setLog(ActivityManagerService, killProcessesBelowAdj);
                         param.setResult(true);
+                    }
+                }
+        );
+
+        /*禁止清理全部后台*/
+        findAndHookMethod(ActivityManagerService,
+                killAllBackgroundProcesses,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        setLog(ActivityManagerService, killAllBackgroundProcesses);
+                        param.setResult(null);
                     }
                 }
         );
@@ -83,8 +96,8 @@ public class SystemService extends HookMode {
                 }
         );
 
-        /*关闭后台服务限制*/
-        findAndHookMethod(ActivityManagerService,
+        /*关闭后台服务限制_可能导致后台异常*/
+        /*findAndHookMethod(ActivityManagerService,
                 getAppStartModeLOSP, int.class, String.class, int.class, int.class, boolean.class, boolean.class, boolean.class, String.class,
                 new HookAction() {
                     @Override
@@ -93,9 +106,9 @@ public class SystemService extends HookMode {
                         param.setResult(0);
                     }
                 }
-        );
+        );*/
 
-        /*禁止停止后台空闲服务_与getAppStartModeLOSP的Hook重复*/
+        /*禁止停止后台空闲服务_与getAppStartModeLOSP的Hook重复_不适合存活的service应该杀掉*/
        /* findAndHookMethod("com.android.server.am.ActiveServices",
                 "stopInBackgroundLocked", int.class,
                 new HookAction() {
@@ -115,6 +128,19 @@ public class SystemService extends HookMode {
                     protected void before(XC_MethodHook.MethodHookParam param) {
                         setLog(ProcessList, killAppIfBgRestrictedAndCachedIdleLocked);
                         param.setResult(0L);
+                    }
+                }
+        );
+
+        /*去除受限限制*/
+        findAndHookMethod(ProcessList,
+                updateBackgroundRestrictedForUidPackageLocked,
+                int.class, String.class, boolean.class,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        setLog(ProcessList, updateBackgroundRestrictedForUidPackageLocked);
+                        param.args[2] = false;
                     }
                 }
         );

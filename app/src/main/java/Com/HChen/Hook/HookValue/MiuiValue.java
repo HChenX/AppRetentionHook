@@ -15,4 +15,6 @@ public final class MiuiValue {
     public static final String MiuiMemReclaimer = "com.android.server.am.MiuiMemReclaimer";
     /*MiuiFramework*/
     public static final String ProcessManager = "miui.process.ProcessManager";
+    public static final String PressureStateSettings = "android.os.spc.PressureStateSettings";
+
 }

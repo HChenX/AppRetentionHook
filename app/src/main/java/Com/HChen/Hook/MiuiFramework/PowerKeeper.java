@@ -19,5 +19,15 @@ public class PowerKeeper extends HookMode {
                     }
                 }
         );
+
+        findAndHookConstructor(PressureStateSettings,
+                new HookAction() {
+                    @Override
+                    protected void after(MethodHookParam param) {
+                        setLog(PressureStateSettings, "PROCESS_CLEANER_ENABLED");
+                        setBoolean(param.thisObject, "PROCESS_CLEANER_ENABLED", false);
+                    }
+                }
+        );
     }
 }

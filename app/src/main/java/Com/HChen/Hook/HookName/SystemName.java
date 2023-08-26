@@ -6,6 +6,7 @@ public final class SystemName {
     public static final String performIdleMaintenance = "performIdleMaintenance";
     public static final String getAppStartModeLOSP = "getAppStartModeLOSP";
     public static final String killAppIfBgRestrictedAndCachedIdleLocked = "killAppIfBgRestrictedAndCachedIdleLocked";
+    public static final String updateBackgroundRestrictedForUidPackageLocked = "updateBackgroundRestrictedForUidPackageLocked";
     public static final String runKillAll = "runKillAll";
     public static final String shouldKillExcessiveProcesses = "shouldKillExcessiveProcesses";
     public static final String updateAndTrimProcessLSP = "updateAndTrimProcessLSP";
@@ -13,6 +14,8 @@ public final class SystemName {
     public static final String trimInactiveRecentTasks = "trimInactiveRecentTasks";
     public static final String isInVisibleRange = "isInVisibleRange";
     public static final String run = "run";
+    public static final String killPids = "killPids";
+    public static final String killAllBackgroundProcesses = "killAllBackgroundProcesses";
     public static final String getDefaultMaxCachedProcesses = "getDefaultMaxCachedProcesses";
     public static final String updateMaxCachedProcesses = "updateMaxCachedProcesses";
     public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";
