@@ -52,8 +52,7 @@ public abstract class HookMode extends HookLog {
         }
     }
 
-    public static class HookAction extends XC_MethodHook {
-        HookLog hookLog = new HookLog();
+    public static class HookAction extends HookLog {
 
         protected void before(MethodHookParam param) throws Throwable {
         }
@@ -74,7 +73,7 @@ public abstract class HookMode extends HookLog {
             try {
                 before(param);
             } catch (Throwable e) {
-                hookLog.logE("[ HChenHook ]: " + e);
+                logE("[ HChenHook ]: " + e);
             }
         }
 
@@ -83,7 +82,7 @@ public abstract class HookMode extends HookLog {
             try {
                 after(param);
             } catch (Throwable e) {
-                hookLog.logE("[ HChenHook ]: " + e);
+                logE("[ HChenHook ]: " + e);
             }
         }
 

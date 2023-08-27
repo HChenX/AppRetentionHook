@@ -5,7 +5,7 @@ import Com.HChen.Hook.MiuiService.MiuiService;
 import Com.HChen.Hook.SystemService.SystemService;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
-public class HookRun {
+public class HookRun  {
     LoadPackageParam loadPackageParam;
 
     public void HookPackage(LoadPackageParam loadPackageParam) {

@@ -20,5 +20,6 @@ public final class SystemName {
     public static final String updateMaxCachedProcesses = "updateMaxCachedProcesses";
     public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";
     public static final String updateLowMemStateLSP = "updateLowMemStateLSP";
+    public static final String setMemFactorOverride = "setMemFactorOverride";
     public static final String setOverrideMaxCachedProcesses = "setOverrideMaxCachedProcesses";
 }
