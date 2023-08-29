@@ -5,7 +5,7 @@ import Com.HChen.Hook.MiuiService.MiuiService;
 import Com.HChen.Hook.SystemService.SystemService;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
-public class HookRun  {
+public class HookRun {
     LoadPackageParam loadPackageParam;
 
     public void HookPackage(LoadPackageParam loadPackageParam) {
@@ -14,6 +14,7 @@ public class HookRun  {
         if (PackageName.equals("android")) {
             initHook(new SystemService());
             initHook(new MiuiService());
+        } else if (PackageName.equals("com.miui.powerkeeper")) {
             initHook(new PowerKeeper());
         }
     }

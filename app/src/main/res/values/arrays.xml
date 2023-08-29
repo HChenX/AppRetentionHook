@@ -2,5 +2,6 @@
 <resources>
     <string-array name="hook_app">
         <item>android</item>
+        <item>com.miui.powerkeeper</item>
     </string-array>
 </resources>

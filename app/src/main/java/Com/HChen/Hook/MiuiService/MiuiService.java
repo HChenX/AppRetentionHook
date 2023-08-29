@@ -51,11 +51,12 @@ public class MiuiService extends HookMode {
                         setBoolean(param.thisObject, "ENABLED_SCOUT", false);
                         setBoolean(param.thisObject, "ENABLED_SCOUT_DEBUG", false);
                         setBoolean(param.thisObject, "BINDER_FULL_KILL_PROC", false);
-                        setBoolean(param.thisObject, "PANIC_D_THREAD", false);
+                        setBoolean(param.thisObject, "SCOUT_BINDER_GKI", false);
+                        /*是崩溃相关*/
+                        /*setBoolean(param.thisObject, "PANIC_D_THREAD", false);
                         setBoolean(param.thisObject, "SYSRQ_ANR_D_THREAD", false);
                         setBoolean(param.thisObject, "PANIC_ANR_D_THREAD", false);
-                        setBoolean(param.thisObject, "SCOUT_BINDER_GKI", false);
-                        setBoolean(param.thisObject, "DISABLE_AOSP_ANR_TRACE_POLICY", false);
+                        setBoolean(param.thisObject, "DISABLE_AOSP_ANR_TRACE_POLICY", false);*/
                     }
                 }
         );//
@@ -344,6 +345,17 @@ public class MiuiService extends HookMode {
                     protected void before(XC_MethodHook.MethodHookParam param) {
                         setLog(2, MiuiMemReclaimer + "$CompactorHandler", handleMessage);
                         param.setResult(null);
+                    }
+                }
+        );
+
+        /*禁用spc*/
+        findAndHookConstructor(PressureStateSettings,
+                new HookAction() {
+                    @Override
+                    protected void after(MethodHookParam param) {
+                        setLog(2, PressureStateSettings, "PROCESS_CLEANER_ENABLED");
+                        setBoolean(param.thisObject, "PROCESS_CLEANER_ENABLED", false);
                     }
                 }
         );
