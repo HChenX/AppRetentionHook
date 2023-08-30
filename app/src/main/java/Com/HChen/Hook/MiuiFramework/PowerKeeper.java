@@ -7,6 +7,10 @@ import Com.HChen.Hook.HookMode.HookMode;
 import de.robv.android.xposed.XC_MethodHook;
 
 public class PowerKeeper extends HookMode {
+    final String logI = "I";
+    final String logW = "W";
+    final String logE = "E";
+
     @Override
     public int smOr() {
         return 2;
@@ -19,7 +23,7 @@ public class PowerKeeper extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(2, ProcessManager, kill);
+                        setLog(2, logI, ProcessManager, kill);
                         param.setResult(false);
                     }
                 }

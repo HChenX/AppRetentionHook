@@ -6,6 +6,9 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
 public abstract class HookLog extends XC_MethodHook {
+    final String hookTag = "Hook Class: ";
+    final String hookMain = "[ HChenHook ]: ";
+    final String methodName = "methodName: ";
     String Tag;
     String Tags;
 
@@ -15,19 +18,19 @@ public abstract class HookLog extends XC_MethodHook {
 
     public void setTag() {
         if (smOr() == 1) {
-            Tag = "[ HChenHook ]: SystemHook: ";
+            Tag = hookMain + "SystemHook: ";
         } else if (smOr() == 2) {
-            Tag = "[ HChenHook ]: MiuiHook: ";
+            Tag = hookMain + "MiuiHook: ";
         } else {
-            Tag = "[ HChenHook ]: ";
+            Tag = hookMain;
         }
     }
 
     public void setTags(int smOr) {
         if (smOr == 1) {
-            Tags = "[ HChenHook ]: SystemHook: ";
+            Tags = hookMain + "SystemHook: ";
         } else if (smOr == 2) {
-            Tags = "[ HChenHook ]: MiuiHook: ";
+            Tags = hookMain + "MiuiHook: ";
         }
     }
 
@@ -39,12 +42,20 @@ public abstract class HookLog extends XC_MethodHook {
         super(priority);
     }
 
-    public void setLog(int smOr, String classLog, String nameLog) {
-        logSI(smOr, "Hook Class: " + classLog + " methodName: " + nameLog);
+    public void setLog(int smOr, String grade, String classLog, String nameLog) {
+        switch (grade) {
+            case "I" -> logSI(smOr, hookTag + classLog + methodName + nameLog);
+            case "W" -> logSW(smOr, hookTag + classLog + methodName + nameLog);
+            case "E" -> logSE(smOr, hookTag + classLog + methodName + nameLog);
+        }
     }
 
-    public void setLog(int smOr, String classLog) {
-        logSI(smOr, "Hook Class: " + classLog);
+    public void setLog(int smOr, String grade, String classLog) {
+        switch (grade) {
+            case "I" -> logSI(smOr, hookTag + classLog);
+            case "W" -> logSW(smOr, hookTag + classLog);
+            case "E" -> logSE(smOr, hookTag + classLog);
+        }
     }
 
     public void logI(String Log) {

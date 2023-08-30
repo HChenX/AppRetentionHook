@@ -10,6 +10,10 @@ import Com.HChen.Hook.HookMode.HookMode;
 import de.robv.android.xposed.XC_MethodHook;
 
 public class SystemService extends HookMode {
+    final String logI = "I";
+    final String logW = "W";
+    final String logE = "E";
+
     @Override
     public int smOr() {
         return 1;
@@ -23,7 +27,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerService, checkExcessivePowerUsage);
+                        setLog(1, logI, ActivityManagerService, checkExcessivePowerUsage);
                         param.setResult(null);
                     }
                 }
@@ -36,7 +40,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerService, killPids);
+                        setLog(1, logI, ActivityManagerService, killPids);
                         param.setResult(true);
                     }
                 }
@@ -60,7 +64,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerService, killProcessesBelowAdj);
+                        setLog(1, logI, ActivityManagerService, killProcessesBelowAdj);
                         param.setResult(true);
                     }
                 }
@@ -72,7 +76,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(MethodHookParam param) {
-                        setLog(1, ActivityManagerService, killAllBackgroundProcesses);
+                        setLog(1, logI, ActivityManagerService, killAllBackgroundProcesses);
                         param.setResult(null);
                     }
                 }
@@ -95,7 +99,7 @@ public class SystemService extends HookMode {
                 performIdleMaintenance, new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerService, performIdleMaintenance);
+                        setLog(1, logI, ActivityManagerService, performIdleMaintenance);
                         param.setResult(null);
                     }
                 }
@@ -131,7 +135,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ProcessList, killAppIfBgRestrictedAndCachedIdleLocked);
+                        setLog(1, logI, ProcessList, killAppIfBgRestrictedAndCachedIdleLocked);
                         param.setResult(0L);
                     }
                 }
@@ -144,7 +148,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(MethodHookParam param) {
-                        setLog(1, ProcessList, updateBackgroundRestrictedForUidPackageLocked);
+                        setLog(1, logI, ProcessList, updateBackgroundRestrictedForUidPackageLocked);
                         param.args[2] = false;
                     }
                 }
@@ -156,7 +160,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerShellCommand, runKillAll);
+                        setLog(1, logI, ActivityManagerShellCommand, runKillAll);
                         param.setResult(null);
                     }
                 }
@@ -168,7 +172,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, OomAdjuster, shouldKillExcessiveProcesses);
+                        setLog(1, logI, OomAdjuster, shouldKillExcessiveProcesses);
                         param.setResult(false);
                     }
                 }
@@ -180,7 +184,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, OomAdjuster, updateAndTrimProcessLSP);
+                        setLog(1, logI, OomAdjuster, updateAndTrimProcessLSP);
                         param.args[2] = 0;
                     }
                 }
@@ -192,7 +196,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, PhantomProcessList, trimPhantomProcessesIfNecessary);
+                        setLog(1, logI, PhantomProcessList, trimPhantomProcessesIfNecessary);
                         param.setResult(null);
                     }
                 }
@@ -229,7 +233,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, RecentTasks, trimInactiveRecentTasks);
+                        setLog(1, logI, RecentTasks, trimInactiveRecentTasks);
                         param.setResult(null);
                     }
                 }
@@ -241,7 +245,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, RecentTasks, isInVisibleRange);
+                        setLog(1, logI, RecentTasks, isInVisibleRange);
                         param.args[2] = 0;
                     }
                 }
@@ -274,7 +278,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, LowMemDetector, "mPressureState");
+                        setLog(1, logI, LowMemDetector, "mPressureState");
                         getDeclaredField(param, "mPressureState", 0);
                     }
                 }
@@ -286,7 +290,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, LowMemDetector + "$LowMemThread", run);
+                        setLog(1, logI, LowMemDetector + "$LowMemThread", run);
                         param.setResult(null);
                     }
                 }
@@ -298,7 +302,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerConstants, getDefaultMaxCachedProcesses);
+                        setLog(1, logI, ActivityManagerConstants, getDefaultMaxCachedProcesses);
                         param.setResult(Integer.MAX_VALUE);
                     }
                 }
@@ -310,7 +314,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerConstants, updateMaxCachedProcesses);
+                        setLog(1, logI, ActivityManagerConstants, updateMaxCachedProcesses);
                         param.setResult(null);
                     }
                 }
@@ -322,7 +326,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerConstants, "MAX_PHANTOM_PROCESSES");
+                        setLog(1, logI, ActivityManagerConstants, "MAX_PHANTOM_PROCESSES");
                         setInt(param.thisObject, "MAX_PHANTOM_PROCESSES", Integer.MAX_VALUE);
                     }
                 }
@@ -334,7 +338,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerConstants, updateKillBgRestrictedCachedIdle);
+                        setLog(1, logI, ActivityManagerConstants, updateKillBgRestrictedCachedIdle);
                         setBoolean(param.thisObject, "mKillBgRestrictedAndCachedIdle", false);
                     }
                 }
@@ -346,7 +350,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void after(XC_MethodHook.MethodHookParam param) {
-                        setLog(1, ActivityManagerConstants, setOverrideMaxCachedProcesses);
+                        setLog(1, logI, ActivityManagerConstants, setOverrideMaxCachedProcesses);
                         param.args[0] = Integer.MAX_VALUE;
                     }
                 }
@@ -383,7 +387,7 @@ public class SystemService extends HookMode {
                 new HookAction() {
                     @Override
                     protected void before(MethodHookParam param) {
-                        setLog(1, ActivityManagerService, setMemFactorOverride);
+                        setLog(1, logI, ActivityManagerService, setMemFactorOverride);
                         param.args[0] = 0;
                     }
                 }

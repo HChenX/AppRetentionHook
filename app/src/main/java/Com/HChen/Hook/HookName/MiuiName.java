@@ -2,6 +2,8 @@ package Com.HChen.Hook.HookName;
 
 public final class MiuiName {
     public static final String isEnableResumeFeature = "isEnableResumeFeature";
+    public static final String isEnableScoutMemory = "isEnableScoutMemory";
+    public static final String checkKgslLeak = "checkKgslLeak";
     public static final String reclaimMemoryForGameIfNeed = "reclaimMemoryForGameIfNeed";
     public static final String doClean = "doClean";
     public static final String runClean = "runClean";
