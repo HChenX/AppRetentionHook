@@ -1,7 +1,7 @@
 package Com.HChen.Hook.SystemService;
 
-import static Com.HChen.Hook.HookName.SystemName.*;
 import static Com.HChen.Hook.HookValue.SystemValue.*;
+import static Com.HChen.Hook.HookName.SystemName.*;
 
 import android.content.Context;
 import android.os.Handler;

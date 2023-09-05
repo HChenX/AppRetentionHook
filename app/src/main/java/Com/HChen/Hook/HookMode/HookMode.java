@@ -18,7 +18,7 @@ public abstract class HookMode extends HookLog {
             init();
             logI("Hook Success!");
         } catch (Throwable e) {
-            logE("Hook Failed! is: " + e);
+            logE("Hook Failed! : " + e);
         }
     }
 

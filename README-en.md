@@ -9,13 +9,13 @@
 ![last commit](https://img.shields.io/github/last-commit/HChenX/AppRetentionHook?style=flat)
 ![language](https://img.shields.io/badge/language-java-purple)
 
-<p><b><a href="README.md">English</a> | <a href="README-zh.md">简体中文</a></b></p>
+<p><b><a href="README-en.md">English</a> | <a href="README.md">简体中文</a></b></p>
 <p>This is a Lsp module, Achieving app retention by modifying the system kill logic through Hook.</p>
 </div>
 
 # ✨Module Introduction
 
-* This is a Lsp module,You need pass Lsp to use it.
+* This is a Lsp module,You need to install Lsp activate.
 * #### Usage:
     * First: install the Lsp module on your phone.
     * Next: open Lsp app, and activation the module.
@@ -30,7 +30,7 @@
 # 🌟Module Effect
 
 - After personal testing, app retention time growth. And Hardly encountered app kill situation.
-- Make me very surprise is even after a night most apps still not kill self.
+- What surprised me was that after half a day , most apps weren't killed by the system.
 - ` Like QQ Bilibili TikTok Coolapk And more test pass , they dont be killed. `
 - Although I have only undergone small-scale testing. But the effect is still significant.
 
@@ -71,10 +71,13 @@
 
 - The module code has referenced the following project, and we sincerely appreciate it:
 
-| Project Name |                            Project Link                            | 
-|:------------:|:------------------------------------------------------------------:|
-|  Cemiuiler   | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
-|  Don't Kill  |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
+|     Project Name     |                            Project Link                            | 
+|:--------------------:|:------------------------------------------------------------------:|
+|      Cemiuiler       | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
+|      Don't Kill      |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
+| Translation provided |                              Provider                              |
+|       English        |  焕晨HChen , ℓοѕτ οиє ⌕ ➹ • #𝙣𝙤𝙋𝙈𝙨𝙥𝙡𝙨 • 𝕏 (Telegram Name)   |
+|  Simplified Chinese  |                              焕晨HChen                               |
 
 # 📢Project Statement
 

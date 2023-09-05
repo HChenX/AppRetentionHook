@@ -1,7 +1,7 @@
 package Com.HChen.Hook.MiuiService;
 
-import static Com.HChen.Hook.HookName.MiuiName.*;
 import static Com.HChen.Hook.HookValue.MiuiValue.*;
+import static Com.HChen.Hook.HookName.MiuiName.*;
 
 import android.app.job.JobParameters;
 import android.content.Context;

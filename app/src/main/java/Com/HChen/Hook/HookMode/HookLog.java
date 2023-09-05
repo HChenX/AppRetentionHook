@@ -80,11 +80,11 @@ public abstract class HookLog extends XC_MethodHook {
 
     public void logSW(int smOr, String log) {
         setTags(smOr);
-        Log.w(Tag, "I: " + log);
+        Log.w(Tag, "Warning by: " + log);
     }
 
     public void logSE(int smOr, String log) {
         setTags(smOr);
-        Log.e(Tag, "I: " + log);
+        Log.e(Tag, "Error by: " + log);
     }
 }

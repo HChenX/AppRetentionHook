@@ -1,20 +1,22 @@
 package Com.HChen.Hook.HookValue;
 
 public final class MiuiValue {
-    public static final String ScoutDisplayMemoryManager = "com.miui.server.stability.ScoutDisplayMemoryManager";
-    public static final String ScoutHelper = "com.android.server.ScoutHelper";
-    public static final String GameMemoryCleaner = "com.miui.server.migard.memory.GameMemoryCleaner";
-    public static final String PeriodicCleanerService = "com.android.server.am.PeriodicCleanerService";
-    public static final String SystemPressureController = "com.android.server.am.SystemPressureController";
-    public static final String ProcessKillerIdler = "com.android.server.am.ProcessKillerIdler";
-    public static final String ProcessPowerCleaner = "com.android.server.am.ProcessPowerCleaner";
-    public static final String ProcessMemoryCleaner = "com.android.server.am.ProcessMemoryCleaner";
-    public static final String CameraBooster = "com.android.server.am.CameraBooster";
-    public static final String SmartCpuPolicyManager = "com.miui.server.smartpower.SmartCpuPolicyManager";
-    public static final String MiuiMemoryService = "com.android.server.am.MiuiMemoryService";
-    public static final String MiuiMemReclaimer = "com.android.server.am.MiuiMemReclaimer";
-    /*MiuiFramework*/
-    public static final String ProcessManager = "miui.process.ProcessManager";
-    public static final String PressureStateSettings = "android.os.spc.PressureStateSettings";
-
+    public static final String isEnableResumeFeature = "isEnableResumeFeature";
+    public static final String isEnableScoutMemory = "isEnableScoutMemory";
+    public static final String checkKgslLeak = "checkKgslLeak";
+    public static final String reclaimMemoryForGameIfNeed = "reclaimMemoryForGameIfNeed";
+    public static final String doClean = "doClean";
+    public static final String runClean = "runClean";
+    public static final String handleMessage = "handleMessage";
+    public static final String cleanUpMemory = "cleanUpMemory";
+    public static final String nStartPressureMonitor = "nStartPressureMonitor";
+    public static final String updateScreenState = "updateScreenState";
+    public static final String onStartJob = "onStartJob";
+    public static final String handleAutoLockOff = "handleAutoLockOff";
+    public static final String handleThermalKillProc = "handleThermalKillProc";
+    public static final String killProcess = "killProcess";
+    public static final String boostCameraIfNeeded = "boostCameraIfNeeded";
+    public static final String handleLimitCpuException = "handleLimitCpuException";
+    public static final String run = "run";
+    public static final String kill = "kill";
 }

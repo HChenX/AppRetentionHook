@@ -66,6 +66,9 @@
 |:----------:|:------------------------------------------------------------------:|
 | Cemiuiler  | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 | Don't Kill |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
+|    翻译提供    |                                提供者                                 |
+|  English   |  焕晨HChen , ℓοѕτ οиє ⌕ ➹ • #𝙣𝙤𝙋𝙈𝙨𝙥𝙡𝙨 • 𝕏 (Telegram Name)   |
+|    简体中文    |                              焕晨HChen                               |
 
 # 📢项目声明
 

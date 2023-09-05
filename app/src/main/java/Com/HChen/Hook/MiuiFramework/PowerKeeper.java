@@ -1,7 +1,7 @@
 package Com.HChen.Hook.MiuiFramework;
 
-import static Com.HChen.Hook.HookValue.MiuiValue.*;
 import static Com.HChen.Hook.HookName.MiuiName.*;
+import static Com.HChen.Hook.HookValue.MiuiValue.*;
 
 import Com.HChen.Hook.HookMode.HookMode;
 import de.robv.android.xposed.XC_MethodHook;

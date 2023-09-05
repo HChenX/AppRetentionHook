@@ -1,25 +1,17 @@
 package Com.HChen.Hook.HookName;
 
 public final class SystemName {
-    public static final String checkExcessivePowerUsage = "checkExcessivePowerUsage";
-    public static final String killProcessesBelowAdj = "killProcessesBelowAdj";
-    public static final String performIdleMaintenance = "performIdleMaintenance";
-    public static final String getAppStartModeLOSP = "getAppStartModeLOSP";
-    public static final String killAppIfBgRestrictedAndCachedIdleLocked = "killAppIfBgRestrictedAndCachedIdleLocked";
-    public static final String updateBackgroundRestrictedForUidPackageLocked = "updateBackgroundRestrictedForUidPackageLocked";
-    public static final String runKillAll = "runKillAll";
-    public static final String shouldKillExcessiveProcesses = "shouldKillExcessiveProcesses";
-    public static final String updateAndTrimProcessLSP = "updateAndTrimProcessLSP";
-    public static final String trimPhantomProcessesIfNecessary = "trimPhantomProcessesIfNecessary";
-    public static final String trimInactiveRecentTasks = "trimInactiveRecentTasks";
-    public static final String isInVisibleRange = "isInVisibleRange";
-    public static final String run = "run";
-    public static final String killPids = "killPids";
-    public static final String killAllBackgroundProcesses = "killAllBackgroundProcesses";
-    public static final String getDefaultMaxCachedProcesses = "getDefaultMaxCachedProcesses";
-    public static final String updateMaxCachedProcesses = "updateMaxCachedProcesses";
-    public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";
-    public static final String updateLowMemStateLSP = "updateLowMemStateLSP";
-    public static final String setMemFactorOverride = "setMemFactorOverride";
-    public static final String setOverrideMaxCachedProcesses = "setOverrideMaxCachedProcesses";
+    public static final String ActivityManagerService = "com.android.server.am.ActivityManagerService";
+    public static final String ProcessList = "com.android.server.am.ProcessList";
+    public static final String ActivityManagerShellCommand = "com.android.server.am.ActivityManagerShellCommand";
+
+    public static final String OomAdjuster = "com.android.server.am.OomAdjuster";
+    public static final String PhantomProcessList = "com.android.server.am.PhantomProcessList";
+    public static final String RecentTasks = "com.android.server.wm.RecentTasks";
+    public static final String LowMemDetector = "com.android.server.am.LowMemDetector";
+
+    public static final String ActivityManagerConstants = "com.android.server.am.ActivityManagerConstants";
+
+    public static final String AppProfiler = "com.android.server.am.AppProfiler";
+
 }
