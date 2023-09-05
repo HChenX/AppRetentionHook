@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
@@ -22,13 +23,12 @@ android {
         }
     }
     namespace 'Com.HChen.Hook'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "Com.HChen.Hook"
-        minSdk 26
-        //noinspection OldTargetApi
-        targetSdk 33
+        minSdk 30
+        targetSdk 34
         //noinspection HighAppVersionCode
         versionCode 2023082900
         versionName "3.7"
@@ -48,6 +48,15 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/**"
+            excludes += "/kotlin/**"
+            excludes += "/*.txt"
+            excludes += "/*.bin"
+            excludes += "/*.json"
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_20
         targetCompatibility JavaVersion.VERSION_20
@@ -57,12 +66,32 @@ android {
     }
 }
 
+
 dependencies {
 
-    compileOnly 'de.robv.android.xposed:api:82'
+    compileOnly(roots.XposedApi)
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+
+    implementation roots.AndroidXCore
+    implementation roots.AndroidXCollection
+    implementation roots.AndroidXRecyclerview
+    implementation roots.AndroidXFragment
+    implementation roots.AndroidXLifecycle
+    implementation roots.AndroidXVectorDrawable
+    implementation roots.AndroidXVectorDrawableAnimated
+    implementation roots.AndroidXCustomView
+    implementation roots.AndroidXCustomViewPoolingContainer
+    implementation roots.AndroidXConstraintLayout
+
+    implementation files(roots.animation)
+    implementation files(roots.appcompat)
+    implementation files(roots.core)
+    implementation files(roots.haptic)
+    implementation files(roots.preference)
+    implementation files(roots.smooth)
+    implementation files(roots.springback)
 }

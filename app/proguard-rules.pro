@@ -21,3 +21,4 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class Com.HChen.Hook.Hook
+-dontwarn com.android.internal.view.menu.MenuBuilder
