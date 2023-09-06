@@ -22,6 +22,7 @@ android {
             keyPassword keyKeyAliasPassword
         }
     }
+
     namespace 'Com.HChen.Hook'
     compileSdk 34
 
@@ -40,6 +41,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
@@ -48,6 +50,7 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+
     packagingOptions {
         resources {
             excludes += "/META-INF/**"
@@ -57,10 +60,12 @@ android {
             excludes += "/*.json"
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_20
         targetCompatibility JavaVersion.VERSION_20
     }
+
     buildFeatures {
         buildConfig true
     }
