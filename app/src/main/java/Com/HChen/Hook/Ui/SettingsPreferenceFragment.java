@@ -28,21 +28,23 @@ public abstract class SettingsPreferenceFragment extends BasePreferenceFragment 
             setPreferencesFromResource(mContentResId, s);
             initPrefs();
         }
-        ((Activity)getActivity()).setRestartView(addRestartListener());
+        ((Activity) getActivity()).setRestartView(addRestartListener());
     }
 
     public View.OnClickListener addRestartListener() {
         return null;
     }
 
-   /* public SharedPreferences getSharedPreferences() {
+    /*public SharedPreferences getSharedPreferences() {
         return PrefsUtils.mSharedPreferences;
     }
 
     public boolean hasKey(String key) {
         return getSharedPreferences().contains(key);
+    }*/
+
+    public void initPrefs() {
     }
-*/
-    public void initPrefs() {}
+
     public abstract int getContentResId();
 }

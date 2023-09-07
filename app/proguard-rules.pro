@@ -21,4 +21,8 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class Com.HChen.Hook.Hook
+-keep class moralnorm.**{*;}
+-keep class miui.drm.**{*;}
 -dontwarn com.android.internal.view.menu.MenuBuilder
+-allowaccessmodification
+-overloadaggressively

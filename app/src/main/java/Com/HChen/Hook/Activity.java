@@ -8,17 +8,18 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import Com.HChen.Hook.Ui.MainFragment;
+import Com.HChen.Hook.Utils.ShellUtils;
+import moralnorm.appcompat.app.AlertDialog;
 import moralnorm.appcompat.app.AppCompatActivity;
 
 public class Activity extends AppCompatActivity {
-    private final MainFragment mMainFrag = new MainFragment();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
         setImmersionMenuEnabled(true);
-        setFragment(mMainFrag);
+        setFragment(new MainFragment());
 //        setContentView(R.xml.main_xml);
     }
 
@@ -40,5 +41,43 @@ public class Activity extends AppCompatActivity {
 
     public void setActionBarEndView(View view) {
         getAppCompatActionBar().setEndView(view);
+    }
+
+    public void showRestartSystemDialog() {
+        showRestartDialog(true, "", "");
+    }
+
+    public void showRestartDialog(String appLabel, String packagename) {
+        showRestartDialog(false, appLabel, packagename);
+    }
+
+    public void showRestartDialog(boolean isRestartSystem, String appLabel, String packagename) {
+        new AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setTitle("重启" + " " + appLabel)
+            .setMessage("确认? " + appLabel)
+            .setHapticFeedbackEnabled(true)
+            .setPositiveButton(android.R.string.ok, (dialog, which) -> doRestart(packagename, isRestartSystem))
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
+    }
+
+    public void doRestart(String packagename, boolean isRestartSystem) {
+        boolean result;
+
+        if (isRestartSystem) {
+            result = ShellUtils.RootCommand("reboot");
+        } else {
+            result = ShellUtils.RootCommand("killall " + packagename);
+        }
+        if (!result) {
+            new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("提示")
+                .setMessage(isRestartSystem ? "重启" : "重启")
+                .setHapticFeedbackEnabled(true)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
+        }
     }
 }
