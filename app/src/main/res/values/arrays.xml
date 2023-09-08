@@ -4,5 +4,6 @@
         <item>android</item>
         <item>com.miui.powerkeeper</item>
         <item>Com.HChen.App</item>
+        <item>com.android.settings</item>
     </string-array>
 </resources>

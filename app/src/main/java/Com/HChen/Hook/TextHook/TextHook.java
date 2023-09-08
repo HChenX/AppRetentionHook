@@ -1,14 +1,11 @@
 package Com.HChen.Hook.TextHook;
 
-import android.view.View;
-
 import Com.HChen.Hook.HookMode.HookMode;
-import de.robv.android.xposed.XposedHelpers;
 
 public class TextHook extends HookMode {
     @Override
     public void init() {
-        findAndHookMethod("Com.HChen.App.HChenMain$$ExternalSyntheticLambda6",
+        /*findAndHookMethod("Com.HChen.App.HChenMain$$ExternalSyntheticLambda6",
                 "onClick", View.class,
                 new HookAction() {
                     @Override
@@ -33,6 +30,8 @@ public class TextHook extends HookMode {
                         getDeclaredField(param, "Text", "Hooking");
                     }
                 }
-        );
+        );*/
+
+        logI("Hook ON!");
     }
 }

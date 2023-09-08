@@ -20,7 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class Com.HChen.Hook.Hook
+-keep class Com.HChen.Hook.HookInlet
 -keep class moralnorm.**{*;}
 -keep class miui.drm.**{*;}
 -dontwarn com.android.internal.view.menu.MenuBuilder

@@ -3,6 +3,9 @@ package Com.HChen.Hook.Utils;
 import java.io.DataOutputStream;
 
 public class ShellUtils {
+
+    /* 用于检查是否授予Su权限,执行简单的Shell命令
+    和返回执行结果是否成功. */
     public static boolean RootCommand(String pkgCodePath) {
         Process process;
         DataOutputStream os = null;

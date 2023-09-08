@@ -12,7 +12,8 @@ import Com.HChen.Hook.Utils.ShellUtils;
 import moralnorm.appcompat.app.AlertDialog;
 import moralnorm.appcompat.app.AppCompatActivity;
 
-public class Activity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
+//    public static GetKey<String, Object> mPrefsMap = BasePutKey.mPrefsMap;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -20,6 +21,7 @@ public class Activity extends AppCompatActivity {
         setContentView(R.layout.main_layout);
         setImmersionMenuEnabled(true);
         setFragment(new MainFragment());
+        ShellUtils.RootCommand("chmod 0777 " + getPackageCodePath());
 //        setContentView(R.xml.main_xml);
     }
 
