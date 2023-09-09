@@ -1,12 +1,207 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory>
+    <PreferenceCategory android:title="系统框架">
         <SwitchPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
+            android:key="prefs_key_system_service"
+            android:title="@string/system_service" />
+
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_checkExcessivePowerUsage"
+            android:title="@string/checkExcessivePowerUsage" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killPids"
+            android:title="@string/killPids" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killProcessesBelowAdj"
+            android:title="@string/killProcessesBelowAdj" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killAllBackgroundProcesses"
+            android:title="@string/killAllBackgroundProcesses" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_performIdleMaintenance"
+            android:title="@string/performIdleMaintenance" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killAppIfBgRestrictedAndCachedIdleLocked"
+            android:title="@string/killAppIfBgRestrictedAndCachedIdleLocked" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_updateBackgroundRestrictedForUidPackageLocked"
+            android:title="@string/updateBackgroundRestrictedForUidPackageLocked" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_runKillAll"
+            android:title="@string/runKillAll" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_OomAdjuster"
+            android:title="@string/OomAdjuster" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_trimPhantomProcessesIfNecessary"
+            android:title="@string/trimPhantomProcessesIfNecessary" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_RecentTasks"
+            android:title="@string/RecentTasks" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_LowMemDetector"
+            android:title="@string/LowMemDetector" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_setMemFactorOverride"
+            android:title="@string/setMemFactorOverride" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_ActivityManagerConstants"
+            android:title="@string/ActivityManagerConstants" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="小米框架">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="prefs_key_miui_service"
+            android:title="@string/miui_service" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_ScoutDisplayMemoryManager"
+            android:title="@string/ScoutDisplayMemoryManager" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_ScoutHelper"
+            android:title="@string/ScoutHelper" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_reclaimMemoryForGameIfNeed"
+            android:title="@string/reclaimMemoryForGameIfNeed" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_PeriodicCleanerService"
+            android:title="@string/PeriodicCleanerService" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_SystemPressureController"
+            android:title="@string/SystemPressureController" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_ProcessKillerIdler"
+            android:title="@string/ProcessKillerIdler" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_handleAutoLockOff"
+            android:title="@string/handleAutoLockOff" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_handleThermalKillProc"
+            android:title="@string/handleThermalKillProc" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_ProcessMemoryCleaner"
+            android:title="@string/ProcessMemoryCleaner" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_CameraBooster"
+            android:title="@string/CameraBooster" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_SmartCpuPolicyManager"
+            android:title="@string/SmartCpuPolicyManager" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_MiuiMemoryService"
+            android:title="@string/MiuiMemoryService" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_MiuiMemReclaimer"
+            android:title="@string/MiuiMemReclaimer" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_miui_service"
+            android:key="prefs_key_PressureStateSettings"
+            android:title="@string/PressureStateSettings" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="电量和性能">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="prefs_key_powerkeeper"
+            android:title="@string/powerkeeper" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_powerkeeper"
+            android:key="prefs_key_ProcessManager"
+            android:title="@string/ProcessManager" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_powerkeeper"
             android:key="prefs_key_text"
             android:title="@string/text" />
 
     </PreferenceCategory>
+
 
 </PreferenceScreen>

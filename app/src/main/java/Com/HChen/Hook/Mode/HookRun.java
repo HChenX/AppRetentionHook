@@ -1,11 +1,11 @@
-package Com.HChen.Hook.HookMode;
+package Com.HChen.Hook.Mode;
 
 import Com.HChen.Hook.Base.BasePutKey;
 import Com.HChen.Hook.BuildConfig;
-import Com.HChen.Hook.MiuiFramework.PowerKeeper;
-import Com.HChen.Hook.MiuiService.MiuiService;
-import Com.HChen.Hook.SystemService.SystemService;
-import Com.HChen.Hook.TextHook.TextHook;
+import Com.HChen.Hook.Execute.MiuiFramework.PowerKeeper;
+import Com.HChen.Hook.Execute.MiuiService.MiuiService;
+import Com.HChen.Hook.Execute.SystemService.SystemService;
+import Com.HChen.Hook.Execute.Text.TextHook;
 import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
@@ -23,10 +23,11 @@ public class HookRun extends HookLog {
     public void init(String PackageName) {
         switch (PackageName) {
             case "android" -> {
-                initHook(new SystemService(), true);
-                initHook(new MiuiService(), true);
+                initHook(new SystemService(), mPrefsMap.getBoolean("system_service"));
+                initHook(new MiuiService(), mPrefsMap.getBoolean("miui_service"));
             }
-            case "com.miui.powerkeeper" -> initHook(new PowerKeeper(), true);
+            case "com.miui.powerkeeper" ->
+                initHook(new PowerKeeper(), mPrefsMap.getBoolean("powerkeeper"));
             case "Com.HChen.App" -> {
                 if (BuildConfig.DEBUG) {
                     initHook(new TextHook(), true);

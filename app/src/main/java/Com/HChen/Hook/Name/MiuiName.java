@@ -1,4 +1,4 @@
-package Com.HChen.Hook.HookName;
+package Com.HChen.Hook.Name;
 
 public final class MiuiName {
     public static final String ScoutDisplayMemoryManager = "com.miui.server.stability.ScoutDisplayMemoryManager";

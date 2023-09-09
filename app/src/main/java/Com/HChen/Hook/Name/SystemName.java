@@ -1,4 +1,4 @@
-package Com.HChen.Hook.HookName;
+package Com.HChen.Hook.Name;
 
 public final class SystemName {
     public static final String ActivityManagerService = "com.android.server.am.ActivityManagerService";

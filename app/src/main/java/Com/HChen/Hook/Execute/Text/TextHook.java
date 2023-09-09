@@ -1,6 +1,7 @@
-package Com.HChen.Hook.TextHook;
+package Com.HChen.Hook.Execute.Text;
 
-import Com.HChen.Hook.HookMode.HookMode;
+import Com.HChen.Hook.Mode.HookMode;
+import moralnorm.os.SystemProperties;
 
 public class TextHook extends HookMode {
     @Override
@@ -31,7 +32,7 @@ public class TextHook extends HookMode {
                     }
                 }
         );*/
-
-        logI("Hook ON!");
+        int get = SystemProperties.getInt("ro.miui.ui.version.code", 1);
+        logI("Hook ON! get prop: " + get);
     }
 }

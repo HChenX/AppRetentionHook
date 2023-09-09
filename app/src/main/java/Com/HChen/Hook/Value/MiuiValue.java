@@ -1,4 +1,4 @@
-package Com.HChen.Hook.HookValue;
+package Com.HChen.Hook.Value;
 
 public final class MiuiValue {
     public static final String isEnableResumeFeature = "isEnableResumeFeature";

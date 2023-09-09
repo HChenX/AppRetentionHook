@@ -1,13 +1,16 @@
-package Com.HChen.Hook.HookMode;
+package Com.HChen.Hook.Mode;
 
 import java.lang.reflect.Field;
 
+import Com.HChen.Hook.Base.BasePutKey;
+import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public abstract class HookMode extends HookLog {
+    GetKey<String, Object> mPrefsMap = BasePutKey.mPrefsMap;
     LoadPackageParam loadPackageParam;
 
     public abstract void init();
@@ -18,7 +21,7 @@ public abstract class HookMode extends HookLog {
             init();
             logI("Hook Success!");
         } catch (Throwable e) {
-            logE("Hook Failed! : " + e);
+            logE("Hook Failed! Because: " + e);
         }
     }
 
@@ -38,7 +41,7 @@ public abstract class HookMode extends HookLog {
         try {
             return findClass(className);
         } catch (XposedHelpers.ClassNotFoundError e) {
-            logE("Find " + className + " is Null, The Code is: " + e);
+            logE("Find " + className + " is Null, Code is: " + e);
             return null;
         }
     }
@@ -47,7 +50,7 @@ public abstract class HookMode extends HookLog {
         try {
             return findClass(findClassIfExists(newClassName) != null ? newClassName : oldClassName);
         } catch (XposedHelpers.ClassNotFoundError e) {
-            logE("Find " + newClassName + " and " + oldClassName + " is Null, The Code is: " + e);
+            logE("Find " + newClassName + " and " + oldClassName + " is Null, Code is: " + e);
             return null;
         }
     }
@@ -73,7 +76,7 @@ public abstract class HookMode extends HookLog {
             try {
                 before(param);
             } catch (Throwable e) {
-                logE("[ HChenHook ]: " + e);
+                logE("" + e);
             }
         }
 
@@ -82,7 +85,7 @@ public abstract class HookMode extends HookLog {
             try {
                 after(param);
             } catch (Throwable e) {
-                logE("[ HChenHook ]: " + e);
+                logE("" + e);
             }
         }
 
@@ -101,14 +104,40 @@ public abstract class HookMode extends HookLog {
                 clazz.getDeclaredMethod(methodName, classes);
             }
             XposedHelpers.findAndHookMethod(clazz, methodName, parameterTypesAndCallback);
-            logI("Hook The: " + clazz + " in: " + methodName);
+            logI("Hook: " + clazz + " method is: " + methodName);
         } catch (NoSuchMethodException e) {
-            logE("Not find the method: " + methodName + " in : " + clazz);
+            logE("Not find method: " + methodName + " in: " + clazz);
         }
     }
 
     public void findAndHookMethod(String className, String methodName, Object... parameterTypesAndCallback) {
-        findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
+        int lastIndex = className.lastIndexOf(".");
+        if (lastIndex != -1) {
+            String result = className.substring(lastIndex + 1);
+            int lastIndexA = result.lastIndexOf("$");
+            if (lastIndexA == -1) {
+                if (mPrefsMap.getBoolean(methodName)) {
+                    findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
+                } else {
+                    if (mPrefsMap.getBoolean(result + "_" + methodName)) {
+                        findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
+                    } else {
+                        if (mPrefsMap.getBoolean(result)) {
+                            findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
+                        } else {
+                            logW("findAndHookMethod the: " + lastIndex + " ; " + methodName + " is false");
+                        }
+                    }
+                }
+            } else {
+                String resultA = result.substring(0, lastIndexA);
+                if (mPrefsMap.getBoolean(resultA)) {
+                    findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
+                } else {
+                    logW("findAndHookMethod the: " + lastIndex + " ; " + methodName + " is false");
+                }
+            }
+        }
     }
 
     public void findAndHookConstructor(Class<?> clazz, Object... parameterTypesAndCallback) {
@@ -116,17 +145,50 @@ public abstract class HookMode extends HookLog {
     }
 
     public void findAndHookConstructor(String className, Object... parameterTypesAndCallback) {
-        findAndHookConstructor(findClassIfExists(className), parameterTypesAndCallback);
+        int lastIndex = className.lastIndexOf(".");
+        if (lastIndex != -1) {
+            String result = className.substring(lastIndex + 1);
+            if (mPrefsMap.getBoolean(result)) {
+                findAndHookConstructor(findClassIfExists(className), parameterTypesAndCallback);
+            } else {
+                logW("findAndHookConstructor the: " + lastIndex + " is false");
+            }
+        } else {
+            logE(className);
+        }
     }
 
     public void hookAllMethods(String className, String methodName, XC_MethodHook callback) {
         try {
             Class<?> hookClass = findClassIfExists(className);
-            if (hookClass != null) {
-                int Num = XposedBridge.hookAllMethods(hookClass, methodName, callback).size();
-                logI("Hook The: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
+            int lastIndex = className.lastIndexOf(".");
+            if (mPrefsMap.getBoolean(methodName)) {
+                if (hookClass != null) {
+                    hookAllMethods(hookClass, methodName, callback);
+                } else {
+                    logE("Hook class: " + className + " method: " + methodName + " is Null");
+                }
             } else {
-                logE("Hook Methods is null: " + className);
+                if (lastIndex != -1) {
+                    String result = className.substring(lastIndex + 1);
+                    if (mPrefsMap.getBoolean(result + "_" + methodName)) {
+                        if (hookClass != null) {
+                            hookAllMethods(hookClass, methodName, callback);
+                        } else {
+                            logE("Hook class: " + className + " method: " + methodName + " is Null");
+                        }
+                    } else {
+                        if (mPrefsMap.getBoolean(result)) {
+                            if (hookClass != null) {
+                                hookAllMethods(hookClass, methodName, callback);
+                            } else {
+                                logE("Hook class: " + className + " method: " + methodName + " is Null");
+                            }
+                        } else {
+                            logW("hookAllMethods the: " + lastIndex + " ; " + methodName + " is false");
+                        }
+                    }
+                }
             }
         } catch (Throwable e) {
             logE("Hook The: " + e + " Error");
@@ -136,7 +198,7 @@ public abstract class HookMode extends HookLog {
     public void hookAllMethods(Class<?> hookClass, String methodName, XC_MethodHook callback) {
         try {
             int Num = XposedBridge.hookAllMethods(hookClass, methodName, callback).size();
-            logI("Hook The: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
+            logI("Hook: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
         } catch (Throwable e) {
             logE("Hook The: " + e + " Error");
         }
@@ -160,21 +222,21 @@ public abstract class HookMode extends HookLog {
                     Object result = setString.get(param.thisObject);
                     checkLast("getDeclaredField", iNeedString, iNeedTo, result);
                 } catch (IllegalAccessException e) {
-                    logE("IllegalAccessException To: " + iNeedString + " Need To: " + iNeedTo + " Code:" + e);
+                    logE("IllegalAccessException to: " + iNeedString + " Need to: " + iNeedTo + " Code:" + e);
                 }
             } catch (NoSuchFieldException e) {
-                logE("No Such For: " + iNeedString + " Code: " + e);
+                logE("No such the: " + iNeedString + " Code: " + e);
             }
         } else {
-            logE("Param is null Code: " + iNeedString + " And " + iNeedTo);
+            logE("Param is null Code: " + iNeedString + " And: " + iNeedTo);
         }
     }
 
     public void checkLast(String setObject, Object fieldName, Object value, Object last) {
         if (value.equals(last)) {
-            logI(setObject + " Success! in " + fieldName + " to " + value);
+            logI(setObject + " Success! set " + fieldName + " to " + value);
         } else {
-            logE(setObject + " Failed! in " + fieldName + " to " + value + " hope is: " + value + " but is: " + last);
+            logE(setObject + " Failed! set " + fieldName + " to " + value + " i hope is: " + value + " but is: " + last);
         }
     }
 

@@ -1,5 +1,6 @@
 package Com.HChen.Hook;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -21,8 +22,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main_layout);
         setImmersionMenuEnabled(true);
         setFragment(new MainFragment());
-        ShellUtils.RootCommand("chmod 0777 " + getPackageCodePath());
+        suGet();
+//        Log.i("TextHook", "onCreate: " + getPackageCodePath());
+//        ShellUtils.RootCommand("chmod 0777 " + getPackageCodePath());
 //        setContentView(R.xml.main_xml);
+    }
+
+    private void suGet() {
+        final String ExecutedCommand = "ExecutedCommand";
+        SharedPreferences sharedPreferences = getSharedPreferences(ExecutedCommand, MODE_PRIVATE);
+        boolean hasExecutedCommand = sharedPreferences.getBoolean("hasExecutedCommand", false);
+        String PackageCodePath = sharedPreferences.getString("packageCodePath", "null");
+        String Now_PackageCodePath = getPackageCodePath();
+        // BuildConfig.VERSION_CODE
+        if (!hasExecutedCommand || !PackageCodePath.equals(Now_PackageCodePath)) {
+            ShellUtils.RootCommand("chmod 0777 " + getPackageCodePath());
+
+            // 标记命令已执行
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("hasExecutedCommand", true);
+            editor.putString("packageCodePath", Now_PackageCodePath);
+            editor.apply();
+        }
     }
 
     public void setFragment(Fragment fragment) {

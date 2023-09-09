@@ -1,4 +1,4 @@
-package Com.HChen.Hook.HookMode;
+package Com.HChen.Hook.Mode;
 
 import android.util.Log;
 
@@ -8,7 +8,7 @@ import de.robv.android.xposed.XposedBridge;
 public abstract class HookLog extends XC_MethodHook {
     final String hookTag = "Hook Class: ";
     final String hookMain = "[ HChenHook ]: ";
-    final String methodName = "methodName: ";
+    final String methodNameS = "methodName: ";
     String Tag;
     String Tags;
 
@@ -44,9 +44,9 @@ public abstract class HookLog extends XC_MethodHook {
 
     public void setLog(int smOr, String grade, String classLog, String nameLog) {
         switch (grade) {
-            case "I" -> logSI(smOr, hookTag + classLog + methodName + nameLog);
-            case "W" -> logSW(smOr, hookTag + classLog + methodName + nameLog);
-            case "E" -> logSE(smOr, hookTag + classLog + methodName + nameLog);
+            case "I" -> logSI(smOr, hookTag + classLog + methodNameS + nameLog);
+            case "W" -> logSW(smOr, hookTag + classLog + methodNameS + nameLog);
+            case "E" -> logSE(smOr, hookTag + classLog + methodNameS + nameLog);
         }
     }
 
@@ -60,7 +60,7 @@ public abstract class HookLog extends XC_MethodHook {
 
     public void logI(String Log) {
         setTag();
-        XposedBridge.log(Tag + "I: " + Log);
+        XposedBridge.log(Tag + "Info by: " + Log);
     }
 
     public void logW(String Log) {
@@ -75,7 +75,7 @@ public abstract class HookLog extends XC_MethodHook {
 
     public void logSI(int smOr, String log) {
         setTags(smOr);
-        Log.i(Tags, "I: " + log);
+        Log.i(Tags, "Info by: " + log);
     }
 
     public void logSW(int smOr, String log) {

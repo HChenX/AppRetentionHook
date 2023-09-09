@@ -1,9 +1,9 @@
-package Com.HChen.Hook.MiuiFramework;
+package Com.HChen.Hook.Execute.MiuiFramework;
 
-import static Com.HChen.Hook.HookName.MiuiName.*;
-import static Com.HChen.Hook.HookValue.MiuiValue.*;
+import static Com.HChen.Hook.Name.MiuiName.ProcessManager;
+import static Com.HChen.Hook.Value.MiuiValue.kill;
 
-import Com.HChen.Hook.HookMode.HookMode;
+import Com.HChen.Hook.Mode.HookMode;
 import de.robv.android.xposed.XC_MethodHook;
 
 public class PowerKeeper extends HookMode {

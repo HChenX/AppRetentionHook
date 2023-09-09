@@ -1,4 +1,4 @@
-package Com.HChen.Hook.HookValue;
+package Com.HChen.Hook.Value;
 
 public final class SystemValue {
     public static final String checkExcessivePowerUsage = "checkExcessivePowerUsage";
