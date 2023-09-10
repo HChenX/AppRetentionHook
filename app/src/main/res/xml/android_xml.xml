@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="系统框架">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="prefs_key_system_service"
+            android:title="@string/system_service_hook" />
+
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_checkExcessivePowerUsage"
+            android:title="@string/checkExcessivePowerUsage" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killPids"
+            android:title="@string/killPids" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killProcessesBelowAdj"
+            android:title="@string/killProcessesBelowAdj" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killAllBackgroundProcesses"
+            android:title="@string/killAllBackgroundProcesses" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_performIdleMaintenance"
+            android:title="@string/performIdleMaintenance" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_killAppIfBgRestrictedAndCachedIdleLocked"
+            android:title="@string/killAppIfBgRestrictedAndCachedIdleLocked" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_updateBackgroundRestrictedForUidPackageLocked"
+            android:title="@string/updateBackgroundRestrictedForUidPackageLocked" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_runKillAll"
+            android:title="@string/runKillAll" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_OomAdjuster"
+            android:title="@string/OomAdjuster" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_trimPhantomProcessesIfNecessary"
+            android:title="@string/trimPhantomProcessesIfNecessary" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_RecentTasks"
+            android:title="@string/RecentTasks" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_LowMemDetector"
+            android:title="@string/LowMemDetector" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_setMemFactorOverride"
+            android:title="@string/setMemFactorOverride" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_system_service"
+            android:key="prefs_key_ActivityManagerConstants"
+            android:title="@string/ActivityManagerConstants" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

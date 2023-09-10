@@ -19,14 +19,14 @@ public class PowerKeeper extends HookMode {
     @Override
     public void init() {
         hookAllMethods(ProcessManager,
-                kill,
-                new HookAction() {
-                    @Override
-                    protected void before(XC_MethodHook.MethodHookParam param) {
-                        setLog(2, logI, ProcessManager, kill);
-                        param.setResult(false);
-                    }
+            kill,
+            new HookAction() {
+                @Override
+                protected void before(XC_MethodHook.MethodHookParam param) {
+                    setLog(2, logI, ProcessManager, kill);
+                    param.setResult(false);
                 }
+            }
         );
     }
 }

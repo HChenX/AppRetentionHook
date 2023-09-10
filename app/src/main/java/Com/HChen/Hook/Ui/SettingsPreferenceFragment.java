@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import android.view.View;
 
 import Com.HChen.Hook.Base.BasePreferenceFragment;
-import Com.HChen.Hook.MainActivity;
+import Com.HChen.Hook.Base.BaseSettingsActivity;
 
 public abstract class SettingsPreferenceFragment extends BasePreferenceFragment {
     public String mTitle;
@@ -28,7 +28,7 @@ public abstract class SettingsPreferenceFragment extends BasePreferenceFragment 
             setPreferencesFromResource(mContentResId, s);
             initPrefs();
         }
-        ((MainActivity) getActivity()).setRestartView(addRestartListener());
+        ((BaseSettingsActivity) getActivity()).setRestartView(addRestartListener());
     }
 
     public View.OnClickListener addRestartListener() {

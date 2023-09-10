@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="系统框架">
+        <Preference
+            android:fragment="Com.HChen.Hook.App.Android"
+            android:icon="@drawable/ic_system_framework"
+            android:key="prefs_key_system_service_android"
+            android:summary="@string/system_service"
+            android:title="@string/system_service" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="小米框架">
+        <Preference
+            android:fragment="Com.HChen.Hook.App.MiuiService"
+            android:icon="@drawable/ic_miui"
+            android:key="prefs_key_miui_service"
+            android:summary="@string/miui_service"
+            android:title="@string/miui_service" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory android:title="电量和性能">
+        <Preference
+            android:fragment="Com.HChen.Hook.App.PowerKeeper"
+            android:icon="@drawable/ic_powerkeeper"
+            android:key="prefs_key_power_keeper"
+            android:summary="@string/powerkeeper"
+            android:title="@string/powerkeeper" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

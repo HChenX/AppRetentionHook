@@ -1,9 +1,24 @@
 <resources>
     <string name="app_name">AppRetention</string>
     <string name="app_more">后台应用留存能力加强，Hook防杀。\nby:焕晨HChen</string>
+    <string name="restart_quick">快速重启作用域</string>
+    <string name="settings">设置</string>
+    <string name="about">关于</string>
+    <string name="reboot">重启系统</string>
+    <string name="qreboot">快速重启</string>
+    <string name="re_powerkeeper">电量和性能</string>
+    <string name="soft_reboot">重启</string>
+    <string name="restart_app_desc1">确定要立即重启</string>
+    <string name="restart_app_desc2">吗？</string>
+    <string name="cancel">已取消重启</string>
+    <string name="sucess">成功重启 </string>
+    <string name="tip">提示</string>
+    <string name="kill_failed">结束进程失败，请检查是否授予了 Root/Su 权限?</string>
+    <string name="reboot_failed">重启失败，请检查是否授予了 Root/Su 权限?</string>
     <string name="text">Text</string>
     <!--SystemService Hook-->
-    <string name="system_service">Hook系统框架</string>
+    <string name="system_service">系统框架</string>
+    <string name="system_service_hook">系统框架总开关</string>
     <string name="checkExcessivePowerUsage">关闭CPU超时检查</string>
     <string name="killPids">关闭killPids功能</string>
     <string name="killProcessesBelowAdj">禁止清理低Adj进程</string>
@@ -19,7 +34,8 @@
     <string name="setMemFactorOverride">设置内存因子</string>
     <string name="ActivityManagerConstants">取消最大进程限制</string>
     <!--MiuiService Hook-->
-    <string name="miui_service">Hook Miui框架</string>
+    <string name="miui_service">Miui框架</string>
+    <string name="miui_service_hook">Miui框架总开关</string>
     <string name="ScoutDisplayMemoryManager">关闭Scout功能</string>
     <string name="ScoutHelper">关闭ScoutHelper</string>
     <string name="reclaimMemoryForGameIfNeed">禁止打开游戏时清理内存</string>
@@ -37,6 +53,7 @@
     <string name="MiuiMemReclaimer">关闭MiuiMemReclaimer功能</string>
     <string name="PressureStateSettings">关闭spc功能</string>
     <!--PowerKeeper Hook-->
-    <string name="powerkeeper">Hook电量和性能</string>
+    <string name="powerkeeper">电量和性能</string>
+    <string name="powerkeeper_hook">电量和性能总开关</string>
     <string name="ProcessManager">禁止电量和性能kill进程</string>
 </resources>

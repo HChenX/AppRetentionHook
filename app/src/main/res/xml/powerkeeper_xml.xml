@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="电量和性能">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="prefs_key_powerkeeper"
+            android:title="@string/powerkeeper_hook" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="true"
+            android:dependency="prefs_key_powerkeeper"
+            android:key="prefs_key_ProcessManager"
+            android:title="@string/ProcessManager" />
+        <SwitchPreference
+            android:autoSizePresetSizes=""
+            android:defaultValue="false"
+            android:dependency="prefs_key_powerkeeper"
+            android:key="prefs_key_text"
+            android:title="@string/text" />
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

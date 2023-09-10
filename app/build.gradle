@@ -59,6 +59,9 @@ android {
             excludes += "/*.bin"
             excludes += "/*.json"
         }
+        /*dex {
+            useLegacyPackaging = true
+        }*/
     }
 
     compileOptions {
@@ -68,6 +71,10 @@ android {
 
     buildFeatures {
         buildConfig true
+    }
+
+    androidResources {
+        generateLocaleConfig = true
     }
 }
 

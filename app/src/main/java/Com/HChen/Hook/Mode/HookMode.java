@@ -125,7 +125,7 @@ public abstract class HookMode extends HookLog {
                         if (mPrefsMap.getBoolean(result)) {
                             findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
                         } else {
-                            logW("findAndHookMethod the: " + lastIndex + " ; " + methodName + " is false");
+                            logW("findAndHookMethod the class: " + result + " ; " + methodName + " is false");
                         }
                     }
                 }
@@ -134,9 +134,11 @@ public abstract class HookMode extends HookLog {
                 if (mPrefsMap.getBoolean(resultA)) {
                     findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
                 } else {
-                    logW("findAndHookMethod the: " + lastIndex + " ; " + methodName + " is false");
+                    logW("findAndHookMethod the class: " + resultA + " ; " + methodName + " is false");
                 }
             }
+        } else {
+            logE("Cant get key, class: " + className);
         }
     }
 
@@ -151,41 +153,33 @@ public abstract class HookMode extends HookLog {
             if (mPrefsMap.getBoolean(result)) {
                 findAndHookConstructor(findClassIfExists(className), parameterTypesAndCallback);
             } else {
-                logW("findAndHookConstructor the: " + lastIndex + " is false");
+                logW("findAndHookConstructor the class: " + result + " is false");
             }
         } else {
-            logE(className);
+            logE("Cant get key, class: " + className);
         }
     }
 
     public void hookAllMethods(String className, String methodName, XC_MethodHook callback) {
         try {
             Class<?> hookClass = findClassIfExists(className);
+            if (hookClass == null) {
+                logE("Hook class: " + className + " method: " + methodName + " is Null");
+                return;
+            }
             int lastIndex = className.lastIndexOf(".");
             if (mPrefsMap.getBoolean(methodName)) {
-                if (hookClass != null) {
-                    hookAllMethods(hookClass, methodName, callback);
-                } else {
-                    logE("Hook class: " + className + " method: " + methodName + " is Null");
-                }
+                hookAllMethods(hookClass, methodName, callback);
             } else {
                 if (lastIndex != -1) {
                     String result = className.substring(lastIndex + 1);
                     if (mPrefsMap.getBoolean(result + "_" + methodName)) {
-                        if (hookClass != null) {
-                            hookAllMethods(hookClass, methodName, callback);
-                        } else {
-                            logE("Hook class: " + className + " method: " + methodName + " is Null");
-                        }
+                        hookAllMethods(hookClass, methodName, callback);
                     } else {
                         if (mPrefsMap.getBoolean(result)) {
-                            if (hookClass != null) {
-                                hookAllMethods(hookClass, methodName, callback);
-                            } else {
-                                logE("Hook class: " + className + " method: " + methodName + " is Null");
-                            }
+                            hookAllMethods(hookClass, methodName, callback);
                         } else {
-                            logW("hookAllMethods the: " + lastIndex + " ; " + methodName + " is false");
+                            logW("hookAllMethods the class: " + result + " ; " + methodName + " is false");
                         }
                     }
                 }
