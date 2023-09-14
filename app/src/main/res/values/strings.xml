@@ -13,6 +13,8 @@
     <string name="cancel">已取消重启</string>
     <string name="sucess">成功重启 </string>
     <string name="tip">提示</string>
+    <string name="all">全选</string>
+    <string name="lla">反选</string>
     <string name="kill_failed">结束进程失败，请检查是否授予了 Root/Su 权限?</string>
     <string name="reboot_failed">重启失败，请检查是否授予了 Root/Su 权限?</string>
     <string name="text">Text</string>

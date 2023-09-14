@@ -47,7 +47,7 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
         mListView.setHasFixedSize(true);
         mAllSelectBtn = view.findViewById(android.R.id.button2);
         mOkBtn = view.findViewById(android.R.id.button1);
-        mAllSelectBtn.setText(curWillCheckAll ? "全选" : "反选");
+        mAllSelectBtn.setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
         OnCustomMultipleChoiceCheckedListener onCheckedListener = new OnCustomMultipleChoiceCheckedListener();
 
         // 全选按钮的回调接口
@@ -85,7 +85,7 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
     @Override
     public void onCurWillCheckAllChanged(boolean curWillCheckAll) {
         this.curWillCheckAll = curWillCheckAll;
-        mAllSelectBtn.setText(curWillCheckAll ? "全选" : "反选");
+        mAllSelectBtn.setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
     }
 
     public interface onCheckedListener {
@@ -150,7 +150,7 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
                         } else {
                             reverseSelect();
                         }
-                        ((Button) v).setText(curWillCheckAll ? "反选" : "全选");
+                        ((Button) v).setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
                         curWillCheckAll = !curWillCheckAll;
                     }
                 }
