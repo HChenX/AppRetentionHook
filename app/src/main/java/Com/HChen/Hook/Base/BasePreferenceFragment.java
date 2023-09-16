@@ -1,4 +1,4 @@
-package Com.HChen.Hook.Base;
+package com.hchen.hook.base;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,19 +11,19 @@ import moralnorm.preference.PreferenceManager;
 import moralnorm.preference.compat.PreferenceFragment;
 
 public class BasePreferenceFragment extends PreferenceFragment {
-    private PreferenceManager mPreferenceManager;
-    public static String mPrefsName = "HChen_prefs";
+    private static final String PREFS_NAME = "HChen_prefs";
+    private PreferenceManager preferenceManager;
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
-        mPreferenceManager = getPreferenceManager();
-        mPreferenceManager.setSharedPreferencesName(mPrefsName);
-        mPreferenceManager.setSharedPreferencesMode(Context.MODE_PRIVATE);
-        mPreferenceManager.setStorageDeviceProtected();
+        preferenceManager = getPreferenceManager();
+        preferenceManager.setSharedPreferencesName(PREFS_NAME);
+        preferenceManager.setSharedPreferencesMode(Context.MODE_PRIVATE);
+        preferenceManager.setStorageDeviceProtected();
     }
 
     public void setTitle(int titleResId) {
-        setTitle(getResources().getString(titleResId));
+        setTitle(getString(titleResId));
     }
 
     public void setTitle(String title) {

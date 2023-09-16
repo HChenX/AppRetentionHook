@@ -1,15 +1,17 @@
-package Com.HChen.Hook.Base;
+package com.hchen.hook.base;
 
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragmentCompat;
 
-import Com.HChen.Hook.SubSettings;
-import moralnorm.preference.Preference;
-import moralnorm.preference.PreferenceFragmentCompat;
+import com.hchen.hook.subsettings.SubSettings;
+import com.hchen.hook.util.SettingLauncher;
 
 public class SettingsActivity extends BaseSettingsActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+
     public void onStartSettingsForArguments(Preference preference, boolean isBundleEnable) {
         onStartSettingsForArguments(SubSettings.class, preference, isBundleEnable);
     }
@@ -21,18 +23,16 @@ public class SettingsActivity extends BaseSettingsActivity implements Preference
     }
 
     public void onStartSettingsForArguments(Class<?> cls, Preference preference, boolean isEnableBundle) {
-        Bundle args = null;
-        if (isEnableBundle) {
-            args = new Bundle();
-            args.putString("key", preference.getKey());
-        }
-        String mFragmentName = preference.getFragment();
-        String mTitle = preference.getTitle().toString();
-        onStartSettingsForArguments(context, cls, mFragmentName, args, 0, mTitle);
+        Bundle args = isEnableBundle ? createBundleWithPreferenceKey(preference) : null;
+        String fragmentName = preference.getFragment();
+        String title = preference.getTitle().toString();
+        onStartSettingsForArguments(context, cls, fragmentName, args, 0, title);
     }
 
     public static void onStartSettingsForArguments(Context context, Class<?> cls, String fragment, Bundle args, int titleResId, String title) {
-        if (args == null) args = new Bundle();
+        if (args == null) {
+            args = new Bundle();
+        }
         onStartSettings(context, cls, fragment, null, args, titleResId, title);
     }
 
@@ -45,5 +45,11 @@ public class SettingsActivity extends BaseSettingsActivity implements Preference
             .setExtras(extras)
             .setArguments(args)
             .launch();
+    }
+
+    private Bundle createBundleWithPreferenceKey(Preference preference) {
+        Bundle args = new Bundle();
+        args.putString("key", preference.getKey());
+        return args;
     }
 }

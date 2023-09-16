@@ -1,4 +1,4 @@
-package Com.HChen.Hook.Base;
+package com.hchen.hook.base;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -13,19 +13,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import Com.HChen.Hook.R;
+import com.hchen.hook.R;
 
-public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAdapter.OnCurWillCheckAllChangedListener {
+public class MultipleChoiceView extends LinearLayout implements MultipleChoiceAdapter.OnCurWillCheckAllChangedListener {
 
-    private MutipleChoiceAdapter mAdapter;
-    /*储存应用名*/
+    private MultipleChoiceAdapter mAdapter;
     private List<String> mData;
     private RecyclerView mListView;
     private Button mAllSelectBtn;
     private Button mOkBtn;
-    //确定选择监听器
-    private onCheckedListener mOnCheckedListener;
-    //当前点击按钮时是否将全选
+    private OnCheckedListener mOnCheckedListener;
     private boolean curWillCheckAll = true;
 
     public MultipleChoiceView(Context context) {
@@ -38,19 +35,16 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
         initView(context);
     }
 
-
-    /* 实例化各个控件 */
     private void initView(Context context) {
-        View view = inflate(context, R.layout.view_mutiplechoice, this);
-        mListView = view.findViewById(android.R.id.list);
+        View view = inflate(context, R.layout.view_multiple_choice, this);
+        mListView = view.findViewById(R.id.list);
         mListView.setLayoutManager(new LinearLayoutManager(context));
         mListView.setHasFixedSize(true);
-        mAllSelectBtn = view.findViewById(android.R.id.button2);
-        mOkBtn = view.findViewById(android.R.id.button1);
+        mAllSelectBtn = view.findViewById(R.id.button2);
+        mOkBtn = view.findViewById(R.id.button1);
         mAllSelectBtn.setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
-        OnCustomMultipleChoiceCheckedListener onCheckedListener = new OnCustomMultipleChoiceCheckedListener();
 
-        // 全选按钮的回调接口
+        OnCustomMultipleChoiceCheckedListener onCheckedListener = new OnCustomMultipleChoiceCheckedListener();
         mAllSelectBtn.setOnClickListener(onCheckedListener);
         mOkBtn.setOnClickListener(onCheckedListener);
     }
@@ -58,9 +52,9 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
     public void setData(List<String> data, boolean[] isSelected) {
         if (data != null) {
             mData = data;
-            mAdapter = new MutipleChoiceAdapter(data);
+            mAdapter = new MultipleChoiceAdapter(data);
             mAdapter.setOnCurWillCheckAllChangedListener(this);
-            /*判断预选择*/
+
             if (isSelected != null) {
                 if (isSelected.length != data.size()) {
                     throw new IllegalArgumentException("data's length not equal the isSelected's length");
@@ -69,16 +63,15 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
                         mAdapter.getCheckedArray().put(i, isSelected[i]);
                     }
                 }
-
             }
-            // 绑定Adapter
+
             mListView.setAdapter(mAdapter);
         } else {
             throw new IllegalArgumentException("data is null");
         }
     }
 
-    public void setOnCheckedListener(onCheckedListener listener) {
+    public void setOnCheckedListener(OnCheckedListener listener) {
         mOnCheckedListener = listener;
     }
 
@@ -88,72 +81,57 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
         mAllSelectBtn.setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
     }
 
-    public interface onCheckedListener {
+    public interface OnCheckedListener {
         void onChecked(SparseBooleanArray sparseBooleanArray);
     }
 
-    /**
-     * 全选
-     */
     public void selectAll() {
         if (mData != null) {
             for (int i = 0; i < mData.size(); i++) {
                 mAdapter.getCheckedArray().put(i, true);
             }
-            // 刷新listview和TextView的显示
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    /**
-     * 全不选
-     */
     public void deselectAll() {
         if (mData != null) {
             for (int i = 0; i < mData.size(); i++) {
                 mAdapter.getCheckedArray().put(i, false);
             }
-            // 刷新listview和TextView的显示
             mAdapter.notifyDataSetChanged();
         }
     }
 
-    /**
-     * 反选
-     */
     public void reverseSelect() {
         if (mData != null) {
             for (int i = 0; i < mData.size(); i++) {
                 mAdapter.getCheckedArray().put(i, !mAdapter.getCheckedArray().get(i));
             }
-            // 刷新listview和TextView的显示
             mAdapter.notifyDataSetChanged();
         }
     }
 
     private class OnCustomMultipleChoiceCheckedListener implements OnClickListener {
-
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                //确定选择按钮
-                case android.R.id.button1 -> {
+                case R.id.button1:
                     if (mOnCheckedListener != null && mAdapter != null) {
                         mOnCheckedListener.onChecked(mAdapter.getCheckedArray());
                     }
-                }
-                //全选/反选按钮
-                case android.R.id.button2 -> {
+                    break;
+                case R.id.button2:
                     if (mData != null) {
                         if (curWillCheckAll) {
                             selectAll();
                         } else {
                             reverseSelect();
                         }
-                        ((Button) v).setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
+                        mAllSelectBtn.setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
                         curWillCheckAll = !curWillCheckAll;
                     }
-                }
+                    break;
             }
         }
     }

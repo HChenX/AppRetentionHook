@@ -1,4 +1,4 @@
-package Com.HChen.Hook.Base;
+package com.hchen.hook.base;
 
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -9,29 +9,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import Com.HChen.Hook.R;
+import com.hchen.hook.R;
 import moralnorm.appcompat.widget.CheckedTextView;
 
-public class MutipleChoiceAdapter extends RecyclerView.Adapter<MutipleChoiceAdapter.ViewHolder> {
+public class MultipleChoiceAdapter extends RecyclerView.Adapter<MultipleChoiceAdapter.ViewHolder> {
 
-    // 填充数据的list
     private List<String> mList;
-    // 用来控制CheckBox的选中状况
     private SparseBooleanArray mIsChecked;
     private OnCurWillCheckAllChangedListener mListener;
     private boolean curWillCheckAll = true;
 
-    public MutipleChoiceAdapter(List<String> list) {
+    public MultipleChoiceAdapter(List<String> list) {
         mList = list;
         mIsChecked = new SparseBooleanArray();
-        // 初始化数据
-        initData();
+        initCheckedArray();
     }
 
-    // 初始化isSelected的数据
-    private void initData() {
+    private void initCheckedArray() {
         for (int i = 0; i < mList.size(); i++) {
-            getCheckedArray().put(i, false);
+            mIsChecked.put(i, false);
         }
     }
 
@@ -39,13 +35,11 @@ public class MutipleChoiceAdapter extends RecyclerView.Adapter<MutipleChoiceAdap
         void onCurWillCheckAllChanged(boolean curWillCheckAll);
     }
 
-
     public void setOnCurWillCheckAllChangedListener(OnCurWillCheckAllChangedListener listener) {
         this.mListener = listener;
     }
 
-
-    public boolean curWillCheckAll() {
+    public boolean isCurWillCheckAll() {
         return curWillCheckAll;
     }
 
@@ -66,23 +60,12 @@ public class MutipleChoiceAdapter extends RecyclerView.Adapter<MutipleChoiceAdap
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         CheckedTextView mCheckBoxTitle = holder.mCheckBoxTitle;
-        // 设置list中TextView的显示
         mCheckBoxTitle.setText(mList.get(position));
-        // 根据isSelected来设置checkbox的选中状况
-        mCheckBoxTitle.setChecked(getCheckedArray().get(position));
+        mCheckBoxTitle.setChecked(mIsChecked.get(position));
         holder.itemView.setOnClickListener(v -> {
-            // 改变CheckBox的状态
             mCheckBoxTitle.toggle();
-            // 将CheckBox的选中状况记录下来
-            getCheckedArray().put(position, mCheckBoxTitle.isChecked());
-            for (int i = 0; i < mIsChecked.size(); i++) {
-                if (mIsChecked.valueAt(i)) {
-                    curWillCheckAll = false;
-                    break;
-                } else {
-                    curWillCheckAll = true;
-                }
-            }
+            mIsChecked.put(position, mCheckBoxTitle.isChecked());
+            updateCurWillCheckAll();
             if (mListener != null) {
                 mListener.onCurWillCheckAllChanged(curWillCheckAll);
             }
@@ -100,6 +83,16 @@ public class MutipleChoiceAdapter extends RecyclerView.Adapter<MutipleChoiceAdap
         public ViewHolder(View itemView) {
             super(itemView);
             mCheckBoxTitle = itemView.findViewById(android.R.id.text1);
+        }
+    }
+
+    private void updateCurWillCheckAll() {
+        curWillCheckAll = true;
+        for (int i = 0; i < mIsChecked.size(); i++) {
+            if (mIsChecked.valueAt(i)) {
+                curWillCheckAll = false;
+                break;
+            }
         }
     }
 }

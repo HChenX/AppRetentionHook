@@ -33,6 +33,6 @@ public class TextHook extends HookMode {
                 }
         );*/
         int get = SystemProperties.getInt("ro.miui.ui.version.code", 1);
-        logI("Hook ON! get prop: " + get);
+        logI("我操!太Hook了: " + get);
     }
 }

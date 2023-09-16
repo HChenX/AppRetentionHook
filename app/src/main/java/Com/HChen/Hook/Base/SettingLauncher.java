@@ -1,23 +1,20 @@
-package Com.HChen.Hook.Base;
+package com.hchen.hook.base;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-
 import androidx.fragment.app.Fragment;
 
 public class SettingLauncher {
     private final Context mContext;
     private boolean mLaunched;
-
-    Bundle mExtras;
-    Bundle mArguments;
-    CharSequence mTitle;
-    String mDestinationName;
-    Class<?> mClass;
-
-    int mTitleResId;
+    private Bundle mExtras;
+    private Bundle mArguments;
+    private CharSequence mTitle;
+    private String mDestinationName;
+    private Class<?> mClass;
+    private int mTitleResId;
 
     public SettingLauncher(Context context) {
         if (context == null) {
@@ -58,14 +55,14 @@ public class SettingLauncher {
 
     public void launch() {
         if (mLaunched) {
-            throw new IllegalStateException("This launcher has already been executed. Do not reuse");
+            throw new IllegalStateException("This launcher has already been executed. Do not reuse.");
         }
         mLaunched = true;
-        Intent intent = toIntent();
+        Intent intent = createIntent();
         launch(intent);
     }
 
-    public Intent toIntent() {
+    public Intent createIntent() {
         Intent intent = new Intent("android.intent.action.MAIN");
         copyExtras(intent);
         intent.setClass(mContext, mClass);
@@ -76,8 +73,6 @@ public class SettingLauncher {
         intent.putExtra(":settings:show_fragment_args", mArguments);
         intent.putExtra(":settings:show_fragment_title", mTitle);
         intent.putExtra(":settings:show_fragment_title_resid", mTitleResId);
-
-        /*intent.putExtra(":settings:show_fragment_contentResId", mContentResId);*/
         return intent;
     }
 
@@ -85,8 +80,8 @@ public class SettingLauncher {
         mContext.startActivity(intent);
     }
 
-    void launchForResult(Fragment fragment, Intent intent, int i) {
-        fragment.startActivityForResult(intent, i);
+    void launchForResult(Fragment fragment, Intent intent, int requestCode) {
+        fragment.startActivityForResult(intent, requestCode);
     }
 
     private void copyExtras(Intent intent) {
@@ -94,5 +89,4 @@ public class SettingLauncher {
             intent.replaceExtras(mExtras);
         }
     }
-
 }

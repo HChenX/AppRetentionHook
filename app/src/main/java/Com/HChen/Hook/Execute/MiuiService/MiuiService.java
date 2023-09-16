@@ -1,47 +1,19 @@
 package Com.HChen.Hook.Execute.MiuiService;
 
-import static Com.HChen.Hook.Name.MiuiName.CameraBooster;
-import static Com.HChen.Hook.Name.MiuiName.GameMemoryCleaner;
-import static Com.HChen.Hook.Name.MiuiName.MiuiMemReclaimer;
-import static Com.HChen.Hook.Name.MiuiName.MiuiMemoryService;
-import static Com.HChen.Hook.Name.MiuiName.PeriodicCleanerService;
-import static Com.HChen.Hook.Name.MiuiName.PressureStateSettings;
-import static Com.HChen.Hook.Name.MiuiName.ProcessKillerIdler;
-import static Com.HChen.Hook.Name.MiuiName.ProcessMemoryCleaner;
-import static Com.HChen.Hook.Name.MiuiName.ProcessPowerCleaner;
-import static Com.HChen.Hook.Name.MiuiName.ScoutDisplayMemoryManager;
-import static Com.HChen.Hook.Name.MiuiName.ScoutHelper;
-import static Com.HChen.Hook.Name.MiuiName.SmartCpuPolicyManager;
-import static Com.HChen.Hook.Name.MiuiName.SystemPressureController;
-import static Com.HChen.Hook.Value.MiuiValue.boostCameraIfNeeded;
-import static Com.HChen.Hook.Value.MiuiValue.cleanUpMemory;
-import static Com.HChen.Hook.Value.MiuiValue.doClean;
-import static Com.HChen.Hook.Value.MiuiValue.handleAutoLockOff;
-import static Com.HChen.Hook.Value.MiuiValue.handleLimitCpuException;
-import static Com.HChen.Hook.Value.MiuiValue.handleMessage;
-import static Com.HChen.Hook.Value.MiuiValue.handleThermalKillProc;
-import static Com.HChen.Hook.Value.MiuiValue.isEnableResumeFeature;
-import static Com.HChen.Hook.Value.MiuiValue.killProcess;
-import static Com.HChen.Hook.Value.MiuiValue.nStartPressureMonitor;
-import static Com.HChen.Hook.Value.MiuiValue.onStartJob;
-import static Com.HChen.Hook.Value.MiuiValue.reclaimMemoryForGameIfNeed;
-import static Com.HChen.Hook.Value.MiuiValue.run;
-import static Com.HChen.Hook.Value.MiuiValue.runClean;
-import static Com.HChen.Hook.Value.MiuiValue.updateScreenState;
-
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.os.Message;
-
 import java.io.PrintWriter;
-
 import Com.HChen.Hook.Mode.HookMode;
 import de.robv.android.xposed.XC_MethodHook;
 
+import static Com.HChen.Hook.Name.MiuiName.*;
+import static Com.HChen.Hook.Value.MiuiValue.*;
+
 public class MiuiService extends HookMode {
-    final String logI = "I";
-    final String logW = "W";
-    final String logE = "E";
+    private final String logI = "I";
+    private final String logW = "W";
+    private final String logE = "E";
 
     @Override
     public int smOr() {
@@ -50,365 +22,251 @@ public class MiuiService extends HookMode {
 
     @Override
     public void init() {
-        /*设置禁止Scout功能*/
-        findAndHookConstructor(ScoutDisplayMemoryManager,
-            new HookAction() {
-                @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ScoutDisplayMemoryManager);
-                    getDeclaredField(param, "ENABLE_SCOUT_MEMORY_MONITOR", false);
-                    getDeclaredField(param, "SCOUT_MEMORY_DISABLE_KGSL", false);
-                }
-            }
-        );//
+        setScoutDisplayMemoryManagerHooks();
+        setScoutHelperHooks();
+        setGameMemoryCleanerHooks();
+        setPeriodicCleanerServiceHooks();
+        setSystemPressureControllerHooks();
+        setProcessKillerIdlerHooks();
+        setProcessPowerCleanerHooks();
+        setProcessMemoryCleanerHooks();
+        setCameraBoosterHooks();
+        setSmartCpuPolicyManagerHooks();
+        setMiuiMemoryServiceHooks();
+        setMiuiMemReclaimerHooks();
+        setPressureStateSettingsHooks();
+    }
 
-        /*测试用*/
-        /*findAndHookMethod(ScoutDisplayMemoryManager,
-            isEnableScoutMemory,
-            new HookAction() {
-                @Override
-                protected void before(MethodHookParam param) {
-                    setLog(2, logW, ScoutDisplayMemoryManager, isEnableScoutMemory);
-                }
+    private void setScoutDisplayMemoryManagerHooks() {
+        findAndHookConstructor(ScoutDisplayMemoryManager, new HookAction() {
+            @Override
+            protected void after(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ScoutDisplayMemoryManager);
+                getDeclaredField(param, "ENABLE_SCOUT_MEMORY_MONITOR", false);
+                getDeclaredField(param, "SCOUT_MEMORY_DISABLE_KGSL", false);
             }
-        );
+        });
 
-        findAndHookMethod(ScoutDisplayMemoryManager,
-            checkKgslLeak,
-            new HookAction() {
-                @Override
-                protected void before(MethodHookParam param) {
-                    setLog(2, logW, ScoutDisplayMemoryManager, checkKgslLeak);
-                }
+        findAndHookMethod(ScoutDisplayMemoryManager, isEnableResumeFeature, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ScoutDisplayMemoryManager, isEnableResumeFeature);
+                param.setResult(false);
             }
-        );
-*/
-        /*关闭Scout的一个功能*/
-        findAndHookMethod(ScoutDisplayMemoryManager,
-            isEnableResumeFeature, new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ScoutDisplayMemoryManager, isEnableResumeFeature);
-                    param.setResult(false);
-                }
-            }
-        );//
+        });
+    }
 
-        /*关闭一堆Scout的功能*/
+    private void setScoutHelperHooks() {
         findAndHookConstructor(ScoutHelper, new HookAction() {
-                @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ScoutHelper);
-                    setBoolean(param.thisObject, "ENABLED_SCOUT", false);
-                    setBoolean(param.thisObject, "ENABLED_SCOUT_DEBUG", false);
-                    setBoolean(param.thisObject, "BINDER_FULL_KILL_PROC", false);
-                    setBoolean(param.thisObject, "SCOUT_BINDER_GKI", false);
-                    /*是崩溃相关*/
-                        /*setBoolean(param.thisObject, "PANIC_D_THREAD", false);
-                        setBoolean(param.thisObject, "SYSRQ_ANR_D_THREAD", false);
-                        setBoolean(param.thisObject, "PANIC_ANR_D_THREAD", false);
-                        setBoolean(param.thisObject, "DISABLE_AOSP_ANR_TRACE_POLICY", false);*/
-                }
+            @Override
+            protected void after(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ScoutHelper);
+                setBoolean(param.thisObject, "ENABLED_SCOUT", false);
+                setBoolean(param.thisObject, "ENABLED_SCOUT_DEBUG", false);
+                setBoolean(param.thisObject, "BINDER_FULL_KILL_PROC", false);
+                setBoolean(param.thisObject, "SCOUT_BINDER_GKI", false);
             }
-        );//
+        });
+    }
 
-        /*禁止在开游戏时回收内存*/
-        findAndHookMethod(GameMemoryCleaner,
-            reclaimMemoryForGameIfNeed, String.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, GameMemoryCleaner, reclaimMemoryForGameIfNeed);
-                    param.setResult(null);
-                }
-
+    private void setGameMemoryCleanerHooks() {
+        findAndHookMethod(GameMemoryCleaner, reclaimMemoryForGameIfNeed, String.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, GameMemoryCleaner, reclaimMemoryForGameIfNeed);
+                param.setResult(null);
             }
-        );//
+        });
+    }
 
-        /*禁用PeriodicCleaner的clean*/
-        findAndHookMethod(PeriodicCleanerService,
-            doClean, int.class, int.class, int.class, String.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService, doClean);
-                    param.setResult(null);
-                }
+    private void setPeriodicCleanerServiceHooks() {
+        findAndHookMethod(PeriodicCleanerService, doClean, int.class, int.class, int.class, String.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, PeriodicCleanerService, doClean);
+                param.setResult(null);
             }
-        );//
+        });
 
-        /*禁用PeriodicCleaner的响应*/
-        findAndHookMethod(PeriodicCleanerService + "$MyHandler",
-            handleMessage,
-            Message.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService + "$MyHandler", handleMessage);
-                    param.setResult(null);
-                }
+        findAndHookMethod(PeriodicCleanerService + "$MyHandler", handleMessage, Message.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, PeriodicCleanerService + "$MyHandler", handleMessage);
+                param.setResult(null);
             }
-        );
+        });
 
-        /*禁用PeriodicCleaner清理*/
-        findAndHookMethod(PeriodicCleanerService + "$PeriodicShellCmd",
-            runClean, PrintWriter.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService + "$PeriodicShellCmd", runClean);
-                    param.setResult(null);
-                }
+        findAndHookMethod(PeriodicCleanerService + "$PeriodicShellCmd", runClean, PrintWriter.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, PeriodicCleanerService + "$PeriodicShellCmd", runClean);
+                param.setResult(null);
             }
-        );
+        });
 
-        /*禁用PeriodicCleaner*/
-        findAndHookConstructor(PeriodicCleanerService,
-            Context.class,
-            new HookAction() {
-                @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService, "mEnable");
-                    getDeclaredField(param, "mEnable", false);
-                }
+        findAndHookConstructor(PeriodicCleanerService, Context.class, new HookAction() {
+            @Override
+            protected void after(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, PeriodicCleanerService, "mEnable");
+                getDeclaredField(param, "mEnable", false);
             }
-        );//
+        });
+    }
 
-        /*禁止清理内存*/
-        findAndHookMethod(SystemPressureController,
-            cleanUpMemory, long.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SystemPressureController, cleanUpMemory);
-                    param.setResult(null);
-                }
+    private void setSystemPressureControllerHooks() {
+        findAndHookMethod(SystemPressureController, cleanUpMemory, long.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, SystemPressureController, cleanUpMemory);
+                param.setResult(null);
             }
-        );//
+        });
 
-        /*禁止启动内存压力检查工具*/
-        hookAllMethods(SystemPressureController,
-            nStartPressureMonitor,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SystemPressureController, nStartPressureMonitor);
-                    param.setResult(null);
-                }
+        hookAllMethods(SystemPressureController, nStartPressureMonitor, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, SystemPressureController, nStartPressureMonitor);
+                param.setResult(null);
             }
-        );//
+        });
 
-        /*禁止跟随屏幕关闭/启动内存压力检测工具*/
-        findAndHookMethod(SystemPressureController,
-            updateScreenState,
-            boolean.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SystemPressureController, updateScreenState);
-                    param.setResult(null);
-                }
+        findAndHookMethod(SystemPressureController, updateScreenState, boolean.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, SystemPressureController, updateScreenState);
+                param.setResult(null);
             }
-        );
+        });
+    }
 
-        /*禁止启动定时任务ProcessKillerIdler*/
-        findAndHookMethod(ProcessKillerIdler,
-            onStartJob, JobParameters.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessKillerIdler, onStartJob);
-                    param.setResult(false);
-                }
+    private void setProcessKillerIdlerHooks() {
+        findAndHookMethod(ProcessKillerIdler, onStartJob, JobParameters.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ProcessKillerIdler, onStartJob);
+                param.setResult(false);
             }
-        );//
+        });
+    }
 
-        /*禁止息屏清理内存*/
-        hookAllMethods(ProcessPowerCleaner,
-            handleAutoLockOff,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessPowerCleaner, handleAutoLockOff);
-                    param.setResult(null);
-                }
+    private void setProcessPowerCleanerHooks() {
+        hookAllMethods(ProcessPowerCleaner, handleAutoLockOff, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ProcessPowerCleaner, handleAutoLockOff);
+                param.setResult(null);
             }
-        );//
+        });
 
-        /*禁止温度过高清理*/
-        hookAllMethods(ProcessPowerCleaner,
-            handleThermalKillProc,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessPowerCleaner, handleThermalKillProc);
-                    param.setResult(null);
-                }
+        hookAllMethods(ProcessPowerCleaner, handleThermalKillProc, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ProcessPowerCleaner, handleThermalKillProc);
+                param.setResult(null);
             }
-        );//
+        });
+    }
 
-        /*禁止kill_用处暂不确定*/
-        /*hookAllMethods("com.android.server.am.ProcessPowerCleaner",
-                "handleKillAll",
-                new HookAction() {
-                    @Override
-                    protected void before(MethodHookParam param) {
-                        param.setResult(null);
-                    }
-                }
-        );*/
-
-        /*禁止kill_用处暂不确定*/
-       /* hookAllMethods("com.android.server.am.ProcessPowerCleaner",
-                "handleKillApp",
-                new HookAction() {
-                    @Override
-                    protected void before(MethodHookParam param) {
-                        param.setResult(true);l
-                    }
-                }
-        );*/
-
-        /*禁止ProcessMemoryCleaner$H响应*/
-        findAndHookMethod(ProcessMemoryCleaner + "$H",
-            handleMessage, Message.class,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessMemoryCleaner + "$H", handleMessage);
-                    param.setResult(null);
-                }
+    private void setProcessMemoryCleanerHooks() {
+        findAndHookMethod(ProcessMemoryCleaner + "$H", handleMessage, Message.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ProcessMemoryCleaner + "$H", handleMessage);
+                param.setResult(null);
             }
-        );//
+        });
 
-       /* hookAllMethods("com.android.server.am.ProcessMemoryCleaner",
-                "checkBackgroundProcCompact",
-                new HookAction() {
-                    @Override
-                    protected void before(MethodHookParam param) {
-                        param.setResult(null);
-                    }
-                }
-        );*/
-
-        /*谎称清理成功*/
-        hookAllMethods(ProcessMemoryCleaner,
-            cleanUpMemory,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessMemoryCleaner, cleanUpMemory);
-                    param.setResult(true);
-                }
+        hookAllMethods(ProcessMemoryCleaner, cleanUpMemory, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ProcessMemoryCleaner, cleanUpMemory);
+                param.setResult(true);
             }
-        );//
+        });
 
-        /*禁止kill，这个是最终的kill方法，专用于释放内存*/
-        hookAllMethods(ProcessMemoryCleaner,
-            killProcess,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessMemoryCleaner, killProcess);
-                    param.setResult(0L);
-                }
+        hookAllMethods(ProcessMemoryCleaner, killProcess, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, ProcessMemoryCleaner, killProcess);
+                param.setResult(0L);
             }
-        );
+        });
+    }
 
-        /*禁止相机kill*/
-        hookAllMethods(CameraBooster,
-            boostCameraIfNeeded,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, CameraBooster, boostCameraIfNeeded);
-                    param.setResult(null);
-                }
+    private void setCameraBoosterHooks() {
+        hookAllMethods(CameraBooster, boostCameraIfNeeded, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, CameraBooster, boostCameraIfNeeded);
+                param.setResult(null);
             }
-        );//
+        });
+    }
 
-        /*禁止Cpu使用检查*/
-        findAndHookMethod(SmartCpuPolicyManager,
-            handleLimitCpuException, int.class, new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SmartCpuPolicyManager, handleLimitCpuException);
-                    param.setResult(null);
-                }
+    private void setSmartCpuPolicyManagerHooks() {
+        findAndHookMethod(SmartCpuPolicyManager, handleLimitCpuException, int.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, SmartCpuPolicyManager, handleLimitCpuException);
+                param.setResult(null);
             }
-        );
+        });
+    }
 
-        /*禁用MiuiMemoryService*/
-        findAndHookMethod(MiuiMemoryService + "$MiuiMemServiceThread",
-            run,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, MiuiMemoryService + "$MiuiMemServiceThread", run);
-                    param.setResult(null);
-                }
+    private void setMiuiMemoryServiceHooks() {
+        findAndHookMethod(MiuiMemoryService + "$MiuiMemServiceThread", run, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, MiuiMemoryService + "$MiuiMemServiceThread", run);
+                param.setResult(null);
             }
-        );
+        });
 
-        /*禁用MiuiMemoryService*/
-        findAndHookMethod(MiuiMemoryService + "$ConnectionHandler",
-            run,
-            new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, MiuiMemoryService + "$ConnectionHandler", run);
-                    param.setResult(null);
-                }
+        findAndHookMethod(MiuiMemoryService + "$ConnectionHandler", run, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, MiuiMemoryService + "$ConnectionHandler", run);
+                param.setResult(null);
             }
-        );
+        });
 
-        /*禁用MiuiMemoryService*/
-        findAndHookConstructor(MiuiMemoryService,
-            Context.class,
-            new HookAction() {
-                @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, MiuiMemoryService);
-                    getDeclaredField(param, "sCompactionEnable", false);
-                    getDeclaredField(param, "sCompactSingleProcEnable", false);
-                    getDeclaredField(param, "sWriteEnable", false);
-                }
+        findAndHookConstructor(MiuiMemoryService, Context.class, new HookAction() {
+            @Override
+            protected void after(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, MiuiMemoryService);
+                getDeclaredField(param, "sCompactionEnable", false);
+                getDeclaredField(param, "sCompactSingleProcEnable", false);
+                getDeclaredField(param, "sWriteEnable", false);
             }
-        );
+        });
+    }
 
-        /*禁用MiuiMemReclaimer*/
-        findAndHookConstructor(MiuiMemReclaimer,
-            new HookAction() {
-                @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, MiuiMemReclaimer);
-                    getDeclaredField(param, "RECLAIM_IF_NEEDED", false);
-                    getDeclaredField(param, "USE_LEGACY_COMPACTION", false);
-                }
+    private void setMiuiMemReclaimerHooks() {
+        findAndHookConstructor(MiuiMemReclaimer, new HookAction() {
+            @Override
+            protected void after(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, MiuiMemReclaimer);
+                getDeclaredField(param, "RECLAIM_IF_NEEDED", false);
+                getDeclaredField(param, "USE_LEGACY_COMPACTION", false);
             }
-        );
+        });
 
-        /*禁用MiuiMemReclaimer*/
-        findAndHookMethod(MiuiMemReclaimer + "$CompactorHandler",
-            handleMessage,
-            Message.class, new HookAction() {
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, MiuiMemReclaimer + "$CompactorHandler", handleMessage);
-                    param.setResult(null);
-                }
+        findAndHookMethod(MiuiMemReclaimer + "$CompactorHandler", handleMessage, Message.class, new HookAction() {
+            @Override
+            protected void before(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, MiuiMemReclaimer + "$CompactorHandler", handleMessage);
+                param.setResult(null);
             }
-        );
+        });
+    }
 
-        /*禁用spc*/
-        findAndHookConstructor(PressureStateSettings,
-            new HookAction() {
-                @Override
-                protected void after(MethodHookParam param) {
-                    setLog(2, logI, PressureStateSettings, "PROCESS_CLEANER_ENABLED");
-                    setBoolean(param.thisObject, "PROCESS_CLEANER_ENABLED", false);
-                }
+    private void setPressureStateSettingsHooks() {
+        findAndHookConstructor(PressureStateSettings, new HookAction() {
+            @Override
+            protected void after(XC_MethodHook.MethodHookParam param) {
+                setLog(2, logI, PressureStateSettings, "PROCESS_CLEANER_ENABLED");
+                setBoolean(param.thisObject, "PROCESS_CLEANER_ENABLED", false);
             }
-        );
+        });
     }
 }
