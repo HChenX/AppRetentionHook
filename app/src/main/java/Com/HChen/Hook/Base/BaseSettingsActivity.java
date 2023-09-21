@@ -121,7 +121,6 @@ public class BaseSettingsActivity extends AppCompatActivity {
             .setHapticFeedbackEnabled(true)
             .setPositiveButton(android.R.string.ok, (dialog, which) -> doRestart(packagename, isRestartSystem))
             .setNegativeButton(android.R.string.cancel, (dialog, which) -> Toast.makeText(this, getResources().getString(R.string.cancel), Toast.LENGTH_SHORT).show())
-            .create()
             .show();
     }
 
