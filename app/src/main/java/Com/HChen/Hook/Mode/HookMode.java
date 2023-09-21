@@ -2,7 +2,7 @@ package Com.HChen.Hook.Mode;
 
 import java.lang.reflect.Field;
 
-import Com.HChen.Hook.Base.BasePutKey;
+import Com.HChen.Hook.Base.BaseGetKey;
 import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -10,7 +10,7 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public abstract class HookMode extends HookLog {
-    GetKey<String, Object> mPrefsMap = BasePutKey.mPrefsMap;
+    GetKey<String, Object> mPrefsMap = BaseGetKey.mPrefsMap;
     LoadPackageParam loadPackageParam;
 
     public abstract void init();
@@ -215,6 +215,7 @@ public abstract class HookMode extends HookLog {
                     setString.set(param.thisObject, iNeedTo);
                     Object result = setString.get(param.thisObject);
                     checkLast("getDeclaredField", iNeedString, iNeedTo, result);
+
                 } catch (IllegalAccessException e) {
                     logE("IllegalAccessException to: " + iNeedString + " Need to: " + iNeedTo + " Code:" + e);
                 }

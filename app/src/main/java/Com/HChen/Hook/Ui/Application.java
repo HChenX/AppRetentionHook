@@ -1,13 +1,13 @@
-package Com.HChen.Hook;
+package Com.HChen.Hook.Ui;
 
 import android.content.Context;
 
-import Com.HChen.Hook.Base.BasePutKey;
+import Com.HChen.Hook.Base.BaseGetKey;
 
 public class Application extends android.app.Application {
     @Override
     protected void attachBaseContext(Context base) {
-        BasePutKey.getSharedPrefs(base);
+        BaseGetKey.getSharedPrefs(base);
         super.attachBaseContext(base);
     }
 

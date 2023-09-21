@@ -1,7 +1,7 @@
 package Com.HChen.Hook.App;
 
+import Com.HChen.Hook.Base.SettingsPreferenceFragment;
 import Com.HChen.Hook.R;
-import Com.HChen.Hook.Ui.SettingsPreferenceFragment;
 
 public class MainFragment extends SettingsPreferenceFragment {
     @Override

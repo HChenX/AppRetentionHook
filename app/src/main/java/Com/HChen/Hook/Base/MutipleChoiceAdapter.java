@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -15,7 +16,7 @@ import moralnorm.appcompat.widget.CheckedTextView;
 public class MutipleChoiceAdapter extends RecyclerView.Adapter<MutipleChoiceAdapter.ViewHolder> {
 
     // 填充数据的list
-    private List<String> mList;
+    private final List<String> mList;
     // 用来控制CheckBox的选中状况
     private SparseBooleanArray mIsChecked;
     private OnCurWillCheckAllChangedListener mListener;
@@ -57,6 +58,7 @@ public class MutipleChoiceAdapter extends RecyclerView.Adapter<MutipleChoiceAdap
         mIsChecked = isChecked;
     }
 
+    @NonNull
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_mutiplechoice, parent, false);
@@ -94,7 +96,7 @@ public class MutipleChoiceAdapter extends RecyclerView.Adapter<MutipleChoiceAdap
         return mList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public CheckedTextView mCheckBoxTitle;
 
         public ViewHolder(View itemView) {

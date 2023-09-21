@@ -3,8 +3,8 @@ package Com.HChen.Hook.App;
 import android.view.View;
 
 import Com.HChen.Hook.Base.BaseSettingsActivity;
+import Com.HChen.Hook.Base.SettingsPreferenceFragment;
 import Com.HChen.Hook.R;
-import Com.HChen.Hook.Ui.SettingsPreferenceFragment;
 
 public class PowerKeeper extends SettingsPreferenceFragment {
     @Override
@@ -14,7 +14,7 @@ public class PowerKeeper extends SettingsPreferenceFragment {
 
     @Override
     public View.OnClickListener addRestartListener() {
-        return view -> ((BaseSettingsActivity) getActivity()).showRestartDialog(
+        return view -> ((BaseSettingsActivity) requireActivity()).showRestartDialog(
             getResources().getString(R.string.powerkeeper),
             "com.miui.powerkeeper"
         );

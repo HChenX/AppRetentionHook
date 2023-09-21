@@ -1,6 +1,6 @@
 package Com.HChen.Hook.Mode;
 
-import Com.HChen.Hook.Base.BasePutKey;
+import Com.HChen.Hook.Base.BaseGetKey;
 import Com.HChen.Hook.BuildConfig;
 import Com.HChen.Hook.Execute.MiuiFramework.PowerKeeper;
 import Com.HChen.Hook.Execute.MiuiService.MiuiService;
@@ -12,7 +12,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 public class HookRun extends HookLog {
     LoadPackageParam loadPackageParam;
 
-    public final GetKey<String, Object> mPrefsMap = BasePutKey.mPrefsMap;
+    public final GetKey<String, Object> mPrefsMap = BaseGetKey.mPrefsMap;
 
     public void HookPackage(LoadPackageParam loadPackageParam) {
         String PackageName = loadPackageParam.packageName;

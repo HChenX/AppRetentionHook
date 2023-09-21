@@ -7,7 +7,10 @@ import android.text.TextUtils;
 
 import androidx.fragment.app.Fragment;
 
-public class SettingLauncher {
+import Com.HChen.Hook.SystemLog;
+
+public class SettingLauncher extends SystemLog {
+    public final String TAG = "SettingLauncher";
     private final Context mContext;
     private boolean mLaunched;
 
@@ -76,7 +79,7 @@ public class SettingLauncher {
         intent.putExtra(":settings:show_fragment_args", mArguments);
         intent.putExtra(":settings:show_fragment_title", mTitle);
         intent.putExtra(":settings:show_fragment_title_resid", mTitleResId);
-
+        logI(TAG, "toIntent: " + intent.getExtras());
         /*intent.putExtra(":settings:show_fragment_contentResId", mContentResId);*/
         return intent;
     }
@@ -85,6 +88,9 @@ public class SettingLauncher {
         mContext.startActivity(intent);
     }
 
+    /**
+     * @noinspection deprecation
+     */
     void launchForResult(Fragment fragment, Intent intent, int i) {
         fragment.startActivityForResult(intent, i);
     }

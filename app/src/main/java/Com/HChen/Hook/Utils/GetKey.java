@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * @noinspection DataFlowIssue
+ */
 public class GetKey<K, V> extends HashMap<K, V> {
     public Object getObject(String key, Object defValue) {
         return get(key) == null ? defValue : get(key);
@@ -32,7 +35,7 @@ public class GetKey<K, V> extends HashMap<K, V> {
 
     public boolean getBoolean(String key) {
         key = "prefs_key_" + key;
-        return get(key) == null ? false : (Boolean) get(key);
+        return get(key) != null && (Boolean) get(key);
     }
 
 }

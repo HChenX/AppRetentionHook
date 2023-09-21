@@ -1,13 +1,14 @@
-package Com.HChen.Hook.Ui;
+package Com.HChen.Hook.Base;
 
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
-import Com.HChen.Hook.Base.BasePreferenceFragment;
-import Com.HChen.Hook.Base.BaseSettingsActivity;
+import Com.HChen.Hook.SystemLog;
 
 public abstract class SettingsPreferenceFragment extends BasePreferenceFragment {
+    public final String TAG = "SettingsPreferenceFragment";
+    SystemLog systemLog = new SystemLog();
     public String mTitle;
     public int mContentResId = 0;
     public int mTitleResId = 0;
@@ -21,6 +22,7 @@ public abstract class SettingsPreferenceFragment extends BasePreferenceFragment 
             mTitleResId = args.getInt(":fragment:show_title_resid");
             mContentResId = args.getInt("contentResId");
         }
+        systemLog.logI(TAG, "onCreatePreferences: " + args);
         if (mTitleResId != 0) setTitle(mTitleResId);
         if (!TextUtils.isEmpty(mTitle)) setTitle(mTitle);
         mContentResId = mContentResId != 0 ? mContentResId : getContentResId();
@@ -28,7 +30,7 @@ public abstract class SettingsPreferenceFragment extends BasePreferenceFragment 
             setPreferencesFromResource(mContentResId, s);
             initPrefs();
         }
-        ((BaseSettingsActivity) getActivity()).setRestartView(addRestartListener());
+        ((BaseSettingsActivity) requireActivity()).setRestartView(addRestartListener());
     }
 
     public View.OnClickListener addRestartListener() {

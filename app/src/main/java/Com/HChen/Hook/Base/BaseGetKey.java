@@ -2,34 +2,26 @@ package Com.HChen.Hook.Base;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 
 import java.util.Map;
 
 import Com.HChen.Hook.BuildConfig;
+import Com.HChen.Hook.SystemLog;
 import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.XSharedPreferences;
 
-public class BasePutKey {
+public class BaseGetKey extends SystemLog {
     public static GetKey<String, Object> mPrefsMap = new GetKey<>();
-    public static String mPrefsName = "HChen_prefs";
-    final String TAG = "[ HChenHook ]: ";
+    public static final String mPrefsName = "HChen_prefs";
+    public final String TAG = "BaseGetKey";
 
     /**
      * @noinspection deprecation
      */
     @SuppressLint("WorldReadableFiles")
-    public static void getSharedPrefs(Context context, boolean multiProcess) {
-        context = context.createDeviceProtectedStorageContext();
-        try {
-            context.getSharedPreferences(mPrefsName, multiProcess ? Context.MODE_MULTI_PROCESS | Context.MODE_WORLD_READABLE : Context.MODE_WORLD_READABLE | Context.MODE_PRIVATE);
-        } catch (Throwable t) {
-            context.getSharedPreferences(mPrefsName, multiProcess ? Context.MODE_MULTI_PROCESS | Context.MODE_PRIVATE : Context.MODE_PRIVATE);
-        }
-    }
-
     public static void getSharedPrefs(Context context) {
-        getSharedPrefs(context, false);
+        context = context.createDeviceProtectedStorageContext();
+        context.getSharedPreferences(mPrefsName, Context.MODE_WORLD_READABLE);
     }
 
     public void setXSharedPrefs() {
@@ -40,16 +32,15 @@ public class BasePutKey {
                 mXSharedPreferences.makeWorldReadable();
                 Map<String, ?> allPrefs = mXSharedPreferences == null ? null : mXSharedPreferences.getAll();
                 if (allPrefs != null) {
-                    Log.i(TAG, "setXSharedPrefs: " + allPrefs);
+                    logI(TAG, "setXSharedPrefs: " + allPrefs);
                     mPrefsMap.putAll(allPrefs);
                 } else {
-                    Log.w(TAG, "setXSharedPrefs: null");
+                    logE(TAG, "setXSharedPrefs: null");
                 }
             } catch (Throwable t) {
-
+                logW(TAG, "setXSharedPrefs: get mXSharedPreferences fail");
             }
         }
     }
-
 
 }

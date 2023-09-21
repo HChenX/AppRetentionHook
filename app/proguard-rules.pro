@@ -23,7 +23,7 @@
 -keep class Com.HChen.Hook.HookInlet
 #-keep class * extends Com.HChen.Hook.Mode.HookMode
 #-keep class * extends Com.HChen.Hook.Base.BasePreferenceFragment
--keep class * extends Com.HChen.Hook.Ui.SettingsPreferenceFragment
+-keep class * extends Com.HChen.Hook.Base.SettingsPreferenceFragment
 -keep class moralnorm.**{*;}
 #-keep class miui.drm.**{*;}
 -dontwarn com.android.internal.view.menu.MenuBuilder

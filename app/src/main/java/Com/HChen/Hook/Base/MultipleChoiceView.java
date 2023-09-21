@@ -1,5 +1,6 @@
 package Com.HChen.Hook.Base;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import Com.HChen.Hook.R;
 
+@SuppressLint("NotifyDataSetChanged")
 public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAdapter.OnCurWillCheckAllChangedListener {
 
     private MutipleChoiceAdapter mAdapter;
@@ -22,7 +24,6 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
     private List<String> mData;
     private RecyclerView mListView;
     private Button mAllSelectBtn;
-    private Button mOkBtn;
     //确定选择监听器
     private onCheckedListener mOnCheckedListener;
     //当前点击按钮时是否将全选
@@ -46,7 +47,7 @@ public class MultipleChoiceView extends LinearLayout implements MutipleChoiceAda
         mListView.setLayoutManager(new LinearLayoutManager(context));
         mListView.setHasFixedSize(true);
         mAllSelectBtn = view.findViewById(android.R.id.button2);
-        mOkBtn = view.findViewById(android.R.id.button1);
+        Button mOkBtn = view.findViewById(android.R.id.button1);
         mAllSelectBtn.setText(curWillCheckAll ? getResources().getString(R.string.all) : getResources().getString(R.string.lla));
         OnCustomMultipleChoiceCheckedListener onCheckedListener = new OnCustomMultipleChoiceCheckedListener();
 

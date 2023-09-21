@@ -1,4 +1,4 @@
-package Com.HChen.Hook;
+package Com.HChen.Hook.Ui;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,11 +9,12 @@ import androidx.annotation.Nullable;
 
 import Com.HChen.Hook.App.MainFragment;
 import Com.HChen.Hook.Base.SettingsActivity;
-import Com.HChen.Hook.Ui.RestartAlertDialog;
+import Com.HChen.Hook.R;
 import Com.HChen.Hook.Utils.ShellUtils;
 
 public class MainActivity extends SettingsActivity {
-//    public static GetKey<String, Object> mPrefsMap = BasePutKey.mPrefsMap;
+    //    public static GetKey<String, Object> mPrefsMap = BasePutKey.mPrefsMap;
+    String TAG = "MainActivity";
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

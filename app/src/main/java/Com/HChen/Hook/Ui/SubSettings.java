@@ -1,4 +1,4 @@
-package Com.HChen.Hook;
+package Com.HChen.Hook.Ui;
 
 import Com.HChen.Hook.Base.SettingsActivity;
 

@@ -5,18 +5,22 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import Com.HChen.Hook.SubSettings;
+import java.util.Objects;
+
+import Com.HChen.Hook.Ui.SubSettings;
 import moralnorm.preference.Preference;
 import moralnorm.preference.PreferenceFragmentCompat;
 
 public class SettingsActivity extends BaseSettingsActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+    public final String TAG = "SettingsActivity";
+
     public void onStartSettingsForArguments(Preference preference, boolean isBundleEnable) {
         onStartSettingsForArguments(SubSettings.class, preference, isBundleEnable);
     }
 
     @Override
     public boolean onPreferenceStartFragment(@NonNull PreferenceFragmentCompat preferenceFragmentCompat, @NonNull Preference preference) {
-        onStartSettingsForArguments(preference, true);
+        onStartSettingsForArguments(preference, false);
         return true;
     }
 
@@ -25,9 +29,10 @@ public class SettingsActivity extends BaseSettingsActivity implements Preference
         if (isEnableBundle) {
             args = new Bundle();
             args.putString("key", preference.getKey());
+            systemLog.logI(TAG, "onStartSettingsForArguments: " + args);
         }
         String mFragmentName = preference.getFragment();
-        String mTitle = preference.getTitle().toString();
+        String mTitle = Objects.requireNonNull(preference.getTitle()).toString();
         onStartSettingsForArguments(context, cls, mFragmentName, args, 0, mTitle);
     }
 
