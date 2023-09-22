@@ -7,7 +7,7 @@ import android.text.TextUtils;
 
 import androidx.fragment.app.Fragment;
 
-import Com.HChen.Hook.SystemLog;
+import Com.HChen.Hook.Utils.SystemLog;
 
 public class SettingLauncher extends SystemLog {
     public final String TAG = "SettingLauncher";

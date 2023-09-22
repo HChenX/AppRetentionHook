@@ -10,6 +10,7 @@ import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class HookRun extends HookLog {
+    public final String TAG = "HookRun";
     LoadPackageParam loadPackageParam;
 
     public final GetKey<String, Object> mPrefsMap = BaseGetKey.mPrefsMap;

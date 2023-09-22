@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 
-import Com.HChen.Hook.SystemLog;
+import Com.HChen.Hook.Utils.SystemLog;
 
 public abstract class SettingsPreferenceFragment extends BasePreferenceFragment {
     public final String TAG = "SettingsPreferenceFragment";

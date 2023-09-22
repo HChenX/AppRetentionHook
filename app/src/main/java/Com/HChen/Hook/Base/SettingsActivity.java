@@ -33,13 +33,15 @@ public class SettingsActivity extends BaseSettingsActivity implements Preference
         }
         String mFragmentName = preference.getFragment();
         String mTitle = Objects.requireNonNull(preference.getTitle()).toString();
-        onStartSettingsForArguments(context, cls, mFragmentName, args, 0, mTitle);
+        if (args == null) args = new Bundle();
+//        onStartSettingsForArguments(context, cls, mFragmentName, args, 0, mTitle);
+        onStartSettings(context, cls, mFragmentName, null, args, 0, mTitle);
     }
 
-    public static void onStartSettingsForArguments(Context context, Class<?> cls, String fragment, Bundle args, int titleResId, String title) {
+    /*public static void onStartSettingsForArguments(Context context, Class<?> cls, String fragment, Bundle args, int titleResId, String title) {
         if (args == null) args = new Bundle();
         onStartSettings(context, cls, fragment, null, args, titleResId, title);
-    }
+    }*/
 
     public static void onStartSettings(Context context, Class<?> cls, String fragment, Bundle extras, Bundle args, int titleResId, String title) {
         new SettingLauncher(context)

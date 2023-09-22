@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment;
 
 import java.util.Objects;
 
-import Com.HChen.Hook.SystemLog;
+import Com.HChen.Hook.Utils.SystemLog;
 import moralnorm.preference.Preference;
 import moralnorm.preference.PreferenceManager;
 import moralnorm.preference.compat.PreferenceFragment;
@@ -28,7 +28,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
         PreferenceManager mPreferenceManager = getPreferenceManager();
         mPreferenceManager.setSharedPreferencesName(mPrefsName);
         mPreferenceManager.setSharedPreferencesMode(Context.MODE_WORLD_READABLE);
-        mPreferenceManager.setStorageDeviceProtected();
+        mPreferenceManager.setStorageDefault();
         systemLog.logI(TAG, "onCreatePreferences: " + mPreferenceManager);
     }
 

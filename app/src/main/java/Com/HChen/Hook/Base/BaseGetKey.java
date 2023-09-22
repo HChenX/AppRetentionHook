@@ -6,8 +6,8 @@ import android.content.Context;
 import java.util.Map;
 
 import Com.HChen.Hook.BuildConfig;
-import Com.HChen.Hook.SystemLog;
 import Com.HChen.Hook.Utils.GetKey;
+import Com.HChen.Hook.Utils.SystemLog;
 import de.robv.android.xposed.XSharedPreferences;
 
 public class BaseGetKey extends SystemLog {

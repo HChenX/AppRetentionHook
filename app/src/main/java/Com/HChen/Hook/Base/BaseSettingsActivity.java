@@ -15,15 +15,16 @@ import androidx.fragment.app.FragmentFactory;
 import java.util.Objects;
 
 import Com.HChen.Hook.R;
-import Com.HChen.Hook.SystemLog;
 import Com.HChen.Hook.Utils.ShellUtils;
-import moralnorm.appcompat.app.AlertDialog;
+import Com.HChen.Hook.Utils.SystemLog;
 import moralnorm.appcompat.app.AppCompatActivity;
 
 public class BaseSettingsActivity extends AppCompatActivity {
+
     private String initialFragmentName;
     AppCompatActivity context;
     SystemLog systemLog = new SystemLog();
+    AlertDialogFactory alertDialogFactory = new AlertDialogFactory();
     public final String TAG = "BaseSettingsActivity";
 //    public static List<BaseSettingsActivity> mActivityList = new ArrayList<>();
 
@@ -113,15 +114,11 @@ public class BaseSettingsActivity extends AppCompatActivity {
     }
 
     public void showRestartDialog(boolean isRestartSystem, String appLabel, String packagename) {
-        new AlertDialog.Builder(this)
-            .setCancelable(true)
-            .setTitle(getResources().getString(R.string.soft_reboot) + " " + appLabel)
-            .setMessage(getResources().getString(R.string.restart_app_desc1
-            ) + appLabel + getResources().getString(R.string.restart_app_desc2))
-            .setHapticFeedbackEnabled(true)
-            .setPositiveButton(android.R.string.ok, (dialog, which) -> doRestart(packagename, isRestartSystem))
-            .setNegativeButton(android.R.string.cancel, (dialog, which) -> Toast.makeText(this, getResources().getString(R.string.cancel), Toast.LENGTH_SHORT).show())
-            .show();
+        alertDialogFactory.makeAlertDialog(this,
+            getResources().getString(R.string.soft_reboot) + " " + appLabel,
+            getResources().getString(R.string.restart_app_desc1) + appLabel + getResources().getString(R.string.restart_app_desc2),
+            () -> doRestart(packagename, isRestartSystem),
+            () -> Toast.makeText(this, getResources().getString(R.string.cancel), Toast.LENGTH_SHORT).show());
     }
 
     public void doRestart(String packagename, boolean isRestartSystem) {
@@ -133,13 +130,8 @@ public class BaseSettingsActivity extends AppCompatActivity {
             result = ShellUtils.RootCommand("killall " + packagename);
         }
         if (!result) {
-            new AlertDialog.Builder(this)
-                .setCancelable(false)
-                .setTitle(getResources().getString(R.string.tip))
-                .setMessage(isRestartSystem ? getResources().getString(R.string.reboot_failed) : getResources().getString(R.string.kill_failed))
-                .setHapticFeedbackEnabled(true)
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
+            alertDialogFactory.makeAlertDialog(this, getResources().getString(R.string.tip),
+                isRestartSystem ? getResources().getString(R.string.reboot_failed) : getResources().getString(R.string.kill_failed), null);
         } else {
             Toast.makeText(this, getResources().getString(R.string.sucess) + packagename, Toast.LENGTH_SHORT).show();
         }
