@@ -2,6 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="系统框架">
+
         <SwitchPreference
             android:defaultValue="true"
             android:key="prefs_key_system_service"
@@ -11,24 +12,28 @@
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_checkExcessivePowerUsage"
+            android:summary="关闭CPU使用超时检查导致的kill"
             android:title="@string/checkExcessivePowerUsage" />
 
         <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_killPids"
+            android:summary="这是一个根据adj值进行kill的功能，暂时认为可以hook"
             android:title="@string/killPids" />
 
         <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_killProcessesBelowAdj"
+            android:summary="跟上面差不多，但是不属于同一个类还是单独拉个开关"
             android:title="@string/killProcessesBelowAdj" />
 
         <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_killAllBackgroundProcesses"
+            android:summary="正如上述，未经测试具体调用者未知"
             android:title="@string/killAllBackgroundProcesses" />
 
         <SwitchPreference
@@ -40,52 +45,61 @@
         <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
-            android:key="prefs_key_killAppIfBgRestrictedAndCachedIdleLocked"
+            android:key="prefs_key_ProcessList"
             android:title="@string/killAppIfBgRestrictedAndCachedIdleLocked" />
-        <SwitchPreference
 
+        <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
-            android:key="prefs_key_updateBackgroundRestrictedForUidPackageLocked"
-            android:title="@string/updateBackgroundRestrictedForUidPackageLocked" />
-        <SwitchPreference
+            android:key="prefs_key_getAppStartModeLOSP"
+            android:summary="开启后服务在后台就不会超过一分钟自动自杀了"
+            android:title="@string/getAppStartModeLOSP" />
 
+        <!-- <SwitchPreference
+             android:defaultValue="true"
+             android:dependency="prefs_key_system_service"
+             android:key="prefs_key_updateBackgroundRestrictedForUidPackageLocked"
+             android:title="@string/updateBackgroundRestrictedForUidPackageLocked"
+             android:summary=""/>-->
+
+        <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_runKillAll"
+            android:summary="就是runkill"
             android:title="@string/runKillAll" />
-        <SwitchPreference
 
+        <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_OomAdjuster"
             android:title="@string/OomAdjuster" />
-        <SwitchPreference
 
+        <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_trimPhantomProcessesIfNecessary"
             android:title="@string/trimPhantomProcessesIfNecessary" />
-        <SwitchPreference
 
+        <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_RecentTasks"
             android:title="@string/RecentTasks" />
-        <SwitchPreference
 
+        <!--<SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_LowMemDetector"
-            android:title="@string/LowMemDetector" />
-        <SwitchPreference
+            android:title="@string/LowMemDetector" />-->
 
+        <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
-            android:key="prefs_key_setMemFactorOverride"
+            android:key="prefs_key_AppProfiler"
             android:title="@string/setMemFactorOverride" />
-        <SwitchPreference
 
+        <SwitchPreference
             android:defaultValue="true"
             android:dependency="prefs_key_system_service"
             android:key="prefs_key_ActivityManagerConstants"

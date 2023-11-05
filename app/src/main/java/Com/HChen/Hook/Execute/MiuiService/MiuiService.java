@@ -17,6 +17,7 @@ import static Com.HChen.Hook.Value.MiuiValue.boostCameraIfNeeded;
 import static Com.HChen.Hook.Value.MiuiValue.cleanUpMemory;
 import static Com.HChen.Hook.Value.MiuiValue.doClean;
 import static Com.HChen.Hook.Value.MiuiValue.handleAutoLockOff;
+import static Com.HChen.Hook.Value.MiuiValue.handleKillAll;
 import static Com.HChen.Hook.Value.MiuiValue.handleLimitCpuException;
 import static Com.HChen.Hook.Value.MiuiValue.handleMessage;
 import static Com.HChen.Hook.Value.MiuiValue.handleThermalKillProc;
@@ -25,7 +26,6 @@ import static Com.HChen.Hook.Value.MiuiValue.killProcess;
 import static Com.HChen.Hook.Value.MiuiValue.nStartPressureMonitor;
 import static Com.HChen.Hook.Value.MiuiValue.onStartJob;
 import static Com.HChen.Hook.Value.MiuiValue.reclaimMemoryForGameIfNeed;
-import static Com.HChen.Hook.Value.MiuiValue.run;
 import static Com.HChen.Hook.Value.MiuiValue.runClean;
 import static Com.HChen.Hook.Value.MiuiValue.updateScreenState;
 
@@ -36,17 +36,8 @@ import android.os.Message;
 import java.io.PrintWriter;
 
 import Com.HChen.Hook.Mode.HookMode;
-import de.robv.android.xposed.XC_MethodHook;
 
 public class MiuiService extends HookMode {
-    final String logI = "I";
-    final String logW = "W";
-    final String logE = "E";
-
-    @Override
-    public int smOr() {
-        return 2;
-    }
 
     @Override
     public void init() {
@@ -54,8 +45,8 @@ public class MiuiService extends HookMode {
         findAndHookConstructor(ScoutDisplayMemoryManager,
             new HookAction() {
                 @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ScoutDisplayMemoryManager);
+                protected void after(MethodHookParam param) {
+                    super.after(param);
                     getDeclaredField(param, "ENABLE_SCOUT_MEMORY_MONITOR", false);
                     getDeclaredField(param, "SCOUT_MEMORY_DISABLE_KGSL", false);
                 }
@@ -81,14 +72,14 @@ public class MiuiService extends HookMode {
                     setLog(2, logW, ScoutDisplayMemoryManager, checkKgslLeak);
                 }
             }
-        );
-*/
+        );*/
+
         /*关闭Scout的一个功能*/
         findAndHookMethod(ScoutDisplayMemoryManager,
             isEnableResumeFeature, new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ScoutDisplayMemoryManager, isEnableResumeFeature);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(false);
                 }
             }
@@ -96,19 +87,19 @@ public class MiuiService extends HookMode {
 
         /*关闭一堆Scout的功能*/
         findAndHookConstructor(ScoutHelper, new HookAction() {
-                @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ScoutHelper);
-                    setBoolean(param.thisObject, "ENABLED_SCOUT", false);
-                    setBoolean(param.thisObject, "ENABLED_SCOUT_DEBUG", false);
-                    setBoolean(param.thisObject, "BINDER_FULL_KILL_PROC", false);
-                    setBoolean(param.thisObject, "SCOUT_BINDER_GKI", false);
-                    /*是崩溃相关*/
-                        /*setBoolean(param.thisObject, "PANIC_D_THREAD", false);
-                        setBoolean(param.thisObject, "SYSRQ_ANR_D_THREAD", false);
-                        setBoolean(param.thisObject, "PANIC_ANR_D_THREAD", false);
-                        setBoolean(param.thisObject, "DISABLE_AOSP_ANR_TRACE_POLICY", false);*/
-                }
+            @Override
+            protected void after(MethodHookParam param) {
+                super.after(param);
+                setBoolean(param.thisObject, "ENABLED_SCOUT", false);
+                setBoolean(param.thisObject, "ENABLED_SCOUT_DEBUG", false);
+                setBoolean(param.thisObject, "BINDER_FULL_KILL_PROC", false);
+                setBoolean(param.thisObject, "SCOUT_BINDER_GKI", false);
+                /*是崩溃相关*/
+                    /*setBoolean(param.thisObject, "PANIC_D_THREAD", false);
+                    setBoolean(param.thisObject, "SYSRQ_ANR_D_THREAD", false);
+                    setBoolean(param.thisObject, "PANIC_ANR_D_THREAD", false);
+                    setBoolean(param.thisObject, "DISABLE_AOSP_ANR_TRACE_POLICY", true);*/
+            }
             }
         );//
 
@@ -117,21 +108,32 @@ public class MiuiService extends HookMode {
             reclaimMemoryForGameIfNeed, String.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, GameMemoryCleaner, reclaimMemoryForGameIfNeed);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
 
             }
         );//
 
+        /*关闭内存回收功能，寄生于游戏清理*/
+        findAndHookConstructor(GameMemoryCleaner,
+            Context.class, new HookAction() {
+                @Override
+                protected void after(MethodHookParam param) {
+                    super.after(param);
+                    getDeclaredField(param, "IS_MEMORY_CLEAN_ENABLED", false);
+                }
+            }
+        );
+
         /*禁用PeriodicCleaner的clean*/
         findAndHookMethod(PeriodicCleanerService,
             doClean, int.class, int.class, int.class, String.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService, doClean);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -143,8 +145,8 @@ public class MiuiService extends HookMode {
             Message.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService + "$MyHandler", handleMessage);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -155,8 +157,8 @@ public class MiuiService extends HookMode {
             runClean, PrintWriter.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService + "$PeriodicShellCmd", runClean);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -167,8 +169,8 @@ public class MiuiService extends HookMode {
             Context.class,
             new HookAction() {
                 @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, PeriodicCleanerService, "mEnable");
+                protected void after(MethodHookParam param) {
+                    super.after(param);
                     getDeclaredField(param, "mEnable", false);
                 }
             }
@@ -179,8 +181,8 @@ public class MiuiService extends HookMode {
             cleanUpMemory, long.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SystemPressureController, cleanUpMemory);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -191,8 +193,8 @@ public class MiuiService extends HookMode {
             nStartPressureMonitor,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SystemPressureController, nStartPressureMonitor);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -204,8 +206,8 @@ public class MiuiService extends HookMode {
             boolean.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SystemPressureController, updateScreenState);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -216,8 +218,8 @@ public class MiuiService extends HookMode {
             onStartJob, JobParameters.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessKillerIdler, onStartJob);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(false);
                 }
             }
@@ -228,8 +230,8 @@ public class MiuiService extends HookMode {
             handleAutoLockOff,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessPowerCleaner, handleAutoLockOff);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -240,12 +242,24 @@ public class MiuiService extends HookMode {
             handleThermalKillProc,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessPowerCleaner, handleThermalKillProc);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
         );//
+
+        /*禁止kill进程*/
+        hookAllMethods(ProcessPowerCleaner,
+            handleKillAll,
+            new HookAction() {
+                @Override
+                protected void before(MethodHookParam param) {
+                    super.before(param);
+                    param.setResult(null);
+                }
+            }
+        );
 
         /*禁止kill_用处暂不确定*/
         /*hookAllMethods("com.android.server.am.ProcessPowerCleaner",
@@ -274,8 +288,8 @@ public class MiuiService extends HookMode {
             handleMessage, Message.class,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessMemoryCleaner + "$H", handleMessage);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -296,8 +310,8 @@ public class MiuiService extends HookMode {
             cleanUpMemory,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessMemoryCleaner, cleanUpMemory);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(true);
                 }
             }
@@ -308,8 +322,8 @@ public class MiuiService extends HookMode {
             killProcess,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, ProcessMemoryCleaner, killProcess);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(0L);
                 }
             }
@@ -320,8 +334,8 @@ public class MiuiService extends HookMode {
             boostCameraIfNeeded,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, CameraBooster, boostCameraIfNeeded);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
@@ -331,44 +345,45 @@ public class MiuiService extends HookMode {
         findAndHookMethod(SmartCpuPolicyManager,
             handleLimitCpuException, int.class, new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, SmartCpuPolicyManager, handleLimitCpuException);
+                protected void before(MethodHookParam param) {
+                    super.before(param);
                     param.setResult(null);
                 }
             }
         );
 
-        /*禁用MiuiMemoryService*/
+        /*多余操作*/
+        /* *//*禁用MiuiMemoryService*//*
         findAndHookMethod(MiuiMemoryService + "$MiuiMemServiceThread",
             run,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
+                protected void before(MethodHookParam param) {
                     setLog(2, logI, MiuiMemoryService + "$MiuiMemServiceThread", run);
                     param.setResult(null);
                 }
             }
         );
 
-        /*禁用MiuiMemoryService*/
+        *//*禁用MiuiMemoryService*//*
         findAndHookMethod(MiuiMemoryService + "$ConnectionHandler",
             run,
             new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
+                protected void before(MethodHookParam param) {
                     setLog(2, logI, MiuiMemoryService + "$ConnectionHandler", run);
                     param.setResult(null);
                 }
             }
-        );
+        );*/
 
         /*禁用MiuiMemoryService*/
         findAndHookConstructor(MiuiMemoryService,
             Context.class,
             new HookAction() {
                 @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, MiuiMemoryService);
+                protected void after(MethodHookParam param) {
+                    super.after(param);
                     getDeclaredField(param, "sCompactionEnable", false);
                     getDeclaredField(param, "sCompactSingleProcEnable", false);
                     getDeclaredField(param, "sWriteEnable", false);
@@ -380,32 +395,33 @@ public class MiuiService extends HookMode {
         findAndHookConstructor(MiuiMemReclaimer,
             new HookAction() {
                 @Override
-                protected void after(XC_MethodHook.MethodHookParam param) {
-                    setLog(2, logI, MiuiMemReclaimer);
+                protected void after(MethodHookParam param) {
+                    super.after(param);
                     getDeclaredField(param, "RECLAIM_IF_NEEDED", false);
-                    getDeclaredField(param, "USE_LEGACY_COMPACTION", false);
+                    /*getDeclaredField(param, "USE_LEGACY_COMPACTION", false);*/
                 }
             }
         );
 
-        /*禁用MiuiMemReclaimer*/
+        /*压缩进程的*/
+        /*禁用MiuiMemReclaimer*//*
         findAndHookMethod(MiuiMemReclaimer + "$CompactorHandler",
             handleMessage,
             Message.class, new HookAction() {
                 @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
+                protected void before(MethodHookParam param) {
                     setLog(2, logI, MiuiMemReclaimer + "$CompactorHandler", handleMessage);
                     param.setResult(null);
                 }
             }
-        );
+        );*/
 
         /*禁用spc*/
         findAndHookConstructor(PressureStateSettings,
             new HookAction() {
                 @Override
                 protected void after(MethodHookParam param) {
-                    setLog(2, logI, PressureStateSettings, "PROCESS_CLEANER_ENABLED");
+                    super.after(param);
                     setBoolean(param.thisObject, "PROCESS_CLEANER_ENABLED", false);
                 }
             }

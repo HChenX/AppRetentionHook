@@ -16,7 +16,6 @@ import moralnorm.preference.compat.PreferenceFragment;
 
 public class BasePreferenceFragment extends PreferenceFragment {
     public final String TAG = "BasePreferenceFragment";
-    SystemLog systemLog = new SystemLog();
     public static final String mPrefsName = "HChen_prefs";
 
     /**
@@ -29,7 +28,7 @@ public class BasePreferenceFragment extends PreferenceFragment {
         mPreferenceManager.setSharedPreferencesName(mPrefsName);
         mPreferenceManager.setSharedPreferencesMode(Context.MODE_WORLD_READABLE);
         mPreferenceManager.setStorageDefault();
-        systemLog.logI(TAG, "onCreatePreferences: " + mPreferenceManager);
+        SystemLog.logI(TAG, "onCreatePreferences: " + mPreferenceManager);
     }
 
     public void setTitle(int titleResId) {

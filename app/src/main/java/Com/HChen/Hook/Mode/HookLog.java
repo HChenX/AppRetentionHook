@@ -2,17 +2,44 @@ package Com.HChen.Hook.Mode;
 
 import android.util.Log;
 
-import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
-public abstract class HookLog extends XC_MethodHook {
-    final String hookTag = "Hook Class: ";
-    final String hookMain = "[ HChenHook ]: ";
-    final String methodNameS = "methodName: ";
-    String Tag;
-    String Tags;
+public class HookLog {
+    //    static final String hookTag = "Hook Class: ";
+    static final String hookMain = "[HChenHook]";
+//    static final String methodNameS = "methodName: ";
 
-    public int smOr() {
+    public static void logI(String tag, String Log) {
+//        setTag();
+        XposedBridge.log(hookMain + "[" + tag + "]: " + "Info: " + Log);
+    }
+
+    public static void logW(String tag, String Log) {
+//        setTag();
+        XposedBridge.log(hookMain + "[" + tag + "]: " + "Warning: " + Log);
+    }
+
+    public static void logE(String tag, String Log) {
+//        setTag();
+        XposedBridge.log(hookMain + "[" + tag + "]: " + "Error: " + Log);
+    }
+
+    public static void logSI(String tag, String log) {
+//        setTags(smOr);
+        Log.i(hookMain + "[" + tag + "]: ", "Info: " + log);
+    }
+
+    public static void logSW(String tag, String log) {
+//        setTags(smOr);
+        Log.w(hookMain + "[" + tag + "]: ", "Warning: " + log);
+    }
+
+    public void logSE(String tag, String log) {
+//        setTags(smOr);
+        Log.e(hookMain + "[" + tag + "]: ", "Error: " + log);
+    }
+
+    /*public int smOr() {
         return -1;
     }
 
@@ -32,17 +59,10 @@ public abstract class HookLog extends XC_MethodHook {
         } else if (smOr == 2) {
             Tags = hookMain + "MiuiHook: ";
         }
-    }
+    }*/
 
-    public HookLog() {
-        super();
-    }
 
-    public HookLog(int priority) {
-        super(priority);
-    }
-
-    public void setLog(int smOr, String grade, String classLog, String nameLog) {
+   /* public void setLog(int smOr, String grade, String classLog, String nameLog) {
         switch (grade) {
             case "I" -> logSI(smOr, hookTag + classLog + methodNameS + nameLog);
             case "W" -> logSW(smOr, hookTag + classLog + methodNameS + nameLog);
@@ -56,35 +76,5 @@ public abstract class HookLog extends XC_MethodHook {
             case "W" -> logSW(smOr, hookTag + classLog);
             case "E" -> logSE(smOr, hookTag + classLog);
         }
-    }
-
-    public void logI(String Log) {
-        setTag();
-        XposedBridge.log(Tag + "Info by: " + Log);
-    }
-
-    public void logW(String Log) {
-        setTag();
-        XposedBridge.log(Tag + "Warning by: " + Log);
-    }
-
-    public void logE(String Log) {
-        setTag();
-        XposedBridge.log(Tag + "Error by: " + Log);
-    }
-
-    public void logSI(int smOr, String log) {
-        setTags(smOr);
-        Log.i(Tags, "Info by: " + log);
-    }
-
-    public void logSW(int smOr, String log) {
-        setTags(smOr);
-        Log.w(Tag, "Warning by: " + log);
-    }
-
-    public void logSE(int smOr, String log) {
-        setTags(smOr);
-        Log.e(Tag, "Error by: " + log);
-    }
+    }*/
 }

@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import java.util.Objects;
 
 import Com.HChen.Hook.Ui.SubSettings;
+import Com.HChen.Hook.Utils.SystemLog;
 import moralnorm.preference.Preference;
 import moralnorm.preference.PreferenceFragmentCompat;
 
@@ -29,7 +30,7 @@ public class SettingsActivity extends BaseSettingsActivity implements Preference
         if (isEnableBundle) {
             args = new Bundle();
             args.putString("key", preference.getKey());
-            systemLog.logI(TAG, "onStartSettingsForArguments: " + args);
+            SystemLog.logI(TAG, "onStartSettingsForArguments: " + args);
         }
         String mFragmentName = preference.getFragment();
         String mTitle = Objects.requireNonNull(preference.getTitle()).toString();

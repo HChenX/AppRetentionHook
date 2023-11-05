@@ -19,7 +19,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
+<!--                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />-->
             </intent-filter>
         </activity>
 
@@ -28,7 +28,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
+                <!--                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />-->
             </intent-filter>
         </activity>
 

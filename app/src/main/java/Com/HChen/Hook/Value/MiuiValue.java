@@ -14,6 +14,7 @@ public final class MiuiValue {
     public static final String onStartJob = "onStartJob";
     public static final String handleAutoLockOff = "handleAutoLockOff";
     public static final String handleThermalKillProc = "handleThermalKillProc";
+    public static final String handleKillAll = "handleKillAll";
     public static final String killProcess = "killProcess";
     public static final String boostCameraIfNeeded = "boostCameraIfNeeded";
     public static final String handleLimitCpuException = "handleLimitCpuException";

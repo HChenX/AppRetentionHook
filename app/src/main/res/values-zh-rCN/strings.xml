@@ -33,7 +33,7 @@
     <string name="trimPhantomProcessesIfNecessary">禁止修剪虚幻进程</string>
     <string name="RecentTasks">禁止修剪后台任务卡片</string>
     <string name="LowMemDetector">虚报内存压力为低</string>
-    <string name="setMemFactorOverride">设置内存因子</string>
+    <string name="setMemFactorOverride">禁止AppProfiler逻辑</string>
     <string name="ActivityManagerConstants">取消最大进程限制</string>
     <!--MiuiService Hook-->
     <string name="miui_service">Miui框架</string>

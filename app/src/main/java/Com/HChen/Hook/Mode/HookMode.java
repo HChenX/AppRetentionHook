@@ -1,8 +1,13 @@
 package Com.HChen.Hook.Mode;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import Com.HChen.Hook.Base.BaseGetKey;
+import Com.HChen.Hook.Utils.AllValue;
 import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -10,7 +15,10 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public abstract class HookMode extends HookLog {
+    public String tag = getClass().getSimpleName();
     public final GetKey<String, Object> mPrefsMap = BaseGetKey.mPrefsMap;
+    public final String[] allValue = AllValue.AllValue;
+    List<String> tempString, tempStringT, tempStringS = new ArrayList<>();
     LoadPackageParam loadPackageParam;
 
     public abstract void init();
@@ -19,9 +27,9 @@ public abstract class HookMode extends HookLog {
         try {
             SetLoadPackageParam(loadPackageParam);
             init();
-            logI("Hook Success!");
+            logI(tag, "Hook Success!");
         } catch (Throwable e) {
-            logE("Hook Failed! Because: " + e);
+            logE(tag, "Hook Failed! code: " + e);
         }
     }
 
@@ -41,7 +49,7 @@ public abstract class HookMode extends HookLog {
         try {
             return findClass(className);
         } catch (XposedHelpers.ClassNotFoundError e) {
-            logE("Find " + className + " is Null, Code is: " + e);
+            logE(tag, "Find " + className + " is null, code: " + e);
             return null;
         }
     }
@@ -50,17 +58,58 @@ public abstract class HookMode extends HookLog {
         try {
             return findClass(findClassIfExists(newClassName) != null ? newClassName : oldClassName);
         } catch (XposedHelpers.ClassNotFoundError e) {
-            logE("Find " + newClassName + " and " + oldClassName + " is Null, Code is: " + e);
+            logE(tag, "Find " + newClassName + " and " + oldClassName + " is null, code: " + e);
             return null;
         }
     }
 
-    public static class HookAction extends HookLog {
+    public static class HookAction extends XC_MethodHook {
 
-        protected void before(MethodHookParam param) throws Throwable {
+        private String method = null;
+
+        protected void before(MethodHookParam param) {
+            String all = param.method.toString();
+            String className = param.thisObject.toString();
+            Info info = getInfo(all, className);
+            logSI(info.className, info.method + " before run");
         }
 
-        protected void after(MethodHookParam param) throws Throwable {
+        protected void after(MethodHookParam param) {
+            String all = param.method.toString();
+            String className = param.thisObject.toString();
+            Info info = getInfo(all, className);
+            logSI(info.className, info.method + " after run");
+        }
+
+        private Info getInfo(String all, String className) {
+//            int lastIndex = all.lastIndexOf(".");
+            Pattern pattern = Pattern.compile(".*\\.(.*\\(.*\\))");
+            Matcher matcher = pattern.matcher(all);
+            if (className.contains("@")) {
+                if (matcher.find()) {
+                    method = matcher.group(1);
+                } else method = null;
+                pattern = Pattern.compile(".*\\.(\\w+)\\..*\\(.*\\)");
+                matcher = pattern.matcher(all);
+                if (matcher.find()) {
+                    className = matcher.group(1);
+                } else className = null;
+            } else {
+                if (matcher.find()) {
+                    className = matcher.group(1);
+                } else method = "constructor";
+            }
+            return new Info(className, method);
+        }
+
+        private static class Info {
+            public String method;
+            public String className;
+
+            public Info(String className, String method) {
+                this.className = className;
+                this.method = method;
+            }
         }
 
         public HookAction() {
@@ -71,21 +120,40 @@ public abstract class HookMode extends HookLog {
             super(priority);
         }
 
+        public static HookAction returnConstant(final Object result) {
+            return new HookAction(PRIORITY_DEFAULT) {
+                @Override
+                protected void before(MethodHookParam param) {
+                    super.before(param);
+                    param.setResult(result);
+                }
+            };
+        }
+
+        public static final HookAction DO_NOTHING = new HookAction(PRIORITY_HIGHEST * 2) {
+            @Override
+            protected void before(MethodHookParam param) {
+                super.before(param);
+                param.setResult(null);
+            }
+
+        };
+
         @Override
-        protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+        protected void beforeHookedMethod(MethodHookParam param) {
             try {
                 before(param);
             } catch (Throwable e) {
-                logE("" + e);
+                logE("beforeHookedMethod", e.toString());
             }
         }
 
         @Override
-        protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+        protected void afterHookedMethod(MethodHookParam param) {
             try {
                 after(param);
             } catch (Throwable e) {
-                logE("" + e);
+                logE("afterHookedMethod", e.toString());
             }
         }
 
@@ -93,6 +161,7 @@ public abstract class HookMode extends HookLog {
 
     public void findAndHookMethod(Class<?> clazz, String methodName, Object... parameterTypesAndCallback) {
         try {
+            /*获取class*/
             if (parameterTypesAndCallback.length != 1) {
                 Object[] newArray = new Object[parameterTypesAndCallback.length - 1];
                 System.arraycopy(parameterTypesAndCallback, 0, newArray, 0, newArray.length);
@@ -104,9 +173,9 @@ public abstract class HookMode extends HookLog {
                 clazz.getDeclaredMethod(methodName, classes);
             }
             XposedHelpers.findAndHookMethod(clazz, methodName, parameterTypesAndCallback);
-            logI("Hook: " + clazz + " method is: " + methodName);
+            logI(tag, "Hook: " + clazz + " method is: " + methodName);
         } catch (NoSuchMethodException e) {
-            logE("Not find method: " + methodName + " in: " + clazz);
+            logE(tag, "Not find method: " + methodName + " in: " + clazz);
         }
     }
 
@@ -125,7 +194,12 @@ public abstract class HookMode extends HookLog {
                         if (mPrefsMap.getBoolean(result)) {
                             findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
                         } else {
-                            logW("findAndHookMethod the class: " + result + " ; " + methodName + " is false");
+                            checkAndRun(tempStringT, methodName,
+                                () -> findAndHookMethod(
+                                    findClassIfExists(className),
+                                    methodName,
+                                    parameterTypesAndCallback),
+                                "findAndHookMethod the class: " + className + " ; ");
                         }
                     }
                 }
@@ -134,16 +208,22 @@ public abstract class HookMode extends HookLog {
                 if (mPrefsMap.getBoolean(resultA)) {
                     findAndHookMethod(findClassIfExists(className), methodName, parameterTypesAndCallback);
                 } else {
-                    logW("findAndHookMethod the class: " + resultA + " ; " + methodName + " is false");
+                    checkAndRun(tempStringT, methodName,
+                        () -> findAndHookMethod(
+                            findClassIfExists(className),
+                            methodName,
+                            parameterTypesAndCallback),
+                        "findAndHookMethod the class: " + className + " ; ");
                 }
             }
         } else {
-            logE("Cant get key, class: " + className);
+            logE(tag, "Cant get key, class: " + className);
         }
     }
 
     public void findAndHookConstructor(Class<?> clazz, Object... parameterTypesAndCallback) {
         XposedHelpers.findAndHookConstructor(clazz, parameterTypesAndCallback);
+        logI(tag, "Hook: " + clazz + " is success");
     }
 
     public void findAndHookConstructor(String className, Object... parameterTypesAndCallback) {
@@ -153,18 +233,22 @@ public abstract class HookMode extends HookLog {
             if (mPrefsMap.getBoolean(result)) {
                 findAndHookConstructor(findClassIfExists(className), parameterTypesAndCallback);
             } else {
-                logW("findAndHookConstructor the class: " + result + " is false");
+                checkAndRun(tempStringS, result,
+                    () -> findAndHookConstructor(
+                        findClassIfExists(className),
+                        parameterTypesAndCallback),
+                    "findAndHookConstructor the class: " + className + " ; ");
             }
         } else {
-            logE("Cant get key, class: " + className);
+            logE(tag, "Cant get key, class: " + className);
         }
     }
 
-    public void hookAllMethods(String className, String methodName, XC_MethodHook callback) {
+    public void hookAllMethods(String className, String methodName, HookAction callback) {
         try {
             Class<?> hookClass = findClassIfExists(className);
             if (hookClass == null) {
-                logE("Hook class: " + className + " method: " + methodName + " is Null");
+                logE(tag, "Hook class: " + className + " method: " + methodName + " is Null");
                 return;
             }
             int lastIndex = className.lastIndexOf(".");
@@ -179,22 +263,27 @@ public abstract class HookMode extends HookLog {
                         if (mPrefsMap.getBoolean(result)) {
                             hookAllMethods(hookClass, methodName, callback);
                         } else {
-                            logW("hookAllMethods the class: " + result + " ; " + methodName + " is false");
+                            checkAndRun(tempString, methodName,
+                                () -> hookAllMethods(
+                                    hookClass,
+                                    methodName,
+                                    callback),
+                                "hookAllMethods the class: " + className + " ; ");
                         }
                     }
                 }
             }
         } catch (Throwable e) {
-            logE("Hook The: " + e + " Error");
+            logE(tag, "Hook The: " + e + " Error");
         }
     }
 
-    public void hookAllMethods(Class<?> hookClass, String methodName, XC_MethodHook callback) {
+    public void hookAllMethods(Class<?> hookClass, String methodName, HookAction callback) {
         try {
             int Num = XposedBridge.hookAllMethods(hookClass, methodName, callback).size();
-            logI("Hook: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
+            logI(tag, "Hook: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
         } catch (Throwable e) {
-            logE("Hook The: " + e + " Error");
+            logE(tag, "Hook The: " + e + " Error");
         }
     }
 
@@ -216,21 +305,21 @@ public abstract class HookMode extends HookLog {
                     Object result = setString.get(param.thisObject);
                     checkLast("getDeclaredField", iNeedString, iNeedTo, result);
                 } catch (IllegalAccessException e) {
-                    logE("IllegalAccessException to: " + iNeedString + " Need to: " + iNeedTo + " Code:" + e);
+                    logE(tag, "IllegalAccessException to: " + iNeedString + " Need to: " + iNeedTo + " Code:" + e);
                 }
             } catch (NoSuchFieldException e) {
-                logE("No such the: " + iNeedString + " Code: " + e);
+                logE(tag, "No such the: " + iNeedString + " Code: " + e);
             }
         } else {
-            logE("Param is null Code: " + iNeedString + " And: " + iNeedTo);
+            logE(tag, "Param is null Code: " + iNeedString + " And: " + iNeedTo);
         }
     }
 
     public void checkLast(String setObject, Object fieldName, Object value, Object last) {
         if (value.equals(last)) {
-            logI(setObject + " Success! set " + fieldName + " to " + value);
+            logI(tag, setObject + " Success! set " + fieldName + " to " + value);
         } else {
-            logE(setObject + " Failed! set " + fieldName + " to " + value + " i hope is: " + value + " but is: " + last);
+            logE(tag, setObject + " Failed! set " + fieldName + " to " + value + " i hope is: " + value + " but is: " + last);
         }
     }
 
@@ -247,5 +336,67 @@ public abstract class HookMode extends HookLog {
     public void setObject(Object obj, String fieldName, Object value) {
         XposedHelpers.setObjectField(obj, fieldName, value);
         checkLast("setObject", fieldName, value, XposedHelpers.getObjectField(obj, fieldName));
+    }
+
+    public void checkAndRun(List<String> mList, String methodName, Runnable mCode, String log) {
+        List<String> endRetrieval = retrievalValue(methodName, allValue);
+        StringBuilder combinedKeywords = new StringBuilder();
+        if (!endRetrieval.isEmpty()) {
+            for (int i = 0; i < endRetrieval.size(); i++) {
+                combinedKeywords.append(endRetrieval.get(i));
+                if (i < endRetrieval.size() - 1) {
+                    combinedKeywords.append("_");
+                }
+            }
+            mList.add(combinedKeywords.toString());
+            boolean check = false;
+            if (mPrefsMap.getBoolean(combinedKeywords.toString())) {
+                if (mCode != null) mCode.run();
+            } else {
+                String find = null;
+                for (int i = 0; i < mList.size(); i++) {
+                    try {
+                        Pattern pattern = Pattern.compile(".*" + methodName + ".*");
+                        Matcher matcher = pattern.matcher(mList.get(i));
+                        if (matcher.matches()) {
+                            find = mList.get(i);
+                            mList.clear();
+                            check = true;
+                            break;
+                        }
+                    } catch (Exception e) {
+                        logW(tag, "Such key error: " + methodName);
+                    }
+                }
+                if (mPrefsMap.getBoolean(find) && check) {
+                    if (mCode != null) mCode.run();
+                } else
+                    logW(tag, log + combinedKeywords + " is false");
+            }
+        } else {
+            logW(tag, log + methodName + " is false");
+        }
+    }
+
+    public List<String> retrievalValue(String needString, String[] allValue) {
+        List<String> matchedKeywords = new ArrayList<>();
+        for (String keyWord : allValue) {
+            if (isFuzzyMatch(keyWord, needString)) {
+                matchedKeywords.add(keyWord);
+            }
+        }
+        return matchedKeywords;
+    }
+
+    private boolean isFuzzyMatch(String keyWord, String needString) {
+        try {
+            String regex = ".*" + needString + ".*";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(keyWord);
+            return matcher.matches();
+        } catch (Exception e) {
+            logW(tag, "Such key error: " + keyWord + " " + needString);
+            return false;
+        }
     }
 }

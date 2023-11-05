@@ -1,6 +1,5 @@
 package Com.HChen.Hook.Ui;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -8,12 +7,14 @@ import android.view.MenuItem;
 import androidx.annotation.Nullable;
 
 import Com.HChen.Hook.App.MainFragment;
+import Com.HChen.Hook.Base.AlertDialogFactory;
 import Com.HChen.Hook.Base.SettingsActivity;
 import Com.HChen.Hook.R;
 import Com.HChen.Hook.Utils.ShellUtils;
 
 public class MainActivity extends SettingsActivity {
     //    public static GetKey<String, Object> mPrefsMap = BasePutKey.mPrefsMap;
+    public static final String mCheck = "HChen_check";
     String TAG = "MainActivity";
 
     @Override
@@ -21,15 +22,26 @@ public class MainActivity extends SettingsActivity {
         super.onCreate(savedInstanceState);
         setImmersionMenuEnabled(true);
         setFragment(new MainFragment());
-        suGet();
+        AlertDialogFactory.makeAlertDialog(this,
+            "提示",
+            "正在施工请勿着急",
+            this::finish,
+            null,
+            false,
+            1
+        );
+        ShellUtils.RootCommand("chmod 0777 " + getPackageCodePath());
 //        Log.i("TextHook", "onC reate: " + getPackageCodePath());
-//        ShellUtils.RootCommand("chmod 0777 " + getPackageCodePath());
+//        suGet();
 //        setContentView(R.xml.main_xml);
     }
 
-    private void suGet() {
-        final String ExecutedCommand = "ExecutedCommand";
-        SharedPreferences sharedPreferences = getSharedPreferences(ExecutedCommand, MODE_PRIVATE);
+    /**
+     * @noinspection CommentedOutCode
+     */
+    /*private void suGet() {
+        @SuppressLint({"WorldReadableFiles", "WorldWriteableFiles"}) SharedPreferences sharedPreferences =
+            getSharedPreferences(mCheck, MODE_WORLD_READABLE | MODE_WORLD_WRITEABLE);
         boolean hasExecutedCommand = sharedPreferences.getBoolean("hasExecutedCommand", false);
         String PackageCodePath = sharedPreferences.getString("packageCodePath", "null");
         String Now_PackageCodePath = getPackageCodePath();
@@ -43,7 +55,7 @@ public class MainActivity extends SettingsActivity {
             editor.putString("packageCodePath", Now_PackageCodePath);
             editor.apply();
         }
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

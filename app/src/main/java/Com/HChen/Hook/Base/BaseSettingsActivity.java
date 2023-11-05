@@ -23,8 +23,6 @@ public class BaseSettingsActivity extends AppCompatActivity {
 
     private String initialFragmentName;
     AppCompatActivity context;
-    SystemLog systemLog = new SystemLog();
-    AlertDialogFactory alertDialogFactory = new AlertDialogFactory();
     public final String TAG = "BaseSettingsActivity";
 //    public static List<BaseSettingsActivity> mActivityList = new ArrayList<>();
 
@@ -37,7 +35,7 @@ public class BaseSettingsActivity extends AppCompatActivity {
             initialFragmentName = intent.getStringExtra(":android:show_fragment");
         }
 
-        systemLog.logI(TAG, "onCreate: " + intent.getExtras() + " Bundle: " + bundle);
+        SystemLog.logI(TAG, "onCreate: " + intent.getExtras() + " Bundle: " + bundle);
         super.onCreate(bundle);
         if (intent.getExtras() != null) {
             createUiFromIntent(intent);
@@ -54,7 +52,7 @@ public class BaseSettingsActivity extends AppCompatActivity {
         if (targetFragment != null) {
             targetFragment.setArguments(getArguments(intent));
             setFragment(targetFragment);
-            systemLog.logI(TAG, "createUiFromIntent: " + targetFragment);
+            SystemLog.logI(TAG, "createUiFromIntent: " + targetFragment);
         }
 //        showXposedActiveDialog();
     }
@@ -64,11 +62,11 @@ public class BaseSettingsActivity extends AppCompatActivity {
             FragmentFactory fragmentManager = getSupportFragmentManager().getFragmentFactory();
             Fragment fragment = fragmentManager.instantiate(context.getClassLoader(), initialFragmentName);
 //            fragment.setArguments(savedInstanceState);
-            systemLog.logI(TAG, "getTargetFragment:  " + fragment);
+            SystemLog.logI(TAG, "getTargetFragment:  " + fragment);
             return fragment;
 //            return Fragment.instantiate(context, initialFragmentName, savedInstanceState);
         } catch (Exception e) {
-            systemLog.logE(TAG, "Unable to get target fragment", e);
+            SystemLog.logE(TAG, "Unable to get target fragment", e);
             return null;
         }
     }
@@ -81,7 +79,7 @@ public class BaseSettingsActivity extends AppCompatActivity {
         /*标题和id*/
         args.putString(":fragment:show_title", showFragmentTitle);
         args.putInt(":fragment:show_title_resid", showFragmentTitleResId);
-        systemLog.logI(TAG, "getArguments: " + args);
+        SystemLog.logI(TAG, "getArguments: " + args);
         return args;
     }
 
@@ -114,11 +112,13 @@ public class BaseSettingsActivity extends AppCompatActivity {
     }
 
     public void showRestartDialog(boolean isRestartSystem, String appLabel, String packagename) {
-        alertDialogFactory.makeAlertDialog(this,
+        AlertDialogFactory.makeAlertDialog(this,
             getResources().getString(R.string.soft_reboot) + " " + appLabel,
             getResources().getString(R.string.restart_app_desc1) + appLabel + getResources().getString(R.string.restart_app_desc2),
             () -> doRestart(packagename, isRestartSystem),
-            () -> Toast.makeText(this, getResources().getString(R.string.cancel), Toast.LENGTH_SHORT).show());
+            () -> Toast.makeText(this, getResources().getString(R.string.cancel), Toast.LENGTH_SHORT).show(),
+            true,
+            2);
     }
 
     public void doRestart(String packagename, boolean isRestartSystem) {
@@ -130,8 +130,14 @@ public class BaseSettingsActivity extends AppCompatActivity {
             result = ShellUtils.RootCommand("killall " + packagename);
         }
         if (!result) {
-            alertDialogFactory.makeAlertDialog(this, getResources().getString(R.string.tip),
-                isRestartSystem ? getResources().getString(R.string.reboot_failed) : getResources().getString(R.string.kill_failed), null);
+            AlertDialogFactory.makeAlertDialog(this,
+                getResources().getString(R.string.tip),
+                isRestartSystem ? getResources().getString(R.string.reboot_failed) : getResources().getString(R.string.kill_failed),
+                null,
+                null,
+                false,
+                1
+            );
         } else {
             Toast.makeText(this, getResources().getString(R.string.sucess) + packagename, Toast.LENGTH_SHORT).show();
         }
