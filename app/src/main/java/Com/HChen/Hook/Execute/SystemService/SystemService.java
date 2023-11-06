@@ -197,7 +197,7 @@ public class SystemService extends HookMode {
             new HookAction() {
                 @Override
                 protected void after(MethodHookParam param) {
-                    super.before(param);
+                    super.after(param);
                     getDeclaredField(param, "mMemFactorOverride", 0);
                 }
             }

@@ -68,21 +68,39 @@ public abstract class HookMode extends HookLog {
         private String method = null;
 
         protected void before(MethodHookParam param) {
-            String all = param.method.toString();
-            String className = param.thisObject.toString();
-            Info info = getInfo(all, className);
-            logSI(info.className, info.method + " before run");
+//            String all = param.method.toString();
+//            String className = param.thisObject.toString();
+            Info info = paramCheck(param);
+            info = getInfo(info.all, info.className);
+            logSI(info.className, info.method + " before");
         }
 
         protected void after(MethodHookParam param) {
-            String all = param.method.toString();
-            String className = param.thisObject.toString();
-            Info info = getInfo(all, className);
-            logSI(info.className, info.method + " after run");
+//            String all = param.method.toString();
+//            String className = param.thisObject.toString();
+            Info info = paramCheck(param);
+            info = getInfo(info.all, info.className);
+            logSI(info.className, info.method + " after");
+        }
+
+        private Info paramCheck(MethodHookParam param) {
+            String all = null;
+            String className = null;
+            if (param.method != null) {
+                all = param.method.toString();
+            }
+            if (param.thisObject != null) {
+                className = param.thisObject.toString();
+            }
+            if (param.method == null || param.thisObject == null)
+                logE("paramCheck", "param.method is: " + param.method
+                    + " param.thisObject is: " + param.thisObject);
+            return new Info(all, className, null);
         }
 
         private Info getInfo(String all, String className) {
 //            int lastIndex = all.lastIndexOf(".");
+            if (all == null || className == null) return new Info(null, null, null);
             Pattern pattern = Pattern.compile(".*\\.(.*\\(.*\\))");
             Matcher matcher = pattern.matcher(all);
             if (className.contains("@")) {
@@ -99,14 +117,16 @@ public abstract class HookMode extends HookLog {
                     className = matcher.group(1);
                 } else method = "constructor";
             }
-            return new Info(className, method);
+            return new Info(null, className, method);
         }
 
         private static class Info {
+            public String all;
             public String method;
             public String className;
 
-            public Info(String className, String method) {
+            public Info(String all, String className, String method) {
+                this.all = all;
                 this.className = className;
                 this.method = method;
             }
@@ -144,7 +164,7 @@ public abstract class HookMode extends HookLog {
             try {
                 before(param);
             } catch (Throwable e) {
-                logE("beforeHookedMethod", e.toString());
+                logE("beforeHookedMethod", "" + e);
             }
         }
 
@@ -153,7 +173,7 @@ public abstract class HookMode extends HookLog {
             try {
                 after(param);
             } catch (Throwable e) {
-                logE("afterHookedMethod", e.toString());
+                logE("afterHookedMethod", "" + e);
             }
         }
 
