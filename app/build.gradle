@@ -31,7 +31,7 @@ android {
         minSdk 30
         targetSdk 34
         //noinspection HighAppVersionCode
-        versionCode 2023110600
+        versionCode 2023110601
         versionName "3.9"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
