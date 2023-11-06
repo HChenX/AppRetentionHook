@@ -1,8 +1,8 @@
-package Com.HChen.Hook.Execute.Text;
+package Com.HChen.Hook.Execute.Test;
 
 import Com.HChen.Hook.Mode.HookMode;
 
-public class TextHook extends HookMode {
+public class TestHook extends HookMode {
     @Override
     public void init() {
         /*findAndHookMethod("Com.HChen.App.HChenMain$$ExternalSyntheticLambda6",

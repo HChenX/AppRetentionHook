@@ -11,11 +11,9 @@ import static Com.HChen.Hook.Name.SystemName.ProcessList;
 import static Com.HChen.Hook.Name.SystemName.RecentTasks;
 import static Com.HChen.Hook.Value.SystemValue.checkExcessivePowerUsage;
 import static Com.HChen.Hook.Value.SystemValue.doLowMemReportIfNeededLocked;
-import static Com.HChen.Hook.Value.SystemValue.getAppStartModeLOSP;
 import static Com.HChen.Hook.Value.SystemValue.getDefaultMaxCachedProcesses;
 import static Com.HChen.Hook.Value.SystemValue.isInVisibleRange;
 import static Com.HChen.Hook.Value.SystemValue.killAllBackgroundProcesses;
-import static Com.HChen.Hook.Value.SystemValue.killAllBackgroundProcessesExceptLSP;
 import static Com.HChen.Hook.Value.SystemValue.killAppIfBgRestrictedAndCachedIdleLocked;
 import static Com.HChen.Hook.Value.SystemValue.killPids;
 import static Com.HChen.Hook.Value.SystemValue.killProcessesBelowAdj;
@@ -24,7 +22,6 @@ import static Com.HChen.Hook.Value.SystemValue.runKillAll;
 import static Com.HChen.Hook.Value.SystemValue.setOverrideMaxCachedProcesses;
 import static Com.HChen.Hook.Value.SystemValue.shouldKillExcessiveProcesses;
 import static Com.HChen.Hook.Value.SystemValue.trimInactiveRecentTasks;
-import static Com.HChen.Hook.Value.SystemValue.trimMemoryUiHiddenIfNecessaryLSP;
 import static Com.HChen.Hook.Value.SystemValue.trimPhantomProcessesIfNecessary;
 import static Com.HChen.Hook.Value.SystemValue.updateAndTrimProcessLSP;
 import static Com.HChen.Hook.Value.SystemValue.updateBackgroundRestrictedForUidPackageLocked;
@@ -64,6 +61,9 @@ public class SystemService extends HookMode {
                 protected void before(MethodHookParam param) {
                     super.before(param);
                     param.setResult(true);
+                    logSI(killPids, "pids: " + param.args[0]
+                        + " pReason: " + param.args[1]
+                        + " secure: " + param.args[2]);
                 }
             }
         );
@@ -88,6 +88,8 @@ public class SystemService extends HookMode {
                 protected void before(MethodHookParam param) {
                     super.before(param);
                     param.setResult(true);
+                    logSI(killProcessesBelowAdj, "belowAdj: " + param.args[0]
+                        + " reason: " + param.args[1]);
                 }
             }
         );
@@ -164,8 +166,9 @@ public class SystemService extends HookMode {
         );
 
         /*关闭后台服务限制_可能导致后台异常
-         * 需要测试*/
-        findAndHookMethod(ActivityManagerService,
+         * 需要测试
+         * 应该不需要hook*/
+        /*findAndHookMethod(ActivityManagerService,
             getAppStartModeLOSP, int.class, String.class, int.class, int.class, boolean.class, boolean.class, boolean.class, String.class,
             new HookAction() {
                 @Override
@@ -174,7 +177,7 @@ public class SystemService extends HookMode {
                     param.setResult(0);
                 }
             }
-        );
+        );*/
 
         /*禁止停止后台空闲服务_与getAppStartModeLOSP的Hook重复_不适合存活的service应该杀掉*/
        /* findAndHookMethod("com.android.server.am.ActiveServices",
@@ -207,12 +210,14 @@ public class SystemService extends HookMode {
                 protected void before(MethodHookParam param) {
                     super.before(param);
                     param.setResult(null);
+                    logSI(doLowMemReportIfNeededLocked, "dyingProc: " + param.args[0]);
                 }
             }
         );
 
-        /*禁止trim应用内存*/
-        hookAllMethods(AppProfiler,
+        /*禁止trim应用内存
+         * 当应用处于不可见或不活跃状态时，释放不必要的内存，这是合理的*/
+        /*hookAllMethods(AppProfiler,
             trimMemoryUiHiddenIfNecessaryLSP,
             new HookAction() {
                 @Override
@@ -221,9 +226,10 @@ public class SystemService extends HookMode {
                     param.setResult(null);
                 }
             }
-        );
+        );*/
 
-        /*禁止停止后台受限和缓存的app*/
+        /*禁止停止后台受限和缓存的app
+         * 是否允许在后台限制和闲置的情况下杀死应用程序进程*/
         hookAllMethods(ProcessList,
             killAppIfBgRestrictedAndCachedIdleLocked,
             new HookAction() {
@@ -235,7 +241,8 @@ public class SystemService extends HookMode {
             }
         );
 
-        /*去除受限限制*/
+        /*去除受限限制
+         * 目前待测试*/
         findAndHookMethod(ProcessList,
             updateBackgroundRestrictedForUidPackageLocked,
             int.class, String.class, boolean.class,
@@ -250,7 +257,7 @@ public class SystemService extends HookMode {
 
         /*禁止kill除条件之外的所有后台进程
          * 未经测试*/
-        findAndHookMethod(ProcessList,
+        /*findAndHookMethod(ProcessList,
             killAllBackgroundProcessesExceptLSP, int.class, int.class,
             new HookAction() {
                 @Override
@@ -259,7 +266,7 @@ public class SystemService extends HookMode {
                     param.setResult(null);
                 }
             }
-        );
+        );*/
 
         /*禁止使用命令停止全部活动*/
         hookAllMethods(ActivityManagerShellCommand,
@@ -281,6 +288,7 @@ public class SystemService extends HookMode {
                 protected void before(MethodHookParam param) {
                     super.before(param);
                     param.setResult(false);
+                    logSI(shouldKillExcessiveProcesses, "nowUptime: " + param.args[0]);
                 }
             }
         );//
@@ -293,6 +301,10 @@ public class SystemService extends HookMode {
                 protected void before(MethodHookParam param) {
                     super.before(param);
                     param.args[2] = 0;
+                    logSI(updateAndTrimProcessLSP, "now: " + param.args[0] +
+                        " nowElapsed: " + param.args[1] +
+                        " oldTime: " + param.args[2] +
+                        " activeUids: " + param.args[3]);
                 }
             }
         );
@@ -354,6 +366,10 @@ public class SystemService extends HookMode {
                 protected void before(MethodHookParam param) {
                     super.before(param);
                     param.args[2] = 0;
+                    logSI(isInVisibleRange, "task: " + param.args[0] +
+                        " taskIndex: " + param.args[1] +
+                        " numVisibleTasks: " + param.args[2] +
+                        " skipExcludedCheck: " + param.args[3]);
                 }
             }
         );//

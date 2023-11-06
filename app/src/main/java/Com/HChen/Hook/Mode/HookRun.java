@@ -5,7 +5,7 @@ import Com.HChen.Hook.BuildConfig;
 import Com.HChen.Hook.Execute.MiuiFramework.PowerKeeper;
 import Com.HChen.Hook.Execute.MiuiService.MiuiService;
 import Com.HChen.Hook.Execute.SystemService.SystemService;
-import Com.HChen.Hook.Execute.Text.TextHook;
+import Com.HChen.Hook.Execute.Test.TestHook;
 import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
@@ -31,10 +31,10 @@ public class HookRun extends HookLog {
                 initHook(new PowerKeeper(), mPrefsMap.getBoolean("powerkeeper"));
             case "Com.HChen.App" -> {
                 if (BuildConfig.DEBUG) {
-                    initHook(new TextHook(), true);
+                    initHook(new TestHook(), true);
                 }
             }
-            case "com.android.settings" -> initHook(new TextHook(), mPrefsMap.getBoolean("text"));
+            case "com.android.settings" -> initHook(new TestHook(), mPrefsMap.getBoolean("text"));
         }
     }
 
