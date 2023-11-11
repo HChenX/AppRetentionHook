@@ -281,7 +281,7 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(handleKillAll, "config: " + param.args[0]);
+                    logSI(handleKillApp, "config: " + param.args[0]);
                 }
             }
         );
