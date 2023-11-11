@@ -19,10 +19,10 @@
 * #### Usage:
     * First: install the Lsp module on your phone.
     * Next: open Lsp app, and activation the module.
-    * Last: Select ` Android `. And now must reboot.
+    * Last: Select ` System framework(system) ` And `Powerkeeper(if have)`. And now must reboot.
 
 - The module achieving app retention by modifying the system kill logic through Hook.
-- The module is designed for the Miui of Android 13 `Miui14`. Android 12 and 11 can also be
+- The module is designed for the Miui of Android 13 `Miui14`. Android 14 and 12 and 11 can also be
   used, but the effect is unknown.
 - But please note that non Miui system Android 13 is also my recommended option. Can be used
   normally.
@@ -31,8 +31,7 @@
 
 - After personal testing, app retention time growth. And Hardly encountered app kill situation.
 - What surprised me was that after half a day , most apps weren't killed by the system.
-- ` Like QQ Bilibili TikTok Coolapk And more test pass , they dont be killed. `
-- Although I have only undergone small-scale testing. But the effect is still significant.
+- ` Like QQ Bilibili TikTok Twitter Youtube And more test pass , they dont be killed. `
 
 # 💡Module Description
 
@@ -48,8 +47,7 @@
 
 - And if you use non Miui Android 13 system and non AOSP system.But use like Flyme,ColorOs...
   manufacturer's custom system, they may contain vendor custom kill logic, Has a certain impact on
-  the
-  effectiveness of the module.
+  the effectiveness of the module.
 - If you can accept these possible issues will give you a very surprising experience with the
   module.
 
@@ -71,7 +69,7 @@
 
 - The module code has referenced the following project, and we sincerely appreciate it:
 
-|     Project Name     |                            Project Link                            | 
+|     Project Name     |                            Project Link                            |
 |:--------------------:|:------------------------------------------------------------------:|
 |      Cemiuiler       | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 |      Don't Kill      |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
