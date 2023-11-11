@@ -2,10 +2,10 @@ package Com.HChen.Hook.Mode;
 
 import Com.HChen.Hook.Base.BaseGetKey;
 import Com.HChen.Hook.BuildConfig;
-import Com.HChen.Hook.Execute.MiuiFramework.PowerKeeper;
-import Com.HChen.Hook.Execute.MiuiService.MiuiService;
-import Com.HChen.Hook.Execute.SystemService.SystemService;
-import Com.HChen.Hook.Execute.Test.TestHook;
+import Com.HChen.Hook.Hook.MiuiService;
+import Com.HChen.Hook.Hook.PowerKeeper;
+import Com.HChen.Hook.Hook.SystemService;
+import Com.HChen.Hook.Hook.TestHook;
 import Com.HChen.Hook.Utils.GetKey;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 

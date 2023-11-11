@@ -68,19 +68,9 @@ public abstract class HookMode extends HookLog {
         private String method = null;
 
         protected void before(MethodHookParam param) {
-//            String all = param.method.toString();
-//            String className = param.thisObject.toString();
-            Info info = paramCheck(param);
-            info = getInfo(info.all, info.className);
-            logSI(info.className, info.method + " before");
         }
 
         protected void after(MethodHookParam param) {
-//            String all = param.method.toString();
-//            String className = param.thisObject.toString();
-            Info info = paramCheck(param);
-            info = getInfo(info.all, info.className);
-            logSI(info.className, info.method + " after");
         }
 
         private Info paramCheck(MethodHookParam param) {
@@ -163,6 +153,9 @@ public abstract class HookMode extends HookLog {
         protected void beforeHookedMethod(MethodHookParam param) {
             try {
                 before(param);
+                Info info = paramCheck(param);
+                info = getInfo(info.all, info.className);
+                logSI(info.className, info.method);
             } catch (Throwable e) {
                 logE("beforeHookedMethod", "" + e);
             }

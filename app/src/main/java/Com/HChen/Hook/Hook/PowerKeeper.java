@@ -1,7 +1,7 @@
-package Com.HChen.Hook.Execute.MiuiFramework;
+package Com.HChen.Hook.Hook;
 
-import static Com.HChen.Hook.Name.MiuiName.ProcessManager;
-import static Com.HChen.Hook.Value.MiuiValue.kill;
+import static Com.HChen.Hook.Param.Name.MiuiName.ProcessManager;
+import static Com.HChen.Hook.Param.Value.MiuiValue.kill;
 
 import Com.HChen.Hook.Mode.HookMode;
 
@@ -13,7 +13,6 @@ public class PowerKeeper extends HookMode {
             new HookAction() {
                 @Override
                 protected void before(MethodHookParam param) {
-                    super.before(param);
                     param.setResult(false);
                 }
             }

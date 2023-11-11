@@ -6,10 +6,10 @@ import android.view.MenuItem;
 
 import androidx.annotation.Nullable;
 
-import Com.HChen.Hook.App.MainFragment;
 import Com.HChen.Hook.Base.AlertDialogFactory;
 import Com.HChen.Hook.Base.SettingsActivity;
 import Com.HChen.Hook.R;
+import Com.HChen.Hook.Ui.Fragment.Main;
 import Com.HChen.Hook.Utils.ShellUtils;
 
 public class MainActivity extends SettingsActivity {
@@ -21,7 +21,7 @@ public class MainActivity extends SettingsActivity {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setImmersionMenuEnabled(true);
-        setFragment(new MainFragment());
+        setFragment(new Main());
         AlertDialogFactory.makeAlertDialog(this,
             "提示",
             "正在施工请勿着急",

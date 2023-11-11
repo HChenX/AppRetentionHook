@@ -1,10 +1,11 @@
-package Com.HChen.Hook.Value;
+package Com.HChen.Hook.Param.Value;
 
 public final class MiuiValue {
     public static final String isEnableResumeFeature = "isEnableResumeFeature";
     public static final String isEnableScoutMemory = "isEnableScoutMemory";
     public static final String checkKgslLeak = "checkKgslLeak";
     public static final String reclaimMemoryForGameIfNeed = "reclaimMemoryForGameIfNeed";
+    //    public static final String isEnableScoutMemory = "isEnableScoutMemory";
     public static final String handleScreenOff = "handleScreenOff";
     public static final String doClean = "doClean";
     public static final String runClean = "runClean";
@@ -17,6 +18,7 @@ public final class MiuiValue {
     public static final String handleAutoLockOff = "handleAutoLockOff";
     public static final String handleThermalKillProc = "handleThermalKillProc";
     public static final String handleKillAll = "handleKillAll";
+    public static final String handleKillApp = "handleKillApp";
     public static final String killProcess = "killProcess";
     public static final String boostCameraIfNeeded = "boostCameraIfNeeded";
     public static final String killProcessByMinAdj = "killProcessByMinAdj";
