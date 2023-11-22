@@ -2,8 +2,10 @@ package Com.HChen.Hook.Hook;
 
 import static Com.HChen.Hook.Param.Name.MiuiName.CameraBooster;
 import static Com.HChen.Hook.Param.Name.MiuiName.GameMemoryCleaner;
+import static Com.HChen.Hook.Param.Name.MiuiName.MemoryStandardProcessControl;
 import static Com.HChen.Hook.Param.Name.MiuiName.PeriodicCleanerService;
 import static Com.HChen.Hook.Param.Name.MiuiName.PressureStateSettings;
+import static Com.HChen.Hook.Param.Name.MiuiName.ProcessKiller;
 import static Com.HChen.Hook.Param.Name.MiuiName.ProcessKillerIdler;
 import static Com.HChen.Hook.Param.Name.MiuiName.ProcessMemoryCleaner;
 import static Com.HChen.Hook.Param.Name.MiuiName.ProcessPowerCleaner;
@@ -19,6 +21,7 @@ import static Com.HChen.Hook.Param.Value.MiuiValue.handleKillApp;
 import static Com.HChen.Hook.Param.Value.MiuiValue.handleScreenOff;
 import static Com.HChen.Hook.Param.Value.MiuiValue.handleThermalKillProc;
 import static Com.HChen.Hook.Param.Value.MiuiValue.isEnableScoutMemory;
+import static Com.HChen.Hook.Param.Value.MiuiValue.killApplication;
 import static Com.HChen.Hook.Param.Value.MiuiValue.killPackage;
 import static Com.HChen.Hook.Param.Value.MiuiValue.killProcess;
 import static Com.HChen.Hook.Param.Value.MiuiValue.killProcessByMinAdj;
@@ -124,8 +127,8 @@ public class MiuiService extends HookMode {
         );
 
         /*关闭内存回收功能，寄生于游戏清理*/
-        findAndHookConstructor(GameMemoryCleaner,
-            Context.class, new HookAction() {
+        hookAllConstructors(GameMemoryCleaner,
+            new HookAction() {
                 @Override
                 protected void after(MethodHookParam param) {
                     getDeclaredField(param, "IS_MEMORY_CLEAN_ENABLED", false);
@@ -133,33 +136,36 @@ public class MiuiService extends HookMode {
             }
         );
 
-        /*禁用PeriodicCleaner的clean*/
-        findAndHookMethod(PeriodicCleanerService,
-            doClean, int.class, int.class, int.class, String.class,
-            new HookAction() {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(null);
-                    logSI(doClean, "thresHold: " + param.args[0] +
-                        " killLevel: " + param.args[1] +
-                        " pressure: " + param.args[2] +
-                        " reason: " + param.args[3]);
+        try {
+            /*findClassIfExists(PeriodicCleanerService).getDeclaredMethod(doClean, int.class, int.class, int.class, String.class);*/
+            checkDeclaredMethod(PeriodicCleanerService, doClean, int.class, int.class, int.class, String.class);
+            /*禁用PeriodicCleaner的clean*/
+            findAndHookMethod(PeriodicCleanerService,
+                doClean, int.class, int.class, int.class, String.class,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(null);
+                        logSI(doClean, "thresHold: " + param.args[0] +
+                            " killLevel: " + param.args[1] +
+                            " pressure: " + param.args[2] +
+                            " reason: " + param.args[3]);
+                    }
                 }
-            }
-        );
+            );
 
-        /*禁止息屏清理后台*/
-        findAndHookMethod(PeriodicCleanerService,
-            handleScreenOff, new HookAction() {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(null);
+            /*禁止息屏清理后台*/
+            findAndHookMethod(PeriodicCleanerService,
+                handleScreenOff, new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(null);
+                    }
                 }
-            }
-        );
+            );
 
-        /*禁用PeriodicCleaner的响应
-         * 与上面重复*/
+            /*禁用PeriodicCleaner的响应
+             * 与上面重复*/
         /*findAndHookMethod(PeriodicCleanerService + "$MyHandler",
             handleMessage,
             Message.class,
@@ -172,8 +178,8 @@ public class MiuiService extends HookMode {
             }
         );*/
 
-        /*禁用PeriodicCleaner清理
-         * 与上面重复*/
+            /*禁用PeriodicCleaner清理
+             * 与上面重复*/
         /*findAndHookMethod(PeriodicCleanerService + "$PeriodicShellCmd",
             runClean, PrintWriter.class,
             new HookAction() {
@@ -184,16 +190,39 @@ public class MiuiService extends HookMode {
             }
         );*/
 
-        /*禁用PeriodicCleaner*/
-        findAndHookConstructor(PeriodicCleanerService,
-            Context.class,
-            new HookAction() {
-                @Override
-                protected void after(MethodHookParam param) {
-                    getDeclaredField(param, "mEnable", false);
+            /*禁用PeriodicCleaner*/
+            findAndHookConstructor(PeriodicCleanerService,
+                Context.class,
+                new HookAction() {
+                    @Override
+                    protected void after(MethodHookParam param) {
+                        getDeclaredField(param, "mEnable", false);
+                    }
                 }
-            }
-        );
+            );
+        } catch (NoSuchMethodException e) {
+            /*安卓14的东西*/
+            findAndHookConstructor(MemoryStandardProcessControl,
+                new HookAction() {
+                    @Override
+                    protected void after(MethodHookParam param) {
+                        setBoolean(param.thisObject, "mEnable", false);
+                    }
+                }
+            );
+
+            /*虽然上面设置false下面就不会执行了，但是多层保障*/
+            findAndHookMethod(MemoryStandardProcessControl,
+                killProcess, boolean.class,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(null);
+                        logSI(killProcess, "canKillhighPriorityProcess: " + param.args[0]);
+                    }
+                }
+            );
+        }
 
         /*禁止清理内存*/
         findAndHookMethod(SystemPressureController,
@@ -375,17 +404,33 @@ public class MiuiService extends HookMode {
             }
         );
 
-        /*禁止相机kill*/
-        hookAllMethods(CameraBooster,
-            boostCameraIfNeeded,
-            new HookAction() {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(null);
-                    logSI(boostCameraIfNeeded, "memThreshold: " + param.args[0] + " isMiuiCamera: " + param.args[1]);
+        try {
+            checkDeclaredMethod(CameraBooster, boostCameraIfNeeded, long.class, boolean.class);
+            /*findClassIfExists(CameraBooster).getDeclaredMethod(boostCameraIfNeeded, long.class, boolean.class);*/
+            /*禁止相机kill*/
+            findAndHookMethod(CameraBooster,
+                boostCameraIfNeeded, long.class, boolean.class,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(null);
+                        logSI(boostCameraIfNeeded, "memThreshold: " + param.args[0] + " isMiuiCamera: " + param.args[1]);
+                    }
                 }
-            }
-        );
+            );
+        } catch (NoSuchMethodException f) {
+            /*安卓14的逻辑，相机kill的最终调用，当然还有进程检查也调用了*/
+            hookAllMethods(ProcessKiller,
+                killApplication,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(false);
+                        logSI(killApplication, "app: " + param.args[0] + " reason: " + param.args[1] + " evenForeground: " + param.args[2]);
+                    }
+                }
+            );
+        }
 
         /*禁止Cpu使用检查
          * 调用killProcess*/

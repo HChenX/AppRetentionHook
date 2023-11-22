@@ -49,7 +49,7 @@ public abstract class HookMode extends HookLog {
         try {
             return findClass(className);
         } catch (XposedHelpers.ClassNotFoundError e) {
-            logE(tag, "Find " + className + " is null, code: " + e);
+            logE(tag, "Class not found: " + e);
             return null;
         }
     }
@@ -172,6 +172,29 @@ public abstract class HookMode extends HookLog {
 
     }
 
+    public abstract static class replaceHookedMethod extends HookAction {
+
+        public replaceHookedMethod() {
+            super();
+        }
+
+        public replaceHookedMethod(int priority) {
+            super(priority);
+        }
+
+        protected abstract Object replace(XC_MethodHook.MethodHookParam param);
+
+        @Override
+        public void beforeHookedMethod(XC_MethodHook.MethodHookParam param) {
+            try {
+                Object result = replace(param);
+                param.setResult(result);
+            } catch (Throwable t) {
+                param.setThrowable(t);
+            }
+        }
+    }
+
     public void findAndHookMethod(Class<?> clazz, String methodName, Object... parameterTypesAndCallback) {
         try {
             /*获取class*/
@@ -183,7 +206,8 @@ public abstract class HookMode extends HookLog {
                     Class<?> newclass = (Class<?>) newArray[i];
                     classes[i] = newclass;
                 }
-                clazz.getDeclaredMethod(methodName, classes);
+                /*clazz.getDeclaredMethod(methodName, classes);*/
+                checkDeclaredMethod(clazz, methodName, classes);
             }
             XposedHelpers.findAndHookMethod(clazz, methodName, parameterTypesAndCallback);
             logI(tag, "Hook: " + clazz + " method is: " + methodName);
@@ -235,8 +259,12 @@ public abstract class HookMode extends HookLog {
     }
 
     public void findAndHookConstructor(Class<?> clazz, Object... parameterTypesAndCallback) {
-        XposedHelpers.findAndHookConstructor(clazz, parameterTypesAndCallback);
-        logI(tag, "Hook: " + clazz + " is success");
+        try {
+            XposedHelpers.findAndHookConstructor(clazz, parameterTypesAndCallback);
+            logI(tag, "Hook: " + clazz + " is success");
+        } catch (Throwable f) {
+            logE(tag, "findAndHookConstructor error: " + f + " class: " + clazz);
+        }
     }
 
     public void findAndHookConstructor(String className, Object... parameterTypesAndCallback) {
@@ -300,6 +328,28 @@ public abstract class HookMode extends HookLog {
         }
     }
 
+    public void hookAllConstructors(String className, HookAction callback) {
+        Class<?> hookClass = findClassIfExists(className);
+        if (hookClass != null) {
+            hookAllConstructors(hookClass, callback);
+        }
+    }
+
+    public void hookAllConstructors(Class<?> hookClass, HookAction callback) {
+        try {
+            XposedBridge.hookAllConstructors(hookClass, callback);
+        } catch (Throwable f) {
+            logE(tag, "hookAllConstructors error: " + f + " class: " + hookClass);
+        }
+    }
+
+    public void hookAllConstructors(String className, ClassLoader classLoader, HookAction callback) {
+        Class<?> hookClass = XposedHelpers.findClassIfExists(className, classLoader);
+        if (hookClass != null) {
+            hookAllConstructors(hookClass, callback);
+        }
+    }
+
     public void callMethod(Object obj, String methodName, Object... args) {
         XposedHelpers.callMethod(obj, methodName, args);
     }
@@ -329,26 +379,63 @@ public abstract class HookMode extends HookLog {
     }
 
     public void checkLast(String setObject, Object fieldName, Object value, Object last) {
-        if (value.equals(last)) {
-            logI(tag, setObject + " Success! set " + fieldName + " to " + value);
+        if (value != null && last != null) {
+            if (value == last || value.equals(last)) {
+                logI(tag, setObject + " Success! set " + fieldName + " to " + value);
+            } else {
+                logE(tag, setObject + " Failed! set " + fieldName + " to " + value + " i hope is: " + value + " but is: " + last);
+            }
         } else {
-            logE(tag, setObject + " Failed! set " + fieldName + " to " + value + " i hope is: " + value + " but is: " + last);
+            logE(tag, setObject + " Error value: " + value + " or last: " + last + " is null");
         }
     }
 
     public void setInt(Object obj, String fieldName, int value) {
-        XposedHelpers.setIntField(obj, fieldName, value);
-        checkLast("setInt", fieldName, value, XposedHelpers.getIntField(obj, fieldName));
+        checkAndHookField(obj, fieldName,
+            () -> XposedHelpers.setIntField(obj, fieldName, value),
+            () -> checkLast("setInt", fieldName, value,
+                XposedHelpers.getIntField(obj, fieldName)));
     }
 
     public void setBoolean(Object obj, String fieldName, boolean value) {
-        XposedHelpers.setBooleanField(obj, fieldName, value);
-        checkLast("setBoolean", fieldName, value, XposedHelpers.getBooleanField(obj, fieldName));
+        checkAndHookField(obj, fieldName,
+            () -> XposedHelpers.setBooleanField(obj, fieldName, value),
+            () -> checkLast("setBoolean", fieldName, value,
+                XposedHelpers.getBooleanField(obj, fieldName)));
     }
 
     public void setObject(Object obj, String fieldName, Object value) {
-        XposedHelpers.setObjectField(obj, fieldName, value);
-        checkLast("setObject", fieldName, value, XposedHelpers.getObjectField(obj, fieldName));
+        checkAndHookField(obj, fieldName,
+            () -> XposedHelpers.setObjectField(obj, fieldName, value),
+            () -> checkLast("setObject", fieldName, value,
+                XposedHelpers.getObjectField(obj, fieldName)));
+    }
+
+    public void checkDeclaredMethod(String className, String name, Class<?>... parameterTypes) throws NoSuchMethodException {
+        Class<?> hookClass = findClassIfExists(className);
+        if (hookClass != null) {
+            hookClass.getDeclaredMethod(name, parameterTypes);
+            return;
+        }
+        throw new NoSuchMethodException();
+    }
+
+    public void checkDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) throws NoSuchMethodException {
+        if (clazz != null) {
+            clazz.getDeclaredMethod(name, parameterTypes);
+            return;
+        }
+        throw new NoSuchMethodException();
+    }
+
+    public void checkAndHookField(Object obj, String fieldName, Runnable setField, Runnable checkLast) {
+        try {
+            obj.getClass().getDeclaredField(fieldName);
+            setField.run();
+            checkLast.run();
+        } catch (NoSuchFieldException e) {
+            logE(tag, "No such field: " + fieldName + " in param: " + obj + " error: " + e);
+        }
     }
 
     public void checkAndRun(List<String> mList, String methodName, Runnable mCode, String log) {

@@ -2,20 +2,28 @@ package Com.HChen.Hook.Hook;
 
 import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerConstants;
 import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerService;
+import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerServiceStub;
 import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerShellCommand;
+import static Com.HChen.Hook.Param.Name.SystemName.CachedAppOptimizer;
 import static Com.HChen.Hook.Param.Name.SystemName.LowMemDetector;
 import static Com.HChen.Hook.Param.Name.SystemName.OomAdjuster;
 import static Com.HChen.Hook.Param.Name.SystemName.PhantomProcessList;
 import static Com.HChen.Hook.Param.Name.SystemName.ProcessList;
+import static Com.HChen.Hook.Param.Name.SystemName.ProcessRecord;
 import static Com.HChen.Hook.Param.Name.SystemName.ProcessStateRecord;
+import static Com.HChen.Hook.Param.Name.SystemName.ProcessStatsService;
 import static Com.HChen.Hook.Param.Name.SystemName.RecentTasks;
 import static Com.HChen.Hook.Param.Value.SystemValue.checkExcessivePowerUsageLPr;
+import static Com.HChen.Hook.Param.Value.SystemValue.getBinderFreezeInfo;
 import static Com.HChen.Hook.Param.Value.SystemValue.getDefaultMaxCachedProcesses;
 import static Com.HChen.Hook.Param.Value.SystemValue.getMemFactor;
+import static Com.HChen.Hook.Param.Value.SystemValue.getMemFactorLocked;
 import static Com.HChen.Hook.Param.Value.SystemValue.isInVisibleRange;
+import static Com.HChen.Hook.Param.Value.SystemValue.killLocked;
 import static Com.HChen.Hook.Param.Value.SystemValue.killPids;
 import static Com.HChen.Hook.Param.Value.SystemValue.killProcessesBelowAdj;
 import static Com.HChen.Hook.Param.Value.SystemValue.performIdleMaintenance;
+import static Com.HChen.Hook.Param.Value.SystemValue.pruneStaleProcessesLocked;
 import static Com.HChen.Hook.Param.Value.SystemValue.runKillAll;
 import static Com.HChen.Hook.Param.Value.SystemValue.setOverrideMaxCachedProcesses;
 import static Com.HChen.Hook.Param.Value.SystemValue.shouldKillExcessiveProcesses;
@@ -46,6 +54,60 @@ public class SystemService extends HookMode {
             }
         );//*/
 
+        /*防止kill冻结的应用*/
+        findAndHookMethod(CachedAppOptimizer,
+            getBinderFreezeInfo, int.class,
+            new HookAction() {
+                @Override
+                protected void after(MethodHookParam param) {
+                    int end = (int) param.getResult();
+                    if ((end & 1) != 0) {
+                        param.setResult(5);
+                    }
+                    logSI(getBinderFreezeInfo, "end: " + end + " in: " + param.args[0]);
+                }
+            }
+        );
+
+        /*findAndHookMethod(CachedAppOptimizer,
+            unfreezeAppInternalLSP, new HookAction() {
+                @Override
+                protected void before(MethodHookParam param) {
+
+                }
+            }
+        );*/
+
+        /*防止各种原因的kill*/
+        findAndHookMethod(ProcessRecord, killLocked,
+            String.class, String.class, int.class, int.class, boolean.class,
+            new HookAction() {
+                @Override
+                protected void before(MethodHookParam param) {
+                    boolean hook = false;
+                    switch ((String) param.args[0]) {
+                        case "Unable to query binder frozen stats",
+                            "Unable to unfreeze", "Unable to freeze binder interface",
+                            "start timeout", "crash", "bg anr", "skip anr", "anr",
+                            "isolated not needed", "swap low and too many cached" -> {
+                            param.setResult(null);
+                            hook = true;
+                        }
+                    }
+                    String reason = (String) param.args[0];
+                    if (reason.contains("depends on provider") || reason.contains("scheduleCrash for")) {
+                        param.setResult(null);
+                        hook = true;
+                    }
+                    logSI(killLocked, "reason: " + param.args[0] + " description: " + param.args[1]
+                        + " reasonCode: " + param.args[2]
+                        + " subReason: " + param.args[3]
+                        + " noisy: " + param.args[4] + " im hook? " + hook);
+
+                }
+            }
+        );
+
         /*cpu超时false*/
         hookAllMethods(ActivityManagerService,
             checkExcessivePowerUsageLPr,
@@ -64,7 +126,16 @@ public class SystemService extends HookMode {
             }
         );
 
-
+        /*禁止清理过时虚幻进程*/
+        findAndHookMethod(PhantomProcessList,
+            pruneStaleProcessesLocked,
+            new HookAction() {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(null);
+                }
+            }
+        );
 
         /*禁用killPids_根据adj计算最差类型pid并kill
         此方法根据adj进行kill，kill的主要是缓存和adj500的进程，可以禁止它kill.
@@ -228,6 +299,17 @@ public class SystemService extends HookMode {
             }
         );
 
+        /*谎报内存压力无，待测试*/
+        findAndHookMethod(ProcessStatsService,
+            getMemFactorLocked,
+            new HookAction() {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(0);
+                }
+            }
+        );
+
         /*禁止报告低内存*//*
         hookAllMethods(AppProfiler,
             doLowMemReportIfNeededLocked, new HookAction() {
@@ -344,6 +426,16 @@ public class SystemService extends HookMode {
             }
         );
 
+        /*用来防止频繁log*/
+        hookAllConstructors(OomAdjuster,
+            new HookAction() {
+                @Override
+                protected void after(MethodHookParam param) {
+                    setObject(param.thisObject, "mNextNoKillDebugMessageTime", Long.MAX_VALUE);
+                }
+            }
+        );
+
         /*禁止修剪虚幻进程*/
         hookAllMethods(PhantomProcessList,
             trimPhantomProcessesIfNecessary,
@@ -453,16 +545,31 @@ public class SystemService extends HookMode {
             }
         );*/
 
-        /*设置最大进程限制*/
-        findAndHookMethod(ActivityManagerConstants,
-            getDefaultMaxCachedProcesses,
-            new HookAction() {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(Integer.MAX_VALUE);
+        try {
+            /*findClassIfExists(ActivityManagerConstants).getDeclaredMethod(getDefaultMaxCachedProcesses);*/
+            checkDeclaredMethod(ActivityManagerConstants, getDefaultMaxCachedProcesses);
+            /*设置最大进程限制*/
+            findAndHookMethod(ActivityManagerConstants,
+                getDefaultMaxCachedProcesses,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(Integer.MAX_VALUE);
+                    }
                 }
-            }
-        );//
+            );//
+        } catch (NoSuchMethodException e) {
+            /*安卓14*/
+            findAndHookMethod(ActivityManagerServiceStub,
+                getDefaultMaxCachedProcesses,
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(Integer.MAX_VALUE);
+                    }
+                }
+            );
+        }
 
         /*阻止更新最大进程限制*/
         findAndHookMethod(ActivityManagerConstants,
@@ -478,12 +585,15 @@ public class SystemService extends HookMode {
         /*设置最大幻影进程数量*/
         /*禁止kill受限的缓存*/
         findAndHookConstructor(ActivityManagerConstants, Context.class,
-            findClass(ActivityManagerService), Handler.class,
+            findClassIfExists(ActivityManagerService), Handler.class,
             new HookAction() {
                 @Override
                 protected void after(MethodHookParam param) {
                     setInt(param.thisObject, "MAX_PHANTOM_PROCESSES", Integer.MAX_VALUE);
                     setBoolean(param.thisObject, "mKillBgRestrictedAndCachedIdle", false);
+                    /*似乎是高通的东西？*/
+                    setBoolean(param.thisObject, "USE_TRIM_SETTINGS", false);
+                    setBoolean(param.thisObject, "PROACTIVE_KILLS_ENABLED", false);
                 }
             }
         );

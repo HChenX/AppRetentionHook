@@ -3,11 +3,16 @@ package Com.HChen.Hook.Param.Value;
 public final class SystemValue {
     public static final String checkExcessivePowerUsage = "checkExcessivePowerUsage";
     public static final String checkExcessivePowerUsageLPr = "checkExcessivePowerUsageLPr";
+    public static final String pruneStaleProcessesLocked = "pruneStaleProcessesLocked";
+    public static final String killLocked = "killLocked";
+    public static final String unfreezeAppInternalLSP = "unfreezeAppInternalLSP";
+    public static final String getBinderFreezeInfo = "getBinderFreezeInfo";
     public static final String killProcessesBelowAdj = "killProcessesBelowAdj";
     public static final String performIdleMaintenance = "performIdleMaintenance";
     public static final String getAppStartModeLOSP = "getAppStartModeLOSP";
     public static final String doLowMemReportIfNeededLocked = "doLowMemReportIfNeededLocked";
     public static final String getMemFactor = "getMemFactor";
+    public static final String getMemFactorLocked = "getMemFactorLocked";
     public static final String trimMemoryUiHiddenIfNecessaryLSP = "trimMemoryUiHiddenIfNecessaryLSP";
     public static final String killAppIfBgRestrictedAndCachedIdleLocked = "killAppIfBgRestrictedAndCachedIdleLocked";
     public static final String shouldNotKillOnBgRestrictedAndIdle = "shouldNotKillOnBgRestrictedAndIdle";

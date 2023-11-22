@@ -21,6 +21,7 @@ public final class MiuiValue {
     public static final String handleKillApp = "handleKillApp";
     public static final String killProcess = "killProcess";
     public static final String boostCameraIfNeeded = "boostCameraIfNeeded";
+    public static final String killApplication = "killApplication";
     public static final String killProcessByMinAdj = "killProcessByMinAdj";
     public static final String handleLimitCpuException = "handleLimitCpuException";
     public static final String run = "run";
