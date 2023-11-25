@@ -17,6 +17,7 @@ public class HookInlet extends BaseGetKey implements IXposedHookLoadPackage, IXp
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
         HookRun hookRun = new HookRun();
+
         hookRun.HookPackage(loadPackageParam);
     }
 }
