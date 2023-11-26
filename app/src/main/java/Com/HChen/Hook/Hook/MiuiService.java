@@ -120,7 +120,7 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(reclaimMemoryForGameIfNeed, "game: " + param.args[0]);
+                    /*logSI(reclaimMemoryForGameIfNeed, "game: " + param.args[0]);*/
                 }
 
             }
@@ -146,10 +146,10 @@ public class MiuiService extends HookMode {
                     @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(null);
-                        logSI(doClean, "thresHold: " + param.args[0] +
+                        /*logSI(doClean, "thresHold: " + param.args[0] +
                             " killLevel: " + param.args[1] +
                             " pressure: " + param.args[2] +
-                            " reason: " + param.args[3]);
+                            " reason: " + param.args[3]);*/
                     }
                 }
             );
@@ -218,7 +218,7 @@ public class MiuiService extends HookMode {
                     @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(null);
-                        logSI(killProcess, "canKillhighPriorityProcess: " + param.args[0]);
+                        /*logSI(killProcess, "canKillhighPriorityProcess: " + param.args[0]);*/
                     }
                 }
             );
@@ -231,7 +231,7 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(cleanUpMemory, "targetReleaseMem: " + param.args[0]);
+                    /*logSI(cleanUpMemory, "targetReleaseMem: " + param.args[0]);*/
                 }
             }
         );
@@ -288,7 +288,7 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(handleThermalKillProc, "config: " + param.args[0]);
+                    /*logSI(handleThermalKillProc, "config: " + param.args[0]);*/
                 }
             }
         );
@@ -300,7 +300,7 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(handleKillAll, "config: " + param.args[0] + " isKillSystemProc: " + param.args[1]);
+                    /*logSI(handleKillAll, "config: " + param.args[0] + " isKillSystemProc: " + param.args[1]);*/
                 }
             }
         );
@@ -310,7 +310,7 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(handleKillApp, "config: " + param.args[0]);
+                    /*logSI(handleKillApp, "config: " + param.args[0]);*/
                 }
             }
         );
@@ -375,9 +375,9 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(killProcessByMinAdj, "minAdj: " + param.args[0] +
+                    /*logSI(killProcessByMinAdj, "minAdj: " + param.args[0] +
                         " reason: " + param.args[1] +
-                        " whiteList: " + param.args[2]);
+                        " whiteList: " + param.args[2]);*/
                 }
             }
         );
@@ -399,7 +399,7 @@ public class MiuiService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(true);
-                    logSI(cleanUpMemory, "runningProcList: " + param.args[0] + " targetReleaseMem: " + param.args[1]);
+                    /*logSI(cleanUpMemory, "runningProcList: " + param.args[0] + " targetReleaseMem: " + param.args[1]);*/
                 }
             }
         );
@@ -414,7 +414,7 @@ public class MiuiService extends HookMode {
                     @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(null);
-                        logSI(boostCameraIfNeeded, "memThreshold: " + param.args[0] + " isMiuiCamera: " + param.args[1]);
+                        /*logSI(boostCameraIfNeeded, "memThreshold: " + param.args[0] + " isMiuiCamera: " + param.args[1]);*/
                     }
                 }
             );
@@ -426,7 +426,7 @@ public class MiuiService extends HookMode {
                     @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(false);
-                        logSI(killApplication, "app: " + param.args[0] + " reason: " + param.args[1] + " evenForeground: " + param.args[2]);
+                        /*logSI(killApplication, "app: " + param.args[0] + " reason: " + param.args[1] + " evenForeground: " + param.args[2]);*/
                     }
                 }
             );

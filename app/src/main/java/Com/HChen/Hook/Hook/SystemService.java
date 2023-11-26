@@ -4,7 +4,6 @@ import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerConstants;
 import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerService;
 import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerServiceStub;
 import static Com.HChen.Hook.Param.Name.SystemName.ActivityManagerShellCommand;
-import static Com.HChen.Hook.Param.Name.SystemName.CachedAppOptimizer;
 import static Com.HChen.Hook.Param.Name.SystemName.LowMemDetector;
 import static Com.HChen.Hook.Param.Name.SystemName.OomAdjuster;
 import static Com.HChen.Hook.Param.Name.SystemName.PhantomProcessList;
@@ -14,7 +13,6 @@ import static Com.HChen.Hook.Param.Name.SystemName.ProcessStateRecord;
 import static Com.HChen.Hook.Param.Name.SystemName.ProcessStatsService;
 import static Com.HChen.Hook.Param.Name.SystemName.RecentTasks;
 import static Com.HChen.Hook.Param.Value.SystemValue.checkExcessivePowerUsageLPr;
-import static Com.HChen.Hook.Param.Value.SystemValue.getBinderFreezeInfo;
 import static Com.HChen.Hook.Param.Value.SystemValue.getDefaultMaxCachedProcesses;
 import static Com.HChen.Hook.Param.Value.SystemValue.getMemFactor;
 import static Com.HChen.Hook.Param.Value.SystemValue.getMemFactorLocked;
@@ -55,7 +53,7 @@ public class SystemService extends HookMode {
         );//*/
 
         /*防止kill冻结的应用*/
-        findAndHookMethod(CachedAppOptimizer,
+        /*findAndHookMethod(CachedAppOptimizer,
             getBinderFreezeInfo, int.class,
             new HookAction() {
                 @Override
@@ -67,7 +65,7 @@ public class SystemService extends HookMode {
                     logSI(getBinderFreezeInfo, "end: " + end + " in: " + param.args[0]);
                 }
             }
-        );
+        );*/
 
         /*findAndHookMethod(CachedAppOptimizer,
             unfreezeAppInternalLSP, new HookAction() {
@@ -115,13 +113,13 @@ public class SystemService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(false);
-                    logSI(checkExcessivePowerUsageLPr, "uptimeSince: " + param.args[0]
+                    /*logSI(checkExcessivePowerUsageLPr, "uptimeSince: " + param.args[0]
                         + " doCpuKills: " + param.args[1]
                         + " cputimeUsed: " + param.args[2]
                         + " processName: " + param.args[3]
                         + " description: " + param.args[4]
                         + " cpuLimit: " + param.args[5]
-                        + " app:" + param.args[6]);
+                        + " app:" + param.args[6]);*/
                 }
             }
         );
@@ -151,9 +149,9 @@ public class SystemService extends HookMode {
                     if (param.args[1] == "Free memory") {
                         param.setResult(true);
                     }
-                    logSI(killPids, "pids: " + param.args[0]
+                    /*logSI(killPids, "pids: " + param.args[0]
                         + " pReason: " + param.args[1]
-                        + " secure: " + param.args[2]);
+                        + " secure: " + param.args[2]);*/
                 }
             }
         );
@@ -177,8 +175,8 @@ public class SystemService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(true);
-                    logSI(killProcessesBelowAdj, "belowAdj: " + param.args[0]
-                        + " reason: " + param.args[1]);
+                    /*logSI(killProcessesBelowAdj, "belowAdj: " + param.args[0]
+                        + " reason: " + param.args[1]);*/
                 }
             }
         );
@@ -365,9 +363,9 @@ public class SystemService extends HookMode {
             new HookAction() {
                 @Override
                 protected void before(MethodHookParam param) {
-                    logSI(updateBackgroundRestrictedForUidPackageLocked, "uid: " + param.args[0]
+                    /*logSI(updateBackgroundRestrictedForUidPackageLocked, "uid: " + param.args[0]
                         + " packageName: " + param.args[1]
-                        + " restricted: " + param.args[2]);
+                        + " restricted: " + param.args[2]);*/
                     param.args[2] = false;
                 }
             }
@@ -392,7 +390,7 @@ public class SystemService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    logSI(runKillAll, "pw: " + param.args[0]);
+                    /*logSI(runKillAll, "pw: " + param.args[0]);*/
                 }
             }
         );//
@@ -404,7 +402,7 @@ public class SystemService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(false);
-                    logSI(shouldKillExcessiveProcesses, "nowUptime: " + param.args[0]);
+                    /*logSI(shouldKillExcessiveProcesses, "nowUptime: " + param.args[0]);*/
                 }
             }
         );//
@@ -415,10 +413,10 @@ public class SystemService extends HookMode {
             new HookAction() {
                 @Override
                 protected void before(MethodHookParam param) {
-                    logSI(updateAndTrimProcessLSP, "now: " + param.args[0] +
+                    /*logSI(updateAndTrimProcessLSP, "now: " + param.args[0] +
                         " nowElapsed: " + param.args[1] +
                         " oldTime: " + param.args[2] +
-                        " activeUids: " + param.args[3]);
+                        " activeUids: " + param.args[3]);*/
                     /*param.args[0] = 0L;
                     param.args[1] = 0L;*/
                     param.args[2] = 0L;
@@ -490,10 +488,10 @@ public class SystemService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.args[2] = 0;
-                    logSI(isInVisibleRange, "task: " + param.args[0] +
+                    /*logSI(isInVisibleRange, "task: " + param.args[0] +
                         " taskIndex: " + param.args[1] +
                         " numVisibleTasks: " + param.args[2] +
-                        " skipExcludedCheck: " + param.args[3]);
+                        " skipExcludedCheck: " + param.args[3]);*/
                 }
             }
         );//

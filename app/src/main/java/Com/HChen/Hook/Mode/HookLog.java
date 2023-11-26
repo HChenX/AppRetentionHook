@@ -26,17 +26,17 @@ public class HookLog {
 
     public static void logSI(String tag, String log) {
 //        setTags(smOr);
-        Log.i(hookMain + "[" + tag + "]: ", "Info: " + log);
+        Log.i(hookMain, "[" + tag + "]: Info: " + log);
     }
 
     public static void logSW(String tag, String log) {
 //        setTags(smOr);
-        Log.w(hookMain + "[" + tag + "]: ", "Warning: " + log);
+        Log.w(hookMain, "[" + tag + "]: Warning: " + log);
     }
 
     public void logSE(String tag, String log) {
 //        setTags(smOr);
-        Log.e(hookMain + "[" + tag + "]: ", "Error: " + log);
+        Log.e(hookMain, "[" + tag + "]: Error: " + log);
     }
 
     /*public int smOr() {

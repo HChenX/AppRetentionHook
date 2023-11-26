@@ -65,7 +65,7 @@ public abstract class HookMode extends HookLog {
 
     public static class HookAction extends XC_MethodHook {
 
-        private String method = null;
+        private String methodProcessed = null;
 
         protected void before(MethodHookParam param) {
         }
@@ -74,51 +74,69 @@ public abstract class HookMode extends HookLog {
         }
 
         private Info paramCheck(MethodHookParam param) {
-            String all = null;
-            String className = null;
+            String method = null;
+            String thisObject = null;
             if (param.method != null) {
-                all = param.method.toString();
+                method = param.method.toString();
             }
             if (param.thisObject != null) {
-                className = param.thisObject.toString();
+                thisObject = param.thisObject.toString();
             }
-            if (param.method == null || param.thisObject == null)
+            if (param.method == null && param.thisObject == null)
                 logE("paramCheck", "param.method is: " + param.method
                     + " param.thisObject is: " + param.thisObject);
-            return new Info(all, className, null);
+            return new Info(method, thisObject, null);
         }
 
-        private Info getInfo(String all, String className) {
+        private Info getInfo(String method, String thisObject) {
 //            int lastIndex = all.lastIndexOf(".");
-            if (all == null || className == null) return new Info(null, null, null);
-            Pattern pattern = Pattern.compile(".*\\.(.*\\(.*\\))");
-            Matcher matcher = pattern.matcher(all);
-            if (className.contains("@")) {
-                if (matcher.find()) {
-                    method = matcher.group(1);
-                } else method = null;
-                pattern = Pattern.compile(".*\\.(\\w+)\\..*\\(.*\\)");
-                matcher = pattern.matcher(all);
-                if (matcher.find()) {
-                    className = matcher.group(1);
-                } else className = null;
+            if (method == null) return
+                new Info(null, null, null);
+            if (thisObject != null) {
+                Pattern pattern = Pattern.compile(".*\\.(.*\\(.*\\))");
+                Matcher matcher = pattern.matcher(method);
+                if (thisObject.contains("@")) {
+                    if (matcher.find()) {
+                        methodProcessed = matcher.group(1);
+                    } else methodProcessed = null;
+                    pattern = Pattern.compile(".*\\.(\\w+)\\..*\\(.*\\)");
+                    matcher = pattern.matcher(method);
+                    if (matcher.find()) {
+                        thisObject = matcher.group(1);
+                    } else thisObject = null;
+                } else {
+                    if (matcher.find()) {
+                        thisObject = matcher.group(1);
+                    } else methodProcessed = "constructor";
+                }
             } else {
+                Pattern pattern = Pattern.compile(".*\\.(\\w+)\\.(.*\\(.*\\))");
+                Matcher matcher = pattern.matcher(method);
                 if (matcher.find()) {
-                    className = matcher.group(1);
-                } else method = "constructor";
+                    thisObject = matcher.group(1);
+                    methodProcessed = matcher.group(2);
+                } else return new Info(null, method, thisObject);
             }
-            return new Info(null, className, method);
+            return new Info(null, thisObject, methodProcessed);
+        }
+
+        private static StringBuilder paramLog(MethodHookParam param) {
+            StringBuilder log = null;
+            for (int i = 0; i < param.args.length; i++) {
+                log = (log == null ? new StringBuilder() : log).append("param(").append(i).append("): ").append(param.args[i]).append(" ");
+            }
+            return log;
         }
 
         private static class Info {
-            public String all;
             public String method;
-            public String className;
+            public String thisObject;
+            public String methodProcessed;
 
-            public Info(String all, String className, String method) {
-                this.all = all;
-                this.className = className;
+            public Info(String method, String thisObject, String methodProcessed) {
                 this.method = method;
+                this.thisObject = thisObject;
+                this.methodProcessed = methodProcessed;
             }
         }
 
@@ -154,8 +172,8 @@ public abstract class HookMode extends HookLog {
             try {
                 before(param);
                 Info info = paramCheck(param);
-                info = getInfo(info.all, info.className);
-                logSI(info.className, info.method);
+                info = getInfo(info.method, info.thisObject);
+                logSI(info.thisObject, info.methodProcessed + " " + paramLog(param));
             } catch (Throwable e) {
                 logE("beforeHookedMethod", "" + e);
             }
