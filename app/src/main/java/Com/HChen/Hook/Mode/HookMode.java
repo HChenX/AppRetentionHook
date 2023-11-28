@@ -1,8 +1,16 @@
 package Com.HChen.Hook.Mode;
 
+import androidx.annotation.NonNull;
+
+import com.github.kyuubiran.ezxhelper.HookFactory;
+import com.github.kyuubiran.ezxhelper.interfaces.IMethodHookCallback;
+
+import org.luckypray.dexkit.result.MethodData;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +27,7 @@ public abstract class HookMode extends HookLog {
     public final GetKey<String, Object> mPrefsMap = BaseGetKey.mPrefsMap;
     public final String[] allValue = AllValue.AllValue;
     List<String> tempString, tempStringT, tempStringS = new ArrayList<>();
-    LoadPackageParam loadPackageParam;
+    public LoadPackageParam loadPackageParam;
 
     public abstract void init();
 
@@ -65,79 +73,10 @@ public abstract class HookMode extends HookLog {
 
     public static class HookAction extends XC_MethodHook {
 
-        private String methodProcessed = null;
-
         protected void before(MethodHookParam param) {
         }
 
         protected void after(MethodHookParam param) {
-        }
-
-        private Info paramCheck(MethodHookParam param) {
-            String method = null;
-            String thisObject = null;
-            if (param.method != null) {
-                method = param.method.toString();
-            }
-            if (param.thisObject != null) {
-                thisObject = param.thisObject.toString();
-            }
-            if (param.method == null && param.thisObject == null)
-                logE("paramCheck", "param.method is: " + param.method
-                    + " param.thisObject is: " + param.thisObject);
-            return new Info(method, thisObject, null);
-        }
-
-        private Info getInfo(String method, String thisObject) {
-//            int lastIndex = all.lastIndexOf(".");
-            if (method == null) return
-                new Info(null, null, null);
-            if (thisObject != null) {
-                Pattern pattern = Pattern.compile(".*\\.(.*\\(.*\\))");
-                Matcher matcher = pattern.matcher(method);
-                if (thisObject.contains("@")) {
-                    if (matcher.find()) {
-                        methodProcessed = matcher.group(1);
-                    } else methodProcessed = null;
-                    pattern = Pattern.compile(".*\\.(\\w+)\\..*\\(.*\\)");
-                    matcher = pattern.matcher(method);
-                    if (matcher.find()) {
-                        thisObject = matcher.group(1);
-                    } else thisObject = null;
-                } else {
-                    if (matcher.find()) {
-                        thisObject = matcher.group(1);
-                    } else methodProcessed = "constructor";
-                }
-            } else {
-                Pattern pattern = Pattern.compile(".*\\.(\\w+)\\.(.*\\(.*\\))");
-                Matcher matcher = pattern.matcher(method);
-                if (matcher.find()) {
-                    thisObject = matcher.group(1);
-                    methodProcessed = matcher.group(2);
-                } else return new Info(null, method, thisObject);
-            }
-            return new Info(null, thisObject, methodProcessed);
-        }
-
-        private static StringBuilder paramLog(MethodHookParam param) {
-            StringBuilder log = null;
-            for (int i = 0; i < param.args.length; i++) {
-                log = (log == null ? new StringBuilder() : log).append("param(").append(i).append("): ").append(param.args[i]).append(" ");
-            }
-            return log;
-        }
-
-        private static class Info {
-            public String method;
-            public String thisObject;
-            public String methodProcessed;
-
-            public Info(String method, String thisObject, String methodProcessed) {
-                this.method = method;
-                this.thisObject = thisObject;
-                this.methodProcessed = methodProcessed;
-            }
         }
 
         public HookAction() {
@@ -190,13 +129,13 @@ public abstract class HookMode extends HookLog {
 
     }
 
-    public abstract static class replaceHookedMethod extends HookAction {
+    public abstract static class ReplaceHookedMethod extends HookAction {
 
-        public replaceHookedMethod() {
+        public ReplaceHookedMethod() {
             super();
         }
 
-        public replaceHookedMethod(int priority) {
+        public ReplaceHookedMethod(int priority) {
             super(priority);
         }
 
@@ -208,7 +147,86 @@ public abstract class HookMode extends HookLog {
                 Object result = replace(param);
                 param.setResult(result);
             } catch (Throwable t) {
-                param.setThrowable(t);
+                logE("replaceHookedMethod", "" + t);
+            }
+        }
+    }
+
+    public static class HookDexKit {
+
+        public static void beforeDexKit(MethodData method, LoadPackageParam param, ActionTiming actionTiming) {
+            try {
+                if (method == null) {
+                    logE("beforeDexKit", "method is null: " + param.packageName);
+                    return;
+                }
+                HookFactory.createMethodHook(method.getMethodInstance(param.classLoader),
+                    new Consumer<HookFactory>() {
+                        @Override
+                        public void accept(HookFactory hookFactory) {
+                            hookFactory.before(
+                                new callBack() {
+                                    @Override
+                                    public void hookMethod(@NonNull XC_MethodHook.MethodHookParam methodHookParam) {
+                                        actionTiming.before(methodHookParam);
+                                    }
+                                }
+                            );
+                        }
+                    }
+                );
+            } catch (Throwable throwable) {
+                logE("beforeDexKit", "" + throwable);
+            }
+        }
+
+        public static void afterDexKit(MethodData method, LoadPackageParam param, ActionTiming actionTiming) {
+            try {
+                if (method == null) {
+                    logE("afterDexKit", "method is null: " + param.packageName);
+                    return;
+                }
+                HookFactory.createMethodHook(method.getMethodInstance(param.classLoader),
+                    new Consumer<HookFactory>() {
+                        @Override
+                        public void accept(HookFactory hookFactory) {
+                            hookFactory.after(
+                                new callBack() {
+                                    @Override
+                                    public void hookMethod(@NonNull XC_MethodHook.MethodHookParam methodHookParam) {
+                                        actionTiming.after(methodHookParam);
+                                    }
+                                }
+                            );
+                        }
+                    }
+                );
+            } catch (Throwable e) {
+                logE("afterDexKit", "" + e);
+            }
+        }
+    }
+
+    public static class ActionTiming {
+        public void after(@NonNull XC_MethodHook.MethodHookParam param) {
+        }
+
+        public void before(@NonNull XC_MethodHook.MethodHookParam param) {
+        }
+    }
+
+    public abstract static class callBack implements IMethodHookCallback {
+        public abstract void hookMethod(@NonNull XC_MethodHook.MethodHookParam methodHookParam);
+
+        @Override
+        public void onMethodHooked(@NonNull XC_MethodHook.MethodHookParam methodHookParam) {
+            try {
+                hookMethod(methodHookParam);
+                Info info = paramCheck(methodHookParam);
+                info = getInfo(info.method, info.thisObject);
+                logSI(info.thisObject, info.methodProcessed + " " + paramLog(methodHookParam));
+            } catch (Throwable throwable) {
+                logE("onMethodHooked", "" + throwable);
             }
         }
     }

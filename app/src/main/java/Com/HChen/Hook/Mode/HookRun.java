@@ -2,7 +2,9 @@ package Com.HChen.Hook.Mode;
 
 import Com.HChen.Hook.Base.BaseGetKey;
 import Com.HChen.Hook.BuildConfig;
+import Com.HChen.Hook.Hook.AthenaApp;
 import Com.HChen.Hook.Hook.MiuiService;
+import Com.HChen.Hook.Hook.OplusService;
 import Com.HChen.Hook.Hook.PowerKeeper;
 import Com.HChen.Hook.Hook.SystemService;
 import Com.HChen.Hook.Hook.TestHook;
@@ -26,9 +28,11 @@ public class HookRun extends HookLog {
             case "android" -> {
                 initHook(new SystemService(), mPrefsMap.getBoolean("system_service"));
                 initHook(new MiuiService(), mPrefsMap.getBoolean("miui_service"));
+                initHook(new OplusService(), true);
             }
             case "com.miui.powerkeeper" ->
                 initHook(new PowerKeeper(), mPrefsMap.getBoolean("powerkeeper"));
+            case "com.oplus.athena" -> initHook(new AthenaApp(), true);
             case "Com.HChen.App" -> {
                 if (BuildConfig.DEBUG) {
                     initHook(new TestHook(), true);
