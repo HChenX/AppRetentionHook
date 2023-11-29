@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId "Com.HChen.Hook"
-        minSdk 30
+        minSdk 32
         targetSdk 34
         //noinspection HighAppVersionCode
         versionCode 2023111700
@@ -64,6 +64,9 @@ android {
         }
         /*dex {
             useLegacyPackaging = true
+        }
+        jniLibs {
+            useLegacyPackaging true
         }*/
     }
 
@@ -90,7 +93,7 @@ dependencies {
 
     compileOnly(roots.XposedApi)
 
-    implementation 'org.luckypray:dexkit:2.0.0-rc8'
+    implementation 'org.luckypray:dexkit:2.0.0-rc9'
     implementation 'com.github.kyuubiran:EzXHelper:2.0.8'
 //    implementation 'androidx.appcompat:appcompat:1.6.1'
 //    implementation 'com.google.android.material:material:1.9.0'

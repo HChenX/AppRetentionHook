@@ -145,7 +145,7 @@ public class AthenaApp extends HookMode {
                     if (!athenaKill.getReturnType().equals(int.class)) {
                         continue;
                     }
-                    if ("athenaKill".contains(athenaKill.getName())) {
+                    if (athenaKill.getName().contains("athenaKill")) {
                         ArrayList<Object> param = new ArrayList<>(Arrays.asList(athenaKill.getParameterTypes()));
                         param.add(new HookAction() {
                             @Override
@@ -166,7 +166,7 @@ public class AthenaApp extends HookMode {
                     if (!remote.getReturnType().equals(int.class)) {
                         continue;
                     }
-                    if ("athenaKill".contains(remote.getName())) {
+                    if (remote.getName().contains("athenaKill")) {
                         ArrayList<Object> param = new ArrayList<>(Arrays.asList(remote.getParameterTypes()));
                         param.add(new HookAction() {
                             @Override
