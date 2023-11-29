@@ -37,8 +37,9 @@ public class AthenaApp extends HookMode {
                     @Override
                     public void before(@NonNull XC_MethodHook.MethodHookParam param) {
                         String reason = (String) param.args[7];
-                        int code = (int) param.args[5];
-                        if (!("oneclick".equals(reason) && code == 2)) {
+                        /*不稳定*/
+                        /*int code = (int) param.args[5];*/
+                        if (!"oneclick".equals(reason)) {
                             param.setResult(false);
                         }
                     }
