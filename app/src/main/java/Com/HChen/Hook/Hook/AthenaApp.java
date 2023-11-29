@@ -1,6 +1,7 @@
 package Com.HChen.Hook.Hook;
 
 import static Com.HChen.Hook.Param.Name.OplusName.IAthenaService$Stub$Proxy;
+import static Com.HChen.Hook.Param.Name.OplusName.RemoteService;
 
 import androidx.annotation.NonNull;
 
@@ -36,7 +37,7 @@ public class AthenaApp extends HookMode {
                     @Override
                     public void before(@NonNull XC_MethodHook.MethodHookParam param) {
                         String reason = (String) param.args[7];
-                        int code = (int) param.args[4];
+                        int code = (int) param.args[5];
                         if (!("oneclick".equals(reason) && code == 2)) {
                             param.setResult(false);
                         }
@@ -156,6 +157,27 @@ public class AthenaApp extends HookMode {
                 }
             } catch (Throwable throwable) {
                 logE("athenaKill", "error: " + throwable);
+            }
+
+            try {
+                Class<?> remoteService = findClassIfExists(RemoteService);
+                for (Method remote : remoteService.getDeclaredMethods()) {
+                    if (!remote.getReturnType().equals(int.class)) {
+                        continue;
+                    }
+                    if ("athenaKill".contains(remote.getName())) {
+                        ArrayList<Object> param = new ArrayList<>(Arrays.asList(remote.getParameterTypes()));
+                        param.add(new HookAction() {
+                            @Override
+                            protected void before(MethodHookParam param) {
+                                param.setResult(0);
+                            }
+                        });
+                        findAndHookMethod(remoteService, remote.getName(), param.toArray());
+                    }
+                }
+            } catch (Throwable throwable) {
+                logE("remoteService", "error: " + throwable);
             }
         } catch (Throwable throwable) {
             logE("AthenaApp", "un error:" + throwable);

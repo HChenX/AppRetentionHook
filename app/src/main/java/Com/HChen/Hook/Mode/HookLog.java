@@ -80,26 +80,26 @@ public class HookLog {
     }
 
     public static void logI(String tag, String Log) {
-        XposedBridge.log(hookMain + "[" + tag + "]: " + "Info: " + Log);
+        XposedBridge.log(hookMain + "[" + tag + "]: " + "I: " + Log);
     }
 
     public static void logW(String tag, String Log) {
-        XposedBridge.log(hookMain + "[" + tag + "]: " + "Warning: " + Log);
+        XposedBridge.log(hookMain + "[" + tag + "]: " + "W: " + Log);
     }
 
     public static void logE(String tag, String Log) {
-        XposedBridge.log(hookMain + "[" + tag + "]: " + "Error: " + Log);
+        XposedBridge.log(hookMain + "[" + tag + "]: " + "E: " + Log);
     }
 
     public static void logSI(String tag, String log) {
-        Log.i(hookMain, "[" + tag + "]: Info: " + log);
+        Log.i(hookMain, "[" + tag + "]: I: " + log);
     }
 
     public static void logSW(String tag, String log) {
-        Log.w(hookMain, "[" + tag + "]: Warning: " + log);
+        Log.w(hookMain, "[" + tag + "]: W: " + log);
     }
 
     public void logSE(String tag, String log) {
-        Log.e(hookMain, "[" + tag + "]: Error: " + log);
+        Log.e(hookMain, "[" + tag + "]: E: " + log);
     }
 }
