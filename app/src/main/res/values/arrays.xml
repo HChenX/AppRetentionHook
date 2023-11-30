@@ -4,7 +4,7 @@
         <item>android</item>
         <item>com.miui.powerkeeper</item>
         <item>com.oplus.athena</item>
-        <item>Com.HChen.App</item>
+        <!--        <item>Com.HChen.App</item>-->
         <!--        <item>com.android.settings</item>-->
     </string-array>
     <string-array name="restart_apps_name">

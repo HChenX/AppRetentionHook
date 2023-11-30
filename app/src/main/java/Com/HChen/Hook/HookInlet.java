@@ -8,15 +8,16 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 /* Hook入口。*/
 public class HookInlet extends BaseGetKey implements IXposedHookLoadPackage, IXposedHookZygoteInit {
+    public static final String hookMain = "[HChenHook]";
+
     @Override
     public void initZygote(StartupParam startupParam) {
-        BaseGetKey basePutKey = new BaseGetKey();
-        basePutKey.setXSharedPrefs();
+        BaseGetKey.setXSharedPrefs();
     }
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookRun hookRun = new HookRun();
-        hookRun.HookPackage(loadPackageParam);
+//        EzXHelper.setLogTag(hookMain);
+        HookRun.HookPackage(loadPackageParam);
     }
 }

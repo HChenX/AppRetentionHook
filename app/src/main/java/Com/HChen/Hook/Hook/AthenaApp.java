@@ -3,8 +3,6 @@ package Com.HChen.Hook.Hook;
 import static Com.HChen.Hook.Param.Name.OplusName.IAthenaService$Stub$Proxy;
 import static Com.HChen.Hook.Param.Name.OplusName.RemoteService;
 
-import androidx.annotation.NonNull;
-
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;
 import org.luckypray.dexkit.query.matchers.MethodMatcher;
@@ -16,12 +14,19 @@ import java.util.Arrays;
 
 import Com.HChen.Hook.Mode.DexKit.DexKit;
 import Com.HChen.Hook.Mode.HookMode;
-import de.robv.android.xposed.XC_MethodHook;
 
 public class AthenaApp extends HookMode {
+
+    public static int myPid = 0;
+
+    public static int test = 0;
+
+    public static void getPid(int pid) {
+        myPid = pid;
+    }
+
     @Override
     public void init() {
-        DexKit.INSTANCE.initDexKit(loadPackageParam);
         /*防止意外报错导致的未能关闭DexKit*/
         try {
             /*boolean c*/
@@ -32,10 +37,10 @@ public class AthenaApp extends HookMode {
                             .usingStrings(" is reused by others, skip kill "))
                         .usingStrings(" is reused by others, skip kill "))
             ).firstOrNull();
-            HookDexKit.beforeDexKit(methodData, loadPackageParam,
-                new ActionTiming() {
+            hookMethod(getMethodInstance(methodData),
+                new HookAction() {
                     @Override
-                    public void before(@NonNull XC_MethodHook.MethodHookParam param) {
+                    protected void before(MethodHookParam param) {
                         String reason = (String) param.args[7];
                         /*不稳定*/
                         /*int code = (int) param.args[5];*/
@@ -45,6 +50,19 @@ public class AthenaApp extends HookMode {
                     }
                 }
             );
+            /*HookDexKit.beforeDexKit(methodData, loadPackageParam,
+                new ActionTiming() {
+                    @Override
+                    public void before(@NonNull XC_MethodHook.MethodHookParam param) {
+                        String reason = (String) param.args[7];
+                        *//*不稳定*//*
+             *//*int code = (int) param.args[5];*//*
+                        if (!"oneclick".equals(reason)) {
+                            param.setResult(false);
+                        }
+                    }
+                }
+            );*/
         /*try {
             HookFactory.createMethodHook(methodData.getMethodInstance(loadPackageParam.classLoader),
                 new Consumer<HookFactory>() {
@@ -76,7 +94,21 @@ public class AthenaApp extends HookMode {
                             .usingStrings(" is reused by others, skip kill "))
                         .usingStrings("context is null, not to force stop"))
             ).firstOrNull();
-            HookDexKit.beforeDexKit(methodData1, loadPackageParam,
+            hookMethod(getMethodInstance(methodData1),
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        String reason = (String) param.args[6];
+                        switch (reason) {
+                            case "swipe up", "removeTask" -> {
+
+                            }
+                            default -> param.setResult(null);
+                        }
+                    }
+                }
+            );
+            /*HookDexKit.beforeDexKit(methodData1, loadPackageParam,
                 new ActionTiming() {
                     @Override
                     public void before(@NonNull XC_MethodHook.MethodHookParam param) {
@@ -89,7 +121,7 @@ public class AthenaApp extends HookMode {
                         }
                     }
                 }
-            );
+            );*/
             /*try {*/
            /* HookFactory.createMethodHook(methodData1.getMethodInstance(loadPackageParam.classLoader), new Consumer<HookFactory>() {
                 @Override
@@ -129,14 +161,22 @@ public class AthenaApp extends HookMode {
                             .usingStrings("set package stopped state get error:"))
                         .usingStrings("set package stopped state get error:"))
             ).firstOrNull();
-            HookDexKit.beforeDexKit(methodData2, loadPackageParam,
+            hookMethod(getMethodInstance(methodData2),
+                new HookAction() {
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(null);
+                    }
+                }
+            );
+            /*HookDexKit.beforeDexKit(methodData2, loadPackageParam,
                 new ActionTiming() {
                     @Override
                     public void before(@NonNull XC_MethodHook.MethodHookParam param) {
                         param.setResult(null);
                     }
                 }
-            );
+            );*/
 
             /*my那里学到的*/
             try {
@@ -181,9 +221,12 @@ public class AthenaApp extends HookMode {
                 logE("remoteService", "error: " + throwable);
             }
         } catch (Throwable throwable) {
-            logE("AthenaApp", "un error:" + throwable);
-            DexKit.INSTANCE.closeDexKit();
+            if (myPid != 0 && test < 5) {
+                callStaticMethod(findClassIfExists("android.os.Process"), "sendSignal", myPid, 9);
+                myPid = 0;
+                test++;
+            }
+            logE("AthenaApp", "error:" + throwable + " will kill athena, pid: " + myPid + " number of times: " + test);
         }
-        DexKit.INSTANCE.closeDexKit();
     }
 }

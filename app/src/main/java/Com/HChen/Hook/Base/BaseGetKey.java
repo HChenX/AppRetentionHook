@@ -13,7 +13,7 @@ import de.robv.android.xposed.XSharedPreferences;
 public class BaseGetKey extends SystemLog {
     public static GetKey<String, Object> mPrefsMap = new GetKey<>();
     public static final String mPrefsName = "HChen_prefs";
-    public final String TAG = "BaseGetKey";
+    public static final String TAG = "BaseGetKey";
 
     /**
      * @noinspection deprecation
@@ -24,7 +24,7 @@ public class BaseGetKey extends SystemLog {
         context.getSharedPreferences(mPrefsName, Context.MODE_WORLD_READABLE);
     }
 
-    public void setXSharedPrefs() {
+    public static void setXSharedPrefs() {
         if (mPrefsMap.size() == 0) {
             XSharedPreferences mXSharedPreferences;
             try {

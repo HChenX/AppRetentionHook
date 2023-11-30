@@ -1,16 +1,14 @@
 package Com.HChen.Hook.Mode;
 
-import androidx.annotation.NonNull;
-
-import com.github.kyuubiran.ezxhelper.HookFactory;
-import com.github.kyuubiran.ezxhelper.interfaces.IMethodHookCallback;
+import android.app.Application;
+import android.content.Context;
 
 import org.luckypray.dexkit.result.MethodData;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +32,7 @@ public abstract class HookMode extends HookLog {
     public void Run(LoadPackageParam loadPackageParam) {
         try {
             SetLoadPackageParam(loadPackageParam);
+//            EzXHelper.initHandleLoadPackage(loadPackageParam);
             init();
             logI(tag, "Hook Success!");
         } catch (Throwable e) {
@@ -152,7 +151,7 @@ public abstract class HookMode extends HookLog {
         }
     }
 
-    public static class HookDexKit {
+    /*public static class HookDexKit {
 
         public static void beforeDexKit(MethodData method, LoadPackageParam param, ActionTiming actionTiming) {
             try {
@@ -160,6 +159,7 @@ public abstract class HookMode extends HookLog {
                     logE("beforeDexKit", "method is null: " + param.packageName);
                     return;
                 }
+                logI("AthenaApp", "class: " + method.getClassName() + " method: " + method.getMethodName());
                 HookFactory.createMethodHook(method.getMethodInstance(param.classLoader),
                     new Consumer<HookFactory>() {
                         @Override
@@ -186,6 +186,7 @@ public abstract class HookMode extends HookLog {
                     logE("afterDexKit", "method is null: " + param.packageName);
                     return;
                 }
+                logI("AthenaApp", "class: " + method.getClassName() + " method: " + method.getMethodName());
                 HookFactory.createMethodHook(method.getMethodInstance(param.classLoader),
                     new Consumer<HookFactory>() {
                         @Override
@@ -224,11 +225,37 @@ public abstract class HookMode extends HookLog {
                 hookMethod(methodHookParam);
                 Info info = paramCheck(methodHookParam);
                 info = getInfo(info.method, info.thisObject);
-                logSI(info.thisObject, info.methodProcessed + " " + paramLog(methodHookParam));
+                logI(info.thisObject, info.methodProcessed + " " + paramLog(methodHookParam));
             } catch (Throwable throwable) {
                 logE("onMethodHooked", "" + throwable);
             }
         }
+    }*/
+
+    public void hookMethod(Method method, HookAction callback) {
+        try {
+            if (method == null) {
+                logE(tag, "method is null");
+                return;
+            }
+            XposedBridge.hookMethod(method, callback);
+            logI(tag, "Hook: " + method);
+        } catch (Throwable e) {
+            logE(tag, "Hook: " + method + " error");
+        }
+    }
+
+    public Method getMethodInstance(MethodData methodData) {
+        try {
+            if (methodData == null) {
+                logE(tag, "methodData is null");
+                return null;
+            }
+            return methodData.getMethodInstance(loadPackageParam.classLoader);
+        } catch (Throwable throwable) {
+            logE(tag, "getMethodInstance error: " + throwable);
+        }
+        return null;
     }
 
     public void findAndHookMethod(Class<?> clazz, String methodName, Object... parameterTypesAndCallback) {
@@ -386,12 +413,27 @@ public abstract class HookMode extends HookLog {
         }
     }
 
-    public void callMethod(Object obj, String methodName, Object... args) {
-        XposedHelpers.callMethod(obj, methodName, args);
+    public Object callMethod(Object obj, String methodName, Object... args) {
+        return XposedHelpers.callMethod(obj, methodName, args);
     }
 
-    public void callStaticMethod(Class<?> clazz, String methodName, Object... args) {
-        XposedHelpers.callStaticMethod(clazz, methodName, args);
+    public Object callStaticMethod(Class<?> clazz, String methodName, Object... args) {
+        return XposedHelpers.callStaticMethod(clazz, methodName, args);
+    }
+
+    public static Context findContext() {
+        Context context;
+        try {
+            context = (Application) XposedHelpers.callStaticMethod(XposedHelpers.findClass("android.app.ActivityThread", null), "currentApplication");
+            if (context == null) {
+                Object currentActivityThread = XposedHelpers.callStaticMethod(XposedHelpers.findClass("android.app.ActivityThread", null), "currentActivityThread");
+                if (currentActivityThread != null)
+                    context = (Context) XposedHelpers.callMethod(currentActivityThread, "getSystemContext");
+            }
+            return context;
+        } catch (Throwable ignore) {
+        }
+        return null;
     }
 
     public void getDeclaredField(XC_MethodHook.MethodHookParam param, String iNeedString, Object iNeedTo) {
