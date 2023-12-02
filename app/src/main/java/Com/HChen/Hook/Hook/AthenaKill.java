@@ -10,7 +10,16 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class AthenaKill {
     public static int myPid = 0;
+    public static pidCallBackListener mPid;
 //    public static int myUid = 0;
+
+    public interface pidCallBackListener {
+        void pidCallBack(int pid);
+    }
+
+    public static void setPidCallBackListener(pidCallBackListener pid) {
+        mPid = pid;
+    }
 
     public static int init(XC_LoadPackage.LoadPackageParam loadPackageParam) {
         try {
@@ -23,6 +32,7 @@ public class AthenaKill {
                             XposedHelpers.findClassIfExists("android.os.Process", loadPackageParam.classLoader), "myPid");
 //                    myUid = (int) XposedHelpers.callStaticMethod(
 //                        XposedHelpers.findClassIfExists("android.os.Process", loadPackageParam.classLoader), "myUid");
+                        mPid.pidCallBack(myPid);
                     }
                 }
             );

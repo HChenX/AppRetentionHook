@@ -36,7 +36,7 @@ public abstract class HookMode extends HookLog {
             init();
             logI(tag, "Hook Success!");
         } catch (Throwable e) {
-            logE(tag, "Hook Failed! code: " + e);
+            logE(tag, "Hook Failed: " + e);
         }
     }
 
@@ -56,7 +56,7 @@ public abstract class HookMode extends HookLog {
         try {
             return findClass(className);
         } catch (XposedHelpers.ClassNotFoundError e) {
-            logE(tag, "Class not found: " + e);
+            logE(tag, "Class no found: " + e);
             return null;
         }
     }
@@ -65,12 +65,12 @@ public abstract class HookMode extends HookLog {
         try {
             return findClass(findClassIfExists(newClassName) != null ? newClassName : oldClassName);
         } catch (XposedHelpers.ClassNotFoundError e) {
-            logE(tag, "Find " + newClassName + " and " + oldClassName + " is null, code: " + e);
+            logE(tag, "Find " + newClassName + " & " + oldClassName + " is null: " + e);
             return null;
         }
     }
 
-    public static class HookAction extends XC_MethodHook {
+    public abstract static class HookAction extends XC_MethodHook implements IHookLog {
 
         protected void before(MethodHookParam param) {
         }
@@ -89,6 +89,11 @@ public abstract class HookMode extends HookLog {
         public static HookAction returnConstant(final Object result) {
             return new HookAction(PRIORITY_DEFAULT) {
                 @Override
+                public String hookLog() {
+                    return "returnConstant";
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     super.before(param);
                     param.setResult(result);
@@ -97,6 +102,11 @@ public abstract class HookMode extends HookLog {
         }
 
         public static final HookAction DO_NOTHING = new HookAction(PRIORITY_HIGHEST * 2) {
+            @Override
+            public String hookLog() {
+                return "DO_NOTHING";
+            }
+
             @Override
             protected void before(MethodHookParam param) {
                 super.before(param);
@@ -110,8 +120,12 @@ public abstract class HookMode extends HookLog {
             try {
                 before(param);
                 Info info = paramCheck(param);
-                info = getInfo(info.method, info.thisObject);
-                logSI(info.thisObject, info.methodProcessed + " " + paramLog(param));
+                final Info getInfo = getInfo(info.method, info.thisObject);
+                /*日志过滤*/
+                logFilter(hookLog(), new String[]{"AthenaApp", "OplusBattery"},
+                    () -> logI(hookLog(), getInfo.thisObject, getInfo.methodProcessed),
+                    () -> logSI(hookLog(), getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param)));
+//                logSI(HookMode.getHookLog(), info.thisObject, info.methodProcessed + " " + paramLog(param));
             } catch (Throwable e) {
                 logE("beforeHookedMethod", "" + e);
             }
@@ -125,7 +139,6 @@ public abstract class HookMode extends HookLog {
                 logE("afterHookedMethod", "" + e);
             }
         }
-
     }
 
     public abstract static class ReplaceHookedMethod extends HookAction {
@@ -241,7 +254,7 @@ public abstract class HookMode extends HookLog {
             XposedBridge.hookMethod(method, callback);
             logI(tag, "Hook: " + method);
         } catch (Throwable e) {
-            logE(tag, "Hook: " + method + " error");
+            logE(tag, "Hook: " + method);
         }
     }
 
@@ -253,7 +266,7 @@ public abstract class HookMode extends HookLog {
             }
             return methodData.getMethodInstance(loadPackageParam.classLoader);
         } catch (Throwable throwable) {
-            logE(tag, "getMethodInstance error: " + throwable);
+            logE(tag, "getMethodInstance: " + throwable);
         }
         return null;
     }
@@ -273,7 +286,7 @@ public abstract class HookMode extends HookLog {
                 checkDeclaredMethod(clazz, methodName, classes);
             }
             XposedHelpers.findAndHookMethod(clazz, methodName, parameterTypesAndCallback);
-            logI(tag, "Hook: " + clazz + " method is: " + methodName);
+            logI(tag, "Hook: " + clazz + " method: " + methodName);
         } catch (NoSuchMethodException e) {
             logE(tag, "Not find method: " + methodName + " in: " + clazz);
         }
@@ -324,9 +337,9 @@ public abstract class HookMode extends HookLog {
     public void findAndHookConstructor(Class<?> clazz, Object... parameterTypesAndCallback) {
         try {
             XposedHelpers.findAndHookConstructor(clazz, parameterTypesAndCallback);
-            logI(tag, "Hook: " + clazz + " is success");
+            logI(tag, "Hook: " + clazz);
         } catch (Throwable f) {
-            logE(tag, "findAndHookConstructor error: " + f + " class: " + clazz);
+            logE(tag, "findAndHookConstructor: " + f + " class: " + clazz);
         }
     }
 
@@ -378,7 +391,7 @@ public abstract class HookMode extends HookLog {
                 }
             }
         } catch (Throwable e) {
-            logE(tag, "Hook The: " + e + " Error");
+            logE(tag, "Hook The: " + e);
         }
     }
 
@@ -387,7 +400,7 @@ public abstract class HookMode extends HookLog {
             int Num = XposedBridge.hookAllMethods(hookClass, methodName, callback).size();
             logI(tag, "Hook: " + hookClass + " methodName: " + methodName + " Num is: " + Num);
         } catch (Throwable e) {
-            logE(tag, "Hook The: " + e + " Error");
+            logE(tag, "Hook The: " + e);
         }
     }
 
@@ -402,7 +415,7 @@ public abstract class HookMode extends HookLog {
         try {
             XposedBridge.hookAllConstructors(hookClass, callback);
         } catch (Throwable f) {
-            logE(tag, "hookAllConstructors error: " + f + " class: " + hookClass);
+            logE(tag, "hookAllConstructors: " + f + " class: " + hookClass);
         }
     }
 
@@ -446,13 +459,13 @@ public abstract class HookMode extends HookLog {
                     Object result = setString.get(param.thisObject);
                     checkLast("getDeclaredField", iNeedString, iNeedTo, result);
                 } catch (IllegalAccessException e) {
-                    logE(tag, "IllegalAccessException to: " + iNeedString + " Need to: " + iNeedTo + " Code:" + e);
+                    logE(tag, "IllegalAccessException to: " + iNeedString + " Need to: " + iNeedTo + " :" + e);
                 }
             } catch (NoSuchFieldException e) {
-                logE(tag, "No such the: " + iNeedString + " Code: " + e);
+                logE(tag, "No such the: " + iNeedString + " : " + e);
             }
         } else {
-            logE(tag, "Param is null Code: " + iNeedString + " And: " + iNeedTo);
+            logE(tag, "Param is null Code: " + iNeedString + " & " + iNeedTo);
         }
     }
 
@@ -461,7 +474,7 @@ public abstract class HookMode extends HookLog {
             if (value == last || value.equals(last)) {
                 logI(tag, setObject + " Success! set " + fieldName + " to " + value);
             } else {
-                logE(tag, setObject + " Failed! set " + fieldName + " to " + value + " i hope is: " + value + " but is: " + last);
+                logE(tag, setObject + " Failed! set " + fieldName + " to " + value + " hope: " + value + " but: " + last);
             }
         } else {
             logE(tag, setObject + " Error value: " + value + " or last: " + last + " is null");
@@ -512,7 +525,7 @@ public abstract class HookMode extends HookLog {
             setField.run();
             checkLast.run();
         } catch (NoSuchFieldException e) {
-            logE(tag, "No such field: " + fieldName + " in param: " + obj + " error: " + e);
+            logE(tag, "No such field: " + fieldName + " in param: " + obj + " : " + e);
         }
     }
 
@@ -543,16 +556,16 @@ public abstract class HookMode extends HookLog {
                             break;
                         }
                     } catch (Exception e) {
-                        logW(tag, "Such key error: " + methodName);
+                        logW(tag, "Such key: " + methodName);
                     }
                 }
                 if (mPrefsMap.getBoolean(find) && check) {
                     if (mCode != null) mCode.run();
                 } else
-                    logW(tag, log + combinedKeywords + " is false");
+                    logW(tag, log + combinedKeywords + " false");
             }
         } else {
-            logW(tag, log + methodName + " is false");
+            logW(tag, log + methodName + " false");
         }
     }
 
@@ -573,7 +586,7 @@ public abstract class HookMode extends HookLog {
             Matcher matcher = pattern.matcher(keyWord);
             return matcher.matches();
         } catch (Exception e) {
-            logW(tag, "Such key error: " + keyWord + " " + needString);
+            logW(tag, "Such key: " + keyWord + " " + needString);
             return false;
         }
     }

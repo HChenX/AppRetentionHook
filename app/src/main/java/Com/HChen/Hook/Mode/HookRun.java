@@ -4,6 +4,7 @@ import Com.HChen.Hook.Base.BaseGetKey;
 import Com.HChen.Hook.Hook.AthenaApp;
 import Com.HChen.Hook.Hook.AthenaKill;
 import Com.HChen.Hook.Hook.MiuiService;
+import Com.HChen.Hook.Hook.OplusBattery;
 import Com.HChen.Hook.Hook.OplusService;
 import Com.HChen.Hook.Hook.PowerKeeper;
 import Com.HChen.Hook.Hook.SystemService;
@@ -40,6 +41,7 @@ public class HookRun extends HookLog {
                 initHook(new AthenaApp(), true);
                 DexKit.INSTANCE.closeDexKit();
             }
+            case "com.oplus.battery" -> initHook(new OplusBattery(), true);
             /*测试用*/
             /*case "com.android.settings" -> {
                 if (BuildConfig.DEBUG)

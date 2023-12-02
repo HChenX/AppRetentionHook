@@ -38,6 +38,8 @@ import android.os.Handler;
 import Com.HChen.Hook.Mode.HookMode;
 
 public class SystemService extends HookMode {
+    public static String name = "SystemService";
+
     @Override
     public void init() {
         /*关闭Cpu超时检查*/
@@ -81,6 +83,11 @@ public class SystemService extends HookMode {
             String.class, String.class, int.class, int.class, boolean.class,
             new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     boolean hook = false;
                     switch ((String) param.args[0]) {
@@ -97,7 +104,7 @@ public class SystemService extends HookMode {
                         param.setResult(null);
                         hook = true;
                     }
-                    logSI(killLocked, "reason: " + param.args[0] + " description: " + param.args[1]
+                    logSI(null, killLocked, "reason: " + param.args[0] + " description: " + param.args[1]
                         + " reasonCode: " + param.args[2]
                         + " subReason: " + param.args[3]
                         + " noisy: " + param.args[4] + " im hook? " + hook);
@@ -110,6 +117,11 @@ public class SystemService extends HookMode {
         hookAllMethods(ActivityManagerService,
             checkExcessivePowerUsageLPr,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(false);
@@ -129,6 +141,11 @@ public class SystemService extends HookMode {
             pruneStaleProcessesLocked,
             new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
                 }
@@ -144,6 +161,11 @@ public class SystemService extends HookMode {
         findAndHookMethod(ActivityManagerService,
             killPids, int[].class, String.class, boolean.class,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     if (param.args[1] == "Free memory") {
@@ -172,6 +194,11 @@ public class SystemService extends HookMode {
         findAndHookMethod(ActivityManagerService,
             killProcessesBelowAdj, int.class, String.class,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(true);
@@ -244,6 +271,11 @@ public class SystemService extends HookMode {
         findAndHookMethod(ActivityManagerService,
             performIdleMaintenance, new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
                 }
@@ -291,6 +323,11 @@ public class SystemService extends HookMode {
         findAndHookMethod(LowMemDetector,
             getMemFactor, new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(0);
                 }
@@ -301,6 +338,11 @@ public class SystemService extends HookMode {
         findAndHookMethod(ProcessStatsService,
             getMemFactorLocked,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(0);
@@ -349,6 +391,11 @@ public class SystemService extends HookMode {
         findAndHookMethod(ProcessStateRecord,
             shouldNotKillOnBgRestrictedAndIdle, new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(true);
                 }
@@ -361,6 +408,11 @@ public class SystemService extends HookMode {
             updateBackgroundRestrictedForUidPackageLocked,
             int.class, String.class, boolean.class,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     /*logSI(updateBackgroundRestrictedForUidPackageLocked, "uid: " + param.args[0]
@@ -388,6 +440,11 @@ public class SystemService extends HookMode {
             runKillAll,
             new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
                     /*logSI(runKillAll, "pw: " + param.args[0]);*/
@@ -400,6 +457,11 @@ public class SystemService extends HookMode {
             shouldKillExcessiveProcesses,
             new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(false);
                     /*logSI(shouldKillExcessiveProcesses, "nowUptime: " + param.args[0]);*/
@@ -411,6 +473,11 @@ public class SystemService extends HookMode {
         hookAllMethods(OomAdjuster,
             updateAndTrimProcessLSP,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     /*logSI(updateAndTrimProcessLSP, "now: " + param.args[0] +
@@ -428,6 +495,11 @@ public class SystemService extends HookMode {
         hookAllConstructors(OomAdjuster,
             new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void after(MethodHookParam param) {
                     setObject(param.thisObject, "mNextNoKillDebugMessageTime", Long.MAX_VALUE);
                 }
@@ -438,6 +510,11 @@ public class SystemService extends HookMode {
         hookAllMethods(PhantomProcessList,
             trimPhantomProcessesIfNecessary,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
@@ -475,6 +552,11 @@ public class SystemService extends HookMode {
             trimInactiveRecentTasks,
             new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
                 }
@@ -485,6 +567,11 @@ public class SystemService extends HookMode {
         hookAllMethods(RecentTasks,
             isInVisibleRange,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     param.args[2] = 0;
@@ -551,6 +638,11 @@ public class SystemService extends HookMode {
                 getDefaultMaxCachedProcesses,
                 new HookAction() {
                     @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
+                    @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(Integer.MAX_VALUE);
                     }
@@ -561,6 +653,11 @@ public class SystemService extends HookMode {
             findAndHookMethod(ActivityManagerServiceStub,
                 getDefaultMaxCachedProcesses,
                 new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
                     @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(Integer.MAX_VALUE);
@@ -574,6 +671,11 @@ public class SystemService extends HookMode {
             updateMaxCachedProcesses,
             new HookAction() {
                 @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
                 }
@@ -585,6 +687,11 @@ public class SystemService extends HookMode {
         findAndHookConstructor(ActivityManagerConstants, Context.class,
             findClassIfExists(ActivityManagerService), Handler.class,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void after(MethodHookParam param) {
                     setInt(param.thisObject, "MAX_PHANTOM_PROCESSES", Integer.MAX_VALUE);
@@ -610,6 +717,11 @@ public class SystemService extends HookMode {
         findAndHookMethod(ActivityManagerConstants,
             setOverrideMaxCachedProcesses, int.class,
             new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
                 @Override
                 protected void before(MethodHookParam param) {
                     param.args[0] = Integer.MAX_VALUE;

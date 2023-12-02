@@ -9,7 +9,9 @@ import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 
 public class HookLog {
-    public static final String hookMain = "[HChenHook]";
+    public static final String hookMain = "[HChen]";
+    public static final String mHook = "[HChen:";
+    public static final String mode = "]";
     public static String methodProcessed = null;
 
     public static Info paramCheck(XC_MethodHook.MethodHookParam param) {
@@ -79,8 +81,20 @@ public class HookLog {
         }
     }
 
+    public static void logFilter(String into, String[] filter, Runnable runF, Runnable runO) {
+        for (String get : filter) {
+            if (into.equals(get)) {
+                runF.run();
+            } else runO.run();
+        }
+    }
+
     public static void logI(String tag, String Log) {
         XposedBridge.log(hookMain + "[" + tag + "]: " + "I: " + Log);
+    }
+
+    public static void logI(String name, String tag, String Log) {
+        XposedBridge.log(mHook + name + mode + "[" + tag + "]: " + "I: " + Log);
     }
 
     public static void logW(String tag, String Log) {
@@ -91,8 +105,8 @@ public class HookLog {
         XposedBridge.log(hookMain + "[" + tag + "]: " + "E: " + Log);
     }
 
-    public static void logSI(String tag, String log) {
-        Log.i(hookMain, "[" + tag + "]: I: " + log);
+    public static void logSI(String name, String tag, String log) {
+        Log.i(mHook + name + mode, "[" + tag + "]: I: " + log);
     }
 
     public static void logSW(String tag, String log) {

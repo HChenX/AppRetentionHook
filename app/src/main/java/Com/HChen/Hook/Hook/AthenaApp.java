@@ -1,5 +1,10 @@
 package Com.HChen.Hook.Hook;
 
+import static Com.HChen.Hook.Param.Name.OplusName.AppIAthenaKillCallback$Stub;
+import static Com.HChen.Hook.Param.Name.OplusName.AppIAthenaKillCallback$Stub$Proxy;
+import static Com.HChen.Hook.Param.Name.OplusName.AthenaService$OKillerBinder$AthenaKillCallback;
+import static Com.HChen.Hook.Param.Name.OplusName.IAthenaKillCallback$Stub;
+import static Com.HChen.Hook.Param.Name.OplusName.IAthenaKillCallback$Stub$Proxy;
 import static Com.HChen.Hook.Param.Name.OplusName.IAthenaService$Stub$Proxy;
 import static Com.HChen.Hook.Param.Name.OplusName.RemoteService;
 
@@ -11,11 +16,14 @@ import org.luckypray.dexkit.result.MethodData;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import Com.HChen.Hook.Mode.DexKit.DexKit;
 import Com.HChen.Hook.Mode.HookMode;
 
-public class AthenaApp extends HookMode {
+public class AthenaApp extends HookMode implements AthenaKill.pidCallBackListener {
+
+    public static String name = "AthenaApp";
 
     public static int myPid = 0;
 
@@ -29,6 +37,8 @@ public class AthenaApp extends HookMode {
     public void init() {
         /*防止意外报错导致的未能关闭DexKit*/
         try {
+            /*注册回调*/
+            AthenaKill.setPidCallBackListener(this);
             /*boolean c*/
             MethodData methodData = DexKit.INSTANCE.getDexKitBridge().findMethod(
                 FindMethod.create()
@@ -39,6 +49,11 @@ public class AthenaApp extends HookMode {
             ).firstOrNull();
             hookMethod(getMethodInstance(methodData),
                 new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
                     @Override
                     protected void before(MethodHookParam param) {
                         String reason = (String) param.args[7];
@@ -96,6 +111,11 @@ public class AthenaApp extends HookMode {
             ).firstOrNull();
             hookMethod(getMethodInstance(methodData1),
                 new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
                     @Override
                     protected void before(MethodHookParam param) {
                         String reason = (String) param.args[6];
@@ -164,6 +184,11 @@ public class AthenaApp extends HookMode {
             hookMethod(getMethodInstance(methodData2),
                 new HookAction() {
                     @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
+                    @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(null);
                     }
@@ -178,6 +203,55 @@ public class AthenaApp extends HookMode {
                 }
             );*/
 
+            /*void g*/
+            MethodData methodData3 = DexKit.INSTANCE.getDexKitBridge().findMethod(
+                FindMethod.create()
+                    .matcher(MethodMatcher.create()
+                        .declaredClass(ClassMatcher.create()
+                            .usingStrings("com.android.server.am.OplusAthenaAmManager error"))
+                        .paramTypes(List.class, List.class)
+                    )
+            ).firstOrNull();
+            hookMethod(getMethodInstance(methodData3),
+                new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(null);
+                    }
+                }
+            );
+
+            /*void a*/
+            MethodData methodData4 = DexKit.INSTANCE.getDexKitBridge().findMethod(
+                FindMethod.create()
+                    .matcher(MethodMatcher.create()
+                        .declaredClass(ClassMatcher.create()
+                            .usingStrings("com.android.server.am.OplusAthenaAmManager error"))
+                        .usingStrings("policyAction")
+                    )
+            ).firstOrNull();
+            hookMethod(getMethodInstance(methodData4),
+                new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        Object o = param.args[param.args.length - 1];
+                        if (o != null) {
+                            param.setResult(null);
+                        }
+                    }
+                }
+            );
+
             /*my那里学到的*/
             try {
                 Class<?> athena = findClassIfExists(IAthenaService$Stub$Proxy);
@@ -186,18 +260,19 @@ public class AthenaApp extends HookMode {
                         continue;
                     }
                     if (athenaKill.getName().contains("athenaKill")) {
-                        ArrayList<Object> param = new ArrayList<>(Arrays.asList(athenaKill.getParameterTypes()));
+                        hookAthena(athena, athenaKill, 0);
+                        /*ArrayList<Object> param = new ArrayList<>(Arrays.asList(athenaKill.getParameterTypes()));
                         param.add(new HookAction() {
                             @Override
                             protected void before(MethodHookParam param) {
                                 param.setResult(0);
                             }
                         });
-                        findAndHookMethod(athena, athenaKill.getName(), param.toArray());
+                        findAndHookMethod(athena, athenaKill.getName(), param.toArray());*/
                     }
                 }
             } catch (Throwable throwable) {
-                logE("athenaKill", "error: " + throwable);
+                logE("athenaKill", "" + throwable);
             }
 
             try {
@@ -207,26 +282,77 @@ public class AthenaApp extends HookMode {
                         continue;
                     }
                     if (remote.getName().contains("athenaKill")) {
-                        ArrayList<Object> param = new ArrayList<>(Arrays.asList(remote.getParameterTypes()));
+                        hookAthena(remoteService, remote, 0);
+                        /*ArrayList<Object> param = new ArrayList<>(Arrays.asList(remote.getParameterTypes()));
                         param.add(new HookAction() {
                             @Override
                             protected void before(MethodHookParam param) {
                                 param.setResult(0);
                             }
                         });
-                        findAndHookMethod(remoteService, remote.getName(), param.toArray());
+                        findAndHookMethod(remoteService, remote.getName(), param.toArray());*/
                     }
                 }
             } catch (Throwable throwable) {
-                logE("remoteService", "error: " + throwable);
+                logE("remoteService", "" + throwable);
             }
+
+            try {
+                String[] mClass = new String[]{
+                    IAthenaKillCallback$Stub$Proxy,
+                    AppIAthenaKillCallback$Stub$Proxy,
+                    AthenaService$OKillerBinder$AthenaKillCallback,
+                    IAthenaKillCallback$Stub,
+                    AppIAthenaKillCallback$Stub
+                };
+                for (String getClass : mClass) {
+                    Class<?> killCall = findClassIfExists(getClass);
+                    for (Method killCallBack : killCall.getDeclaredMethods()) {
+                        if (killCallBack.getReturnType().equals(void.class)) {
+                            switch (killCallBack.getName()) {
+                                case "onAppKilled", "onAthenaCleanup", "onClearParamChanged" -> {
+                                    hookAthena(killCall, killCallBack, null);
+                                }
+                            }
+                        } else if (killCallBack.getReturnType().equals(boolean.class)) {
+                            if (killCallBack.getName().equals("onTransact")) {
+                                hookAthena(killCall, killCallBack, true);
+                            }
+                        }
+                    }
+                }
+            } catch (Throwable throwable) {
+                logE("killCallBack", "" + throwable);
+            }
+
         } catch (Throwable throwable) {
             if (myPid != 0 && test < 5) {
                 callStaticMethod(findClassIfExists("android.os.Process"), "sendSignal", myPid, 9);
+                logE("AthenaApp", throwable + " will kill athena, pid: " + myPid + " number of times: " + test);
                 myPid = 0;
                 test++;
             }
-            logE("AthenaApp", "error:" + throwable + " will kill athena, pid: " + myPid + " number of times: " + test);
         }
+    }
+
+    public void hookAthena(Class<?> mClass, Method method, Object result) {
+        ArrayList<Object> param = new ArrayList<>(Arrays.asList(method.getParameterTypes()));
+        param.add(new HookAction() {
+            @Override
+            public String hookLog() {
+                return name;
+            }
+
+            @Override
+            protected void before(MethodHookParam param) {
+                param.setResult(result);
+            }
+        });
+        findAndHookMethod(mClass, method.getName(), param.toArray());
+    }
+
+    @Override
+    public void pidCallBack(int pid) {
+        myPid = pid;
     }
 }
