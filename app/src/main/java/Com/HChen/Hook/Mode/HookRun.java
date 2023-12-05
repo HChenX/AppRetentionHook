@@ -22,7 +22,6 @@ public class HookRun extends HookLog {
         param = loadPackageParam;
         init(loadPackageParam);
 //        Process.myUid();
-
     }
 
     public static void init(LoadPackageParam param) {
