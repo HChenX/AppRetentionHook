@@ -7,6 +7,7 @@ public final class SystemName {
     public static final String ProcessList = "com.android.server.am.ProcessList";
     public static final String ProcessStateRecord = "com.android.server.am.ProcessStateRecord";
     public static final String ActivityManagerShellCommand = "com.android.server.am.ActivityManagerShellCommand";
+    public static final String ProcessList$ImperceptibleKillRunner = "com.android.server.am.ProcessList$ImperceptibleKillRunner";
 
     public static final String OomAdjuster = "com.android.server.am.OomAdjuster";
     public static final String PhantomProcessList = "com.android.server.am.PhantomProcessList";

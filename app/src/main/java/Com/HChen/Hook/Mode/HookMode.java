@@ -278,10 +278,24 @@ public abstract class HookMode extends HookLog {
                 Object[] newArray = new Object[parameterTypesAndCallback.length - 1];
                 System.arraycopy(parameterTypesAndCallback, 0, newArray, 0, newArray.length);
                 Class<?>[] classes = new Class<?>[newArray.length];
+                Class<?> newclass = null;
                 for (int i = 0; i < newArray.length; i++) {
-                    Class<?> newclass = (Class<?>) newArray[i];
+                    Object type = newArray[i];
+                    if (type instanceof Class) {
+                        newclass = (Class<?>) newArray[i];
+                    } else if (type instanceof String) {
+                        newclass = findClassIfExists((String) type);
+                        if (newclass == null) {
+                            logE(tag, "class can't is null class:" + clazz + " method: " + methodName);
+                            return;
+                        }
+                    }
                     classes[i] = newclass;
                 }
+                /*for (int i = 0; i < newArray.length; i++) {
+                    Class<?> newclass = (Class<?>) newArray[i];
+                    classes[i] = newclass;
+                }*/
                 /*clazz.getDeclaredMethod(methodName, classes);*/
                 checkDeclaredMethod(clazz, methodName, classes);
             }

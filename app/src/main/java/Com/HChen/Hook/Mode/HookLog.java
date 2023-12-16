@@ -109,6 +109,10 @@ public class HookLog {
         Log.i(mHook + name + mode, "[" + tag + "]: I: " + log);
     }
 
+    public static void logSI(String tag, String log) {
+        Log.i(hookMain, "[" + tag + "]: I: " + log);
+    }
+
     public static void logSW(String tag, String log) {
         Log.w(hookMain, "[" + tag + "]: W: " + log);
     }

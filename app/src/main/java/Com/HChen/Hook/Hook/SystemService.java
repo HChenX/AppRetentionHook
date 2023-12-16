@@ -8,6 +8,7 @@ import static Com.HChen.Hook.Param.Name.SystemName.LowMemDetector;
 import static Com.HChen.Hook.Param.Name.SystemName.OomAdjuster;
 import static Com.HChen.Hook.Param.Name.SystemName.PhantomProcessList;
 import static Com.HChen.Hook.Param.Name.SystemName.ProcessList;
+import static Com.HChen.Hook.Param.Name.SystemName.ProcessList$ImperceptibleKillRunner;
 import static Com.HChen.Hook.Param.Name.SystemName.ProcessRecord;
 import static Com.HChen.Hook.Param.Name.SystemName.ProcessStateRecord;
 import static Com.HChen.Hook.Param.Name.SystemName.ProcessStatsService;
@@ -16,7 +17,9 @@ import static Com.HChen.Hook.Param.Value.SystemValue.checkExcessivePowerUsageLPr
 import static Com.HChen.Hook.Param.Value.SystemValue.getDefaultMaxCachedProcesses;
 import static Com.HChen.Hook.Param.Value.SystemValue.getMemFactor;
 import static Com.HChen.Hook.Param.Value.SystemValue.getMemFactorLocked;
+import static Com.HChen.Hook.Param.Value.SystemValue.handleDeviceIdle;
 import static Com.HChen.Hook.Param.Value.SystemValue.isInVisibleRange;
+import static Com.HChen.Hook.Param.Value.SystemValue.killAppIfBgRestrictedAndCachedIdleLocked;
 import static Com.HChen.Hook.Param.Value.SystemValue.killLocked;
 import static Com.HChen.Hook.Param.Value.SystemValue.killPids;
 import static Com.HChen.Hook.Param.Value.SystemValue.killProcessesBelowAdj;
@@ -78,6 +81,22 @@ public class SystemService extends HookMode {
             }
         );*/
 
+        /*设备空闲清理？*/
+        findAndHookMethod(ProcessList$ImperceptibleKillRunner,
+            handleDeviceIdle,
+            new HookAction() {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(null);
+                }
+
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+            }
+        );
+
         /*防止各种原因的kill*/
         findAndHookMethod(ProcessRecord, killLocked,
             String.class, String.class, int.class, int.class, boolean.class,
@@ -90,17 +109,21 @@ public class SystemService extends HookMode {
                 @Override
                 protected void before(MethodHookParam param) {
                     boolean hook = false;
+                    /*"isolated not needed"被隔离的进程只有变成空进程时才会被清理，我认为是合理的*/
                     switch ((String) param.args[0]) {
                         case "Unable to query binder frozen stats",
                             "Unable to unfreeze", "Unable to freeze binder interface",
                             "start timeout", "crash", "bg anr", "skip anr", "anr",
-                            "isolated not needed", "swap low and too many cached" -> {
+                            "swap low and too many cached" -> {
                             param.setResult(null);
                             hook = true;
                         }
                     }
+                    /*"depends on provider",内容提供者被杀导致的调用方被杀，
+                     * 这是软件作者的bug，不应该在用户端禁止。
+                     * reason.contains("depends on provider")*/
                     String reason = (String) param.args[0];
-                    if (reason.contains("depends on provider") || reason.contains("scheduleCrash for")) {
+                    if (reason.contains("scheduleCrash for")) {
                         param.setResult(null);
                         hook = true;
                     }
@@ -419,6 +442,23 @@ public class SystemService extends HookMode {
                         + " packageName: " + param.args[1]
                         + " restricted: " + param.args[2]);*/
                     param.args[2] = false;
+                }
+            }
+        );
+
+        /*禁止停止后台受限和缓存的app*/
+        findAndHookMethod(ProcessList,
+            killAppIfBgRestrictedAndCachedIdleLocked,
+            ProcessRecord, long.class,
+            new HookAction() {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(0L);
+                }
+
+                @Override
+                public String hookLog() {
+                    return name;
                 }
             }
         );
