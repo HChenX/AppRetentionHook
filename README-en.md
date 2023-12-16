@@ -17,21 +17,24 @@
 
 * This is a Lsp module,You need to install Lsp activate.
 * #### Usage:
-    * First: install the Lsp module on your phone.
-    * Next: open Lsp app, and activation the module.
-    * Last: Select ` System framework(system) ` And `Powerkeeper(if have)`. And now must reboot.
+    * First: Install this Lsp module into your phone.
+    * Secondly：Click the Lsp icon to enter the Lsp interface, Select this module and activate it.
+    * At last：Tick the scope:
+    * [MIUI] `system`&`powerkeeper[if have]`
+    * [OPPO] `Athena`&`battery`&`system`
+    * Then restart your phone and it will work normally.
 
-- The module achieving app retention by modifying the system kill logic through Hook.
-- The module is designed for the Miui of Android 13 `Miui14`. Android 14 and 12 and 11 can also be
-  used, but the effect is unknown.
-- But please note that non Miui system Android 13 is also my recommended option. Can be used
-  normally.
+- This module uses the kill logic of the hook system to keep the background application alive。
+- This module is suitable
+  for: `HyperOS(A14)` `MIUI14(A13,A12,A11)` `OPPO系统(A14,A13,A12)` `AOSP(A14,A13,A12,A11)`
+  and other.
 
 # 🌟Module Effect
 
-- After personal testing, app retention time growth. And Hardly encountered app kill situation.
-- What surprised me was that after half a day , most apps weren't killed by the system.
-- ` Like QQ Bilibili TikTok Twitter Youtube And more test pass , they dont be killed. `
+- After personal testing, the retention time of the background App has increased greatly, and there
+  has been no background killing for a long time.
+- To my great surprise, even after one night, the app survived in the background and was not killed.
+- `These include, but are not limited to: TikTok GitHub(Android) Twitter(X) Telegram YouTobe and other software`
 
 # 💡Module Description
 
@@ -45,9 +48,8 @@
     * 3.The most serious thing is that it may cause the phone to not turn on. So you must be fully
       prepared.
 
-- And if you use non Miui Android 13 system and non AOSP system.But use like Flyme,ColorOs...
-  manufacturer's custom system, they may contain vendor custom kill logic, Has a certain impact on
-  the effectiveness of the module.
+- Reminder: Use for example: `OPPO` `VIVO` `Huawei`and other third-party vendors, they may contain
+  vendor-defined kill logic, which has a certain impact on the effect of the module.
 - If you can accept these possible issues will give you a very surprising experience with the
   module.
 
@@ -74,7 +76,7 @@
 |      Cemiuiler       | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 |      Don't Kill      |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
 | Translation provided |                              Provider                              |
-|       English        |  焕晨HChen , ℓοѕτ οиє ⌕ ➹ • #𝙣𝙤𝙋𝙈𝙨𝙥𝙡𝙨 • 𝕏 (Telegram Name)   |
+|       English        |             焕晨HChen , ℓοѕτ οиє ⌕ — 🚫🥄(Telegram Name)             |
 |  Simplified Chinese  |                              焕晨HChen                               |
 
 # 📢Project Statement

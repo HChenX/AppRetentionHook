@@ -43,7 +43,7 @@
     * 2.系统的待机功耗增加，但造成的待机功耗增加是可以忽略不计的。
     * 3.使用本模块有可能导致系统无法开机卡第二屏，所以请务必做好万全准备。
 
-- 提醒:使用例如：`OPPO` `VIVO` `华为(Huawei)`等第三方厂商的系统，他们可能包含厂商自定义的kill逻辑，对模块效果有一定影响。
+- 提醒：使用例如：`OPPO` `VIVO` `华为(Huawei)`等第三方厂商的系统，他们可能包含厂商自定义的kill逻辑，对模块效果有一定影响。
 - 如果你能接受上面所述的可能存在的问题，那么本模块将会为你带来不一样的惊喜。
 
 # 🔍常见问题
@@ -69,7 +69,7 @@
 | Cemiuiler  | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 | Don't Kill |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
 |    翻译提供    |                                提供者                                 |
-|  English   |  焕晨HChen , ℓοѕτ οиє ⌕ ➹ • #𝙣𝙤𝙋𝙈𝙨𝙥𝙡𝙨 • 𝕏 (Telegram Name)   |
+|  English   |             焕晨HChen ,ℓοѕτ οиє ⌕ — 🚫🥄(Telegram Name)              |
 |    简体中文    |                              焕晨HChen                               |
 
 # 📢项目声明
