@@ -28,7 +28,7 @@ android {
 
     defaultConfig {
         applicationId "Com.HChen.Hook"
-        minSdk 32
+        minSdk 30
         targetSdk 34
         //noinspection HighAppVersionCode
         versionCode 2023121600
