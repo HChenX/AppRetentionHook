@@ -122,10 +122,10 @@ public abstract class HookMode extends HookLog {
                 Info info = paramCheck(param);
                 final Info getInfo = getInfo(info.method, info.thisObject);
                 /*日志过滤*/
-                logFilter(hookLog(), new String[]{"AthenaApp", "OplusBattery"},
+                /*logFilter(hookLog(), new String[]{"AthenaApp", "OplusBattery"},
                     () -> logI(hookLog(), getInfo.thisObject, getInfo.methodProcessed),
-                    () -> logSI(hookLog(), getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param)));
-//                logSI(HookMode.getHookLog(), info.thisObject, info.methodProcessed + " " + paramLog(param));
+                    () -> logSI(hookLog(), getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param)));*/
+                logSI(hookLog(), info.thisObject, info.methodProcessed + " " + paramLog(param));
             } catch (Throwable e) {
                 logE("beforeHookedMethod", "" + e);
             }
