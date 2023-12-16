@@ -31,7 +31,7 @@ android {
         minSdk 32
         targetSdk 34
         //noinspection HighAppVersionCode
-        versionCode 2023111700
+        versionCode 2023121600
         versionName "4.1"
         ndk {
             // noinspection ChromeOsAbiSupport
@@ -93,7 +93,7 @@ dependencies {
 
     compileOnly(roots.XposedApi)
 
-    implementation 'org.luckypray:dexkit:2.0.0-rc9'
+    implementation 'org.luckypray:dexkit:2.0.0'
 //    implementation 'com.github.kyuubiran:EzXHelper:2.0.8'
 //    implementation 'androidx.appcompat:appcompat:1.6.1'
 //    implementation 'com.google.android.material:material:1.9.0'
