@@ -20,8 +20,8 @@
     * First: Install this Lsp module into your phone.
     * Secondly：Click the Lsp icon to enter the Lsp interface, Select this module and activate it.
     * At last：Tick the scope:
-    * [MIUI] `system`&`powerkeeper[if have]`
-    * [OPPO] `Athena`&`battery`&`system`
+    * [MIUI] `System`&`Powerkeeper[If have]`
+    * [OPPO] `Athena`&`Battery`&`System`
     * Then restart your phone and it will work normally.
 
 - This module uses the kill logic of the hook system to keep the background application alive。
