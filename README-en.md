@@ -64,7 +64,7 @@
 - A: Because change system kill logic, so please pay attention to the usage of phone memory.
 - Q: Why my phone power consumption increase?
 - A: This is normal, and a reasonable range is acceptable.
-- Q: Why me phone can't turn on?
+- Q: Why my phone can't turn on?
 - A: It may be caused by some changes, please uninstall and provide feedback.
 
 # 🙏Acknowledgments
