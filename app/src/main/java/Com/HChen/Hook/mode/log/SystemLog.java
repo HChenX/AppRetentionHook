@@ -20,25 +20,30 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook;
+package Com.HChen.Hook.mode.log;
 
-import Com.HChen.Hook.mode.HookInit;
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.IXposedHookZygoteInit;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import android.util.Log;
 
-/* Hook入口。*/
-public class HookInlet implements IXposedHookLoadPackage, IXposedHookZygoteInit {
-    public static final String hookMain = "[HChenHook]";
-    public static String modulePath;
+public class SystemLog {
+    public static final String mTAG = "[HChenLog]";
 
-    @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookInit.HookPackage(loadPackageParam);
+    public static void logI(String c, String log) {
+        Log.i(mTAG, "I: " + c + ": " + log);
     }
 
-    @Override
-    public void initZygote(StartupParam startupParam) {
-        modulePath = startupParam.modulePath;
+    public static void logW(String c, String log) {
+        Log.w(mTAG, "W: " + c + ": " + log);
+    }
+
+    public static void logW(String c, String log, Throwable e) {
+        Log.w(mTAG, "W: " + c + ": " + log, e);
+    }
+
+    public static void logE(String c, String log) {
+        Log.e(mTAG, "E: " + c + ": " + log);
+    }
+
+    public static void logE(String c, String log, Throwable e) {
+        Log.e(mTAG, "E: " + c + ": " + log, e);
     }
 }

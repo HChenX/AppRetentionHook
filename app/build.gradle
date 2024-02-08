@@ -84,6 +84,9 @@ android {
     }
 
     androidResources {
+        additionalParameters += '--allow-reserved-package-id'
+        additionalParameters += '--package-id'
+        additionalParameters += '0x59'
         generateLocaleConfig = true
     }
 }
@@ -91,35 +94,18 @@ android {
 
 dependencies {
 
-    compileOnly(roots.XposedApi)
-
+    /*Xposed*/
+    compileOnly 'de.robv.android.xposed:api:82'
+    /*DexKit*/
     implementation 'org.luckypray:dexkit:2.0.0'
+
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 //    implementation 'com.github.kyuubiran:EzXHelper:2.0.8'
-//    implementation 'androidx.appcompat:appcompat:1.6.1'
 //    implementation 'com.google.android.material:material:1.9.0'
 //    testImplementation 'junit:junit:4.13.2'
 //    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 //    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    implementation "com.google.accompanist:accompanist-systemuicontroller:0.32.0"
-    implementation "org.lsposed.hiddenapibypass:hiddenapibypass:4.3"
-    implementation "com.google.code.gson:gson:2.10.1"
-
-    implementation roots.AndroidXCore
-    implementation roots.AndroidXCollection
-    implementation roots.AndroidXRecyclerview
-    implementation roots.AndroidXFragment
-    implementation roots.AndroidXLifecycle
-    implementation roots.AndroidXVectorDrawable
-    implementation roots.AndroidXVectorDrawableAnimated
-    implementation roots.AndroidXCustomView
-    implementation roots.AndroidXCustomViewPoolingContainer
-    implementation roots.AndroidXConstraintLayout
-
-    implementation files(roots.animation)
-    implementation files(roots.appcompat)
-    implementation files(roots.core)
-    implementation files(roots.haptic)
-    implementation files(roots.preference)
-    implementation files(roots.smooth)
-    implementation files(roots.springback)
+//    implementation "com.google.accompanist:accompanist-systemuicontroller:0.32.0"
+//    implementation "org.lsposed.hiddenapibypass:hiddenapibypass:4.3"
+//    implementation "com.google.code.gson:gson:2.10.1"
 }

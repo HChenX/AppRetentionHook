@@ -2,49 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /><!--允许应用程序读取外部存储（如SD卡）上的文件。-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!--允许应用程序向外部存储（如SD卡）写入文件。-->
-    <uses-permission
-        android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
-        tools:ignore="ScopedStorage" /> <!--允许应用程序管理外部存储的内容。-->
-    <uses-permission android:name="android.permission.ACCESS_SUPERUSER" /><!--超级用户权限-->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /><!--在前台运行服务的权限。-->
-    <permission
-        android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
-        tools:ignore="ReservedSystemPermission" /><!--从后台启动前台服务。-->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /><!--允许自启动。-->
-    <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" /><!--请求允许伴随应用在后台运行的权限。-->
-
     <application
-        android:name=".Ui.Application"
+
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:requestLegacyExternalStorage="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppRetentionHook"
         tools:targetApi="31">
-
-        <activity
-            android:name=".Ui.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <!--                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />-->
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".Ui.SubSettings"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <!--                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />-->
-            </intent-filter>
-        </activity>
 
         <meta-data
             android:name="xposedscope"

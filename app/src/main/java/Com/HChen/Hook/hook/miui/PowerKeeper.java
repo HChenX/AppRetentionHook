@@ -20,25 +20,33 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook;
+package Com.HChen.Hook.hook.miui;
 
-import Com.HChen.Hook.mode.HookInit;
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.IXposedHookZygoteInit;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
+import static Com.HChen.Hook.param.classpath.MiuiName.ProcessManager;
+import static Com.HChen.Hook.param.name.MiuiValue.kill;
 
-/* Hook入口。*/
-public class HookInlet implements IXposedHookLoadPackage, IXposedHookZygoteInit {
-    public static final String hookMain = "[HChenHook]";
-    public static String modulePath;
+import Com.HChen.Hook.mode.Hook;
+
+public class PowerKeeper extends Hook {
+    public static String name = "PowerKeeper";
 
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookInit.HookPackage(loadPackageParam);
+    public void init() {
+        hookAllMethods(ProcessManager,
+            kill,
+            new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(false);
+                }
+            }
+        );
     }
 
-    @Override
-    public void initZygote(StartupParam startupParam) {
-        modulePath = startupParam.modulePath;
-    }
+
 }

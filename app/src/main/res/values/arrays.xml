@@ -8,12 +8,4 @@
         <!--        <item>Com.HChen.App</item>-->
         <!--        <item>com.android.settings</item>-->
     </string-array>
-    <string-array name="restart_apps_name">
-        <item>@string/reboot</item>
-        <item>@string/re_powerkeeper</item>
-    </string-array>
-    <string-array name="restart_apps_packagename">
-        <item>com.miui.powerkeeper</item>
-        <item>reboot</item>
-    </string-array>
 </resources>

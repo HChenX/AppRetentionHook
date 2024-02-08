@@ -20,25 +20,11 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook;
+package Com.HChen.Hook.param.name;
 
-import Com.HChen.Hook.mode.HookInit;
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.IXposedHookZygoteInit;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
-
-/* Hook入口。*/
-public class HookInlet implements IXposedHookLoadPackage, IXposedHookZygoteInit {
-    public static final String hookMain = "[HChenHook]";
-    public static String modulePath;
-
-    @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HookInit.HookPackage(loadPackageParam);
-    }
-
-    @Override
-    public void initZygote(StartupParam startupParam) {
-        modulePath = startupParam.modulePath;
-    }
+public final class OplusValue {
+    public static final String killLocked = "killLocked";
+    public static final String onCreate = "onCreate";
+    public static final String startClearApps = "startClearApps";
+    public static final String startMorningClearApps = "startMorningClearApps";
 }
