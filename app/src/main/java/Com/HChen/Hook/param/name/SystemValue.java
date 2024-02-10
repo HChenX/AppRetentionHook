@@ -28,6 +28,7 @@ public final class SystemValue {
     public static final String pruneStaleProcessesLocked = "pruneStaleProcessesLocked";
     public static final String killLocked = "killLocked";
     public static final String handleDeviceIdle = "handleDeviceIdle";
+    public static final String onSystemReady = "onSystemReady";
     public static final String unfreezeAppInternalLSP = "unfreezeAppInternalLSP";
     public static final String getBinderFreezeInfo = "getBinderFreezeInfo";
     public static final String killProcessesBelowAdj = "killProcessesBelowAdj";

@@ -32,6 +32,7 @@ public final class SystemName {
     public static final String ProcessList$ImperceptibleKillRunner = "com.android.server.am.ProcessList$ImperceptibleKillRunner";
 
     public static final String OomAdjuster = "com.android.server.am.OomAdjuster";
+    public static final String AmsExtImpl = "com.mediatek.server.am.AmsExtImpl";
     public static final String PhantomProcessList = "com.android.server.am.PhantomProcessList";
     public static final String RecentTasks = "com.android.server.wm.RecentTasks";
     public static final String LowMemDetector = "com.android.server.am.LowMemDetector";

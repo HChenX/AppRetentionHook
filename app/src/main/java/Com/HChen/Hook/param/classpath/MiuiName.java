@@ -25,8 +25,12 @@ package Com.HChen.Hook.param.classpath;
 public final class MiuiName {
     public static final String ScoutDisplayMemoryManager = "com.miui.server.stability.ScoutDisplayMemoryManager";
     public static final String ScoutHelper = "com.android.server.ScoutHelper";
+    public static final String DeviceLevelUtils = "com.miui.performance.DeviceLevelUtils";
+    public static final String Build = "miui.os.Build";
     public static final String GameMemoryCleaner = "com.miui.server.migard.memory.GameMemoryCleaner";
     public static final String PeriodicCleanerService = "com.android.server.am.PeriodicCleanerService";
+    public static final String PreloadAppControllerImpl = "com.android.server.am.PreloadAppControllerImpl";
+    public static final String PreloadLifecycle = "com.android.server.wm.PreloadLifecycle";
     public static final String MemoryStandardProcessControl = "com.android.server.am.MemoryStandardProcessControl";
     public static final String SystemPressureController = "com.android.server.am.SystemPressureController";
     public static final String ProcessKillerIdler = "com.android.server.am.ProcessKillerIdler";

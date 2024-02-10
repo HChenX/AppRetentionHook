@@ -57,11 +57,6 @@ public class HookInit extends HookLog {
                 DexKit.INSTANCE.closeDexKit();
             }
             case "com.oplus.battery" -> initHook(new OplusBattery(), param);
-            /*测试用*/
-            /*case "com.android.settings" -> {
-                if (BuildConfig.DEBUG)
-                    initHook(new TestHook(), mPrefsMap.getBoolean("text"));
-            }*/
         }
     }
 

@@ -26,6 +26,7 @@ import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerConstants
 import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerService;
 import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerServiceStub;
 import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerShellCommand;
+import static Com.HChen.Hook.param.classpath.SystemName.AmsExtImpl;
 import static Com.HChen.Hook.param.classpath.SystemName.LowMemDetector;
 import static Com.HChen.Hook.param.classpath.SystemName.OomAdjuster;
 import static Com.HChen.Hook.param.classpath.SystemName.PhantomProcessList;
@@ -45,6 +46,7 @@ import static Com.HChen.Hook.param.name.SystemValue.killAppIfBgRestrictedAndCach
 import static Com.HChen.Hook.param.name.SystemValue.killLocked;
 import static Com.HChen.Hook.param.name.SystemValue.killPids;
 import static Com.HChen.Hook.param.name.SystemValue.killProcessesBelowAdj;
+import static Com.HChen.Hook.param.name.SystemValue.onSystemReady;
 import static Com.HChen.Hook.param.name.SystemValue.performIdleMaintenance;
 import static Com.HChen.Hook.param.name.SystemValue.pruneStaleProcessesLocked;
 import static Com.HChen.Hook.param.name.SystemValue.runKillAll;
@@ -59,6 +61,7 @@ import static Com.HChen.Hook.param.name.SystemValue.updateMaxCachedProcesses;
 
 import android.content.Context;
 import android.os.Handler;
+import android.provider.Settings;
 
 import Com.HChen.Hook.mode.Hook;
 
@@ -68,7 +71,7 @@ public class SystemService extends Hook {
     @Override
     public void init() {
         /*关闭Cpu超时检查*/
-       /* hookAllMethods(ActivityManagerService,
+       /*hookAllMethods(ActivityManagerService,
             checkExcessivePowerUsage,
             new HookAction() {
                 @Override
@@ -77,10 +80,10 @@ public class SystemService extends Hook {
                 }
 
             }
-        );//*/
+        );
 
-        /*防止kill冻结的应用*/
-        /*findAndHookMethod(CachedAppOptimizer,
+        *//*防止kill冻结的应用*//*
+        findAndHookMethod(CachedAppOptimizer,
             getBinderFreezeInfo, int.class,
             new HookAction() {
                 @Override
@@ -92,9 +95,9 @@ public class SystemService extends Hook {
                     logSI(getBinderFreezeInfo, "end: " + end + " in: " + param.args[0]);
                 }
             }
-        );*/
+        );
 
-        /*findAndHookMethod(CachedAppOptimizer,
+        findAndHookMethod(CachedAppOptimizer,
             unfreezeAppInternalLSP, new HookAction() {
                 @Override
                 protected void before(MethodHookParam param) {
@@ -102,6 +105,38 @@ public class SystemService extends Hook {
                 }
             }
         );*/
+
+        /*MTK快霸*/
+        findAndHookMethod(AmsExtImpl,
+            onSystemReady, Context.class,
+            new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
+                protected void before(MethodHookParam param) {
+                    Context context = (Context) param.args[0];
+                    Settings.System.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
+                    Settings.Global.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
+                }
+            }
+        );
+
+        findAndHookConstructor(AmsExtImpl,
+            new HookAction() {
+                @Override
+                public String hookLog() {
+                    return name;
+                }
+
+                @Override
+                protected void after(MethodHookParam param) {
+                    setBoolean(param.thisObject, "isDuraSpeedSupport", false);
+                }
+            }
+        );
 
         /*设备空闲清理？*/
         findAndHookMethod(ProcessList$ImperceptibleKillRunner,
@@ -170,13 +205,6 @@ public class SystemService extends Hook {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(false);
-                    /*logSI(checkExcessivePowerUsageLPr, "uptimeSince: " + param.args[0]
-                        + " doCpuKills: " + param.args[1]
-                        + " cputimeUsed: " + param.args[2]
-                        + " processName: " + param.args[3]
-                        + " description: " + param.args[4]
-                        + " cpuLimit: " + param.args[5]
-                        + " app:" + param.args[6]);*/
                 }
             }
         );
@@ -216,9 +244,6 @@ public class SystemService extends Hook {
                     if (param.args[1] == "Free memory") {
                         param.setResult(true);
                     }
-                    /*logSI(killPids, "pids: " + param.args[0]
-                        + " pReason: " + param.args[1]
-                        + " secure: " + param.args[2]);*/
                 }
             }
         );
@@ -247,14 +272,12 @@ public class SystemService extends Hook {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(true);
-                    /*logSI(killProcessesBelowAdj, "belowAdj: " + param.args[0]
-                        + " reason: " + param.args[1]);*/
                 }
             }
         );
 
-        /*调整内存因子，一般来说0是无压力*//*
-        findAndHookMethod(ActivityManagerService,
+        /*调整内存因子，一般来说0是无压力*/
+        /*findAndHookMethod(ActivityManagerService,
             setMemFactorOverride, int.class,
             new HookAction() {
                 @Override
@@ -290,8 +313,8 @@ public class SystemService extends Hook {
         );*/
 
         /*禁止kill除条件之外的所有后台进程
-         * 未经测试*//*
-        findAndHookMethod(ActivityManagerService + "$LocalService",
+         * 未经测试*/
+        /*findAndHookMethod(ActivityManagerService + "$LocalService",
             killAllBackgroundProcessesExcept, int.class, int.class, new HookAction() {
                 @Override
                 protected void before(MethodHookParam param) {
@@ -350,7 +373,7 @@ public class SystemService extends Hook {
                         param.setResult(null);
                     }
                 }
-        );//*/
+        );*/
 
         /*调整内存因子，一般来说0是无压力
          * 调用好多*/
@@ -395,8 +418,8 @@ public class SystemService extends Hook {
             }
         );
 
-        /*禁止报告低内存*//*
-        hookAllMethods(AppProfiler,
+        /*禁止报告低内存*/
+        /*hookAllMethods(AppProfiler,
             doLowMemReportIfNeededLocked, new HookAction() {
                 @Override
                 protected void before(MethodHookParam param) {
@@ -425,7 +448,7 @@ public class SystemService extends Hook {
             new HookAction() {
                 @Override
                 protected void before(MethodHookParam param) {
-//                    param.setResult(0L);
+                    // param.setResult(0L);
                     logSI(killAppIfBgRestrictedAndCachedIdleLocked, "app: " + param.args[0]
                         + " nowElapsed: " + param.args[1]);
                 }
@@ -460,9 +483,6 @@ public class SystemService extends Hook {
 
                 @Override
                 protected void before(MethodHookParam param) {
-                    /*logSI(updateBackgroundRestrictedForUidPackageLocked, "uid: " + param.args[0]
-                        + " packageName: " + param.args[1]
-                        + " restricted: " + param.args[2]);*/
                     param.args[2] = false;
                 }
             }
@@ -509,7 +529,6 @@ public class SystemService extends Hook {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
-                    /*logSI(runKillAll, "pw: " + param.args[0]);*/
                 }
             }
         );//
@@ -526,7 +545,6 @@ public class SystemService extends Hook {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(false);
-                    /*logSI(shouldKillExcessiveProcesses, "nowUptime: " + param.args[0]);*/
                 }
             }
         );//
@@ -542,12 +560,6 @@ public class SystemService extends Hook {
 
                 @Override
                 protected void before(MethodHookParam param) {
-                    /*logSI(updateAndTrimProcessLSP, "now: " + param.args[0] +
-                        " nowElapsed: " + param.args[1] +
-                        " oldTime: " + param.args[2] +
-                        " activeUids: " + param.args[3]);*/
-                    /*param.args[0] = 0L;
-                    param.args[1] = 0L;*/
                     param.args[2] = 0L;
                 }
             }
@@ -582,7 +594,7 @@ public class SystemService extends Hook {
                     param.setResult(null);
                 }
             }
-        );//
+        );
 
         /*虚假设置adj数值，妈的法克太容易爆内存了*/
         /*findAndHookMethod("com.android.server.am.ProcessList",
@@ -637,15 +649,11 @@ public class SystemService extends Hook {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.args[2] = 0;
-                    /*logSI(isInVisibleRange, "task: " + param.args[0] +
-                        " taskIndex: " + param.args[1] +
-                        " numVisibleTasks: " + param.args[2] +
-                        " skipExcludedCheck: " + param.args[3]);*/
                 }
             }
         );//
 
-       /* findAndHookMethod("com.android.server.am.LowMemDetector$LowMemThread",
+       /*findAndHookMethod("com.android.server.am.LowMemDetector$LowMemThread",
                 "run",
                 new HookAction() {
                     @Override
@@ -668,8 +676,8 @@ public class SystemService extends Hook {
 
         /*没必要了*/
         /*谎报内存压力
-         * 导致频繁唤醒*//*
-        findAndHookConstructor(LowMemDetector,
+         * 导致频繁唤醒*/
+        /*findAndHookConstructor(LowMemDetector,
             findClass(ActivityManagerService),
             new HookAction() {
                 @Override
@@ -773,7 +781,7 @@ public class SystemService extends Hook {
                 protected void after(MethodHookParam param) {
                 }
             }
-        );//*/
+        );*/
 
         /*设置自定义最大缓存数量*/
         findAndHookMethod(ActivityManagerConstants,
@@ -789,10 +797,10 @@ public class SystemService extends Hook {
                     param.args[0] = Integer.MAX_VALUE;
                 }
             }
-        );//
+        );
 
         /*谎称已经被杀_调用多，容易卡开机*/
-       /* findAndHookMethod("com.android.server.am.ProcessRecord",
+       /*findAndHookMethod("com.android.server.am.ProcessRecord",
                 "isKilledByAm",
                 new HookAction() {
                     @Override
@@ -801,10 +809,10 @@ public class SystemService extends Hook {
                         param.setResult(true);
                     }
                 }
-        );//*/
+        );*/
 
         /*锁定内存因子*/
-       /* findAndHookConstructor(AppProfiler,
+       /*findAndHookConstructor(AppProfiler,
                 findClass(ActivityManagerService), Looper.class, findClass(LowMemDetector),
                 new HookAction() {
                     @Override
@@ -819,7 +827,7 @@ public class SystemService extends Hook {
         /*拒绝根据压力trim进程_我TM看不懂逻辑，什么内存因子修剪等级去死吧。
          * 看了最终调用，触发GC回收系统垃圾内存，所以可以保留。
          * */
-       /* findAndHookMethod(AppProfiler,
+       /*findAndHookMethod(AppProfiler,
                 updateLowMemStateLSP, int.class, int.class, int.class,
                 new HookAction() {
                     @Override
@@ -829,9 +837,9 @@ public class SystemService extends Hook {
 
                     }
                 }
-        );//*/
+        );*/
 
-      /*  findAndHookMethod("com.android.server.am.ActivityManagerService",
+      /*findAndHookMethod("com.android.server.am.ActivityManagerService",
                 "setProcessMemoryTrimLevel", String.class, int.class, int.class,
                 new HookAction() {
                     @Override
@@ -848,6 +856,7 @@ public class SystemService extends Hook {
                     protected void after(MethodHookParam param) {
                         setObject(param.thisObject, "mTrimMemoryLevel", 5);
                     }
-                });*/
+                }
+         );*/
     }
 }
