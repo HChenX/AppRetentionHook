@@ -64,6 +64,7 @@ import android.os.Handler;
 import android.provider.Settings;
 
 import Com.HChen.Hook.mode.Hook;
+import dalvik.system.PathClassLoader;
 
 public class SystemService extends Hook {
     public static String name = "SystemService";
@@ -106,37 +107,41 @@ public class SystemService extends Hook {
             }
         );*/
 
-        /*MTK快霸*/
-        findAndHookMethod(AmsExtImpl,
-            onSystemReady, Context.class,
-            new HookAction() {
-                @Override
-                public String hookLog() {
-                    return name;
-                }
+        PathClassLoader pathClassLoader = pathClassLoader("/system/framework/mediatek-services.jar",
+            loadPackageParam.classLoader);
+        if (pathClassLoader != null) {
+            /*MTK快霸*/
+            findAndHookMethod(AmsExtImpl, pathClassLoader,
+                onSystemReady, Context.class,
+                new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
 
-                @Override
-                protected void before(MethodHookParam param) {
-                    Context context = (Context) param.args[0];
-                    Settings.System.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
-                    Settings.Global.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        Context context = (Context) param.args[0];
+                        Settings.System.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
+                        Settings.Global.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
+                    }
                 }
-            }
-        );
+            );
 
-        findAndHookConstructor(AmsExtImpl,
-            new HookAction() {
-                @Override
-                public String hookLog() {
-                    return name;
-                }
+            findAndHookConstructor(AmsExtImpl, pathClassLoader,
+                new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
 
-                @Override
-                protected void after(MethodHookParam param) {
-                    setBoolean(param.thisObject, "isDuraSpeedSupport", false);
+                    @Override
+                    protected void after(MethodHookParam param) {
+                        setBoolean(param.thisObject, "isDuraSpeedSupport", false);
+                    }
                 }
-            }
-        );
+            );
+        }
 
         /*设备空闲清理？*/
         findAndHookMethod(ProcessList$ImperceptibleKillRunner,

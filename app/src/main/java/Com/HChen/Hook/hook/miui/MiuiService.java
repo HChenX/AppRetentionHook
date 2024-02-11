@@ -66,6 +66,7 @@ import android.app.job.JobParameters;
 import android.content.Context;
 
 import Com.HChen.Hook.mode.Hook;
+import dalvik.system.PathClassLoader;
 import de.robv.android.xposed.XC_MethodHook;
 
 public class MiuiService extends Hook {
@@ -75,20 +76,39 @@ public class MiuiService extends Hook {
     @Override
     public void init() {
         /*MiuiLite来自HyperCeiler*/
-        findAndHookMethod(DeviceLevelUtils,
-            isMiuiLiteVersion,
-            new HookAction() {
-                @Override
-                public String hookLog() {
-                    return name;
-                }
+        PathClassLoader pathClassLoader = pathClassLoader("/system/framework/MiuiBooster.jar",
+            loadPackageParam.classLoader);
+        if (pathClassLoader != null) {
+            findAndHookMethod(DeviceLevelUtils, pathClassLoader,
+                isMiuiLiteVersion,
+                new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
 
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(false);
+                    @Override
+                    protected void before(MethodHookParam param) {
+                        param.setResult(false);
+                    }
                 }
-            }
-        );
+            );
+
+            findAndHookMethod(DeviceLevelUtils, pathClassLoader,
+                getDeviceLevelForRAM,
+                new HookAction() {
+                    @Override
+                    public String hookLog() {
+                        return name;
+                    }
+
+                    @Override
+                    protected void before(XC_MethodHook.MethodHookParam param) {
+                        param.setResult(3);
+                    }
+                }
+            );
+        }
 
         findAndHookMethod(Build,
             isMiuiLiteVersion,
@@ -116,21 +136,6 @@ public class MiuiService extends Hook {
 
                 @Override
                 protected void before(MethodHookParam param) {
-                    param.setResult(3);
-                }
-            }
-        );
-
-        findAndHookMethod(DeviceLevelUtils,
-            getDeviceLevelForRAM,
-            new HookAction() {
-                @Override
-                public String hookLog() {
-                    return name;
-                }
-
-                @Override
-                protected void before(XC_MethodHook.MethodHookParam param) {
                     param.setResult(3);
                 }
             }
