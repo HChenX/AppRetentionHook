@@ -33,12 +33,7 @@ public class OplusService extends Hook {
     @Override
     public void init() {
         hookAllMethods(OplusOsenseKillAction, killLocked,
-            new HookAction() {
-                @Override
-                public String hookLog() {
-                    return name;
-                }
-
+            new HookAction(name) {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);

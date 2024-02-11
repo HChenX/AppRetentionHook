@@ -42,7 +42,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import Com.HChen.Hook.callback.IHookLog;
 import Com.HChen.Hook.mode.log.HookLog;
 import dalvik.system.PathClassLoader;
 import de.robv.android.xposed.XC_MethodHook;
@@ -144,7 +143,9 @@ public abstract class Hook extends HookLog {
         }
     }
 
-    public abstract static class HookAction extends XC_MethodHook implements IHookLog {
+    public abstract static class HookAction extends XC_MethodHook {
+        private final String mLog;
+
         /*这种情况下报错应主动处理而不是上抛*/
         protected void before(MethodHookParam param) {
         }
@@ -152,21 +153,18 @@ public abstract class Hook extends HookLog {
         protected void after(MethodHookParam param) {
         }
 
-        public HookAction() {
+        public HookAction(String log) {
             super();
+            mLog = log;
         }
 
-        public HookAction(int priority) {
+        public HookAction(int priority, String log) {
             super(priority);
+            mLog = log;
         }
 
         public static HookAction returnConstant(final Object result) {
-            return new HookAction(PRIORITY_DEFAULT) {
-                @Override
-                public String hookLog() {
-                    return "returnConstant";
-                }
-
+            return new HookAction(PRIORITY_DEFAULT, "returnConstant") {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(result);
@@ -174,13 +172,7 @@ public abstract class Hook extends HookLog {
             };
         }
 
-        public static final HookAction DO_NOTHING = new HookAction(PRIORITY_HIGHEST * 2) {
-
-            @Override
-            public String hookLog() {
-                return "DO_NOTHING";
-            }
-
+        public static final HookAction DO_NOTHING = new HookAction(PRIORITY_HIGHEST * 2, "DO_NOTHING") {
             @Override
             protected void before(MethodHookParam param) {
                 param.setResult(null);
@@ -198,9 +190,9 @@ public abstract class Hook extends HookLog {
                 /*logFilter(hookLog(), new String[]{"AthenaApp", "OplusBattery"},
                     () -> logI(hookLog(), getInfo.thisObject, getInfo.methodProcessed),
                     () -> logSI(hookLog(), getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param)));*/
-                logSI(hookLog(), getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param));
+                logSI(mLog, getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param));
             } catch (Exception e) {
-                logE("before", e.toString());
+                logE(mLog + ":" + "before", e.toString());
             }
         }
 
@@ -209,7 +201,7 @@ public abstract class Hook extends HookLog {
             try {
                 after(param);
             } catch (Exception e) {
-                logE("after", e.toString());
+                logE(mLog + ":" + "after", e.toString());
             }
         }
     }
@@ -217,11 +209,11 @@ public abstract class Hook extends HookLog {
     public abstract static class ReplaceHookedMethod extends HookAction {
 
         public ReplaceHookedMethod() {
-            super();
+            super("replace");
         }
 
         public ReplaceHookedMethod(int priority) {
-            super(priority);
+            super(priority, "replace");
         }
 
         protected abstract Object replace(MethodHookParam param) throws Throwable;
@@ -507,6 +499,45 @@ public abstract class Hook extends HookLog {
         }
     }
 
+    public void setStaticBoolean(Class<?> cl, String fieldName, boolean value) {
+        if (cl == null) {
+            logE(tag, "setStaticBoolean class can't is null field: " + fieldName + " value: " + value);
+            return;
+        }
+        checkAndSetField(cl, fieldName, () -> {
+            XposedHelpers.setStaticBooleanField(cl, fieldName, value);
+        }, () -> {
+            checkLast("setStaticBoolean", fieldName, value,
+                XposedHelpers.getStaticBooleanField(cl, fieldName));
+        });
+    }
+
+    public void setStaticInt(Class<?> cl, String fieldName, int value) {
+        if (cl == null) {
+            logE(tag, "setStaticInt class can't is null field: " + fieldName + " value: " + value);
+            return;
+        }
+        checkAndSetField(cl, fieldName, () -> {
+            XposedHelpers.setStaticIntField(cl, fieldName, value);
+        }, () -> {
+            checkLast("setStaticBoolean", fieldName, value,
+                XposedHelpers.getStaticIntField(cl, fieldName));
+        });
+    }
+
+    public void setStaticObject(Class<?> cl, String fieldName, Object value) {
+        if (cl == null) {
+            logE(tag, "setStaticObject class can't is null field: " + fieldName + " value: " + value);
+            return;
+        }
+        checkAndSetField(cl, fieldName, () -> {
+            XposedHelpers.setStaticObjectField(cl, fieldName, value);
+        }, () -> {
+            checkLast("setStaticBoolean", fieldName, value,
+                XposedHelpers.getStaticObjectField(cl, fieldName));
+        });
+    }
+
     public void setInt(Object obj, String fieldName, int value) {
         checkAndSetField(obj, fieldName,
             () -> XposedHelpers.setIntField(obj, fieldName, value),
@@ -547,7 +578,7 @@ public abstract class Hook extends HookLog {
 
     public void checkAndSetField(Object obj, String fieldName, Runnable setField, Runnable checkLast) {
         try {
-            obj.getClass().getDeclaredField(fieldName);
+            checkField(obj, fieldName);
         } catch (Exception e) {
             logE(tag, "No such field: " + fieldName + " E: " + e);
         }
@@ -556,6 +587,14 @@ public abstract class Hook extends HookLog {
             checkLast.run();
         } catch (Exception f) {
             logE(tag, "Set field: " + fieldName + " E: " + f);
+        }
+    }
+
+    private void checkField(Object o, String fieldName) throws NoSuchFieldException {
+        if (o instanceof Class<?>) {
+            ((Class<?>) o).getDeclaredField(fieldName);
+        } else {
+            o.getClass().getDeclaredField(fieldName);
         }
     }
 

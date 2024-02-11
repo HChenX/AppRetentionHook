@@ -70,12 +70,7 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                         .usingStrings(" is reused by others, skip kill "))
             ).firstOrNull();
             hookMethod(getMethodInstance(methodData),
-                new HookAction() {
-                    @Override
-                    public String hookLog() {
-                        return name;
-                    }
-
+                new HookAction(name) {
                     @Override
                     protected void before(MethodHookParam param) {
                         String reason = (String) param.args[7];
@@ -132,12 +127,7 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                         .usingStrings("context is null, not to force stop"))
             ).firstOrNull();
             hookMethod(getMethodInstance(methodData1),
-                new HookAction() {
-                    @Override
-                    public String hookLog() {
-                        return name;
-                    }
-
+                new HookAction(name) {
                     @Override
                     protected void before(MethodHookParam param) {
                         String reason = (String) param.args[6];
@@ -204,12 +194,7 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                         .usingStrings("set package stopped state get error:"))
             ).firstOrNull();
             hookMethod(getMethodInstance(methodData2),
-                new HookAction() {
-                    @Override
-                    public String hookLog() {
-                        return name;
-                    }
-
+                new HookAction(name) {
                     @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(null);
@@ -235,12 +220,7 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                     )
             ).firstOrNull();
             hookMethod(getMethodInstance(methodData3),
-                new HookAction() {
-                    @Override
-                    public String hookLog() {
-                        return name;
-                    }
-
+                new HookAction(name) {
                     @Override
                     protected void before(MethodHookParam param) {
                         param.setResult(null);
@@ -258,12 +238,7 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                     )
             ).firstOrNull();
             hookMethod(getMethodInstance(methodData4),
-                new HookAction() {
-                    @Override
-                    public String hookLog() {
-                        return name;
-                    }
-
+                new HookAction(name) {
                     @Override
                     protected void before(MethodHookParam param) {
                         Object o = param.args[param.args.length - 1];
@@ -359,12 +334,7 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
 
     public void hookAthena(Class<?> mClass, Method method, Object result) {
         ArrayList<Object> param = new ArrayList<>(Arrays.asList(method.getParameterTypes()));
-        param.add(new HookAction() {
-            @Override
-            public String hookLog() {
-                return name;
-            }
-
+        param.add(new HookAction(name) {
             @Override
             protected void before(MethodHookParam param) {
                 param.setResult(result);

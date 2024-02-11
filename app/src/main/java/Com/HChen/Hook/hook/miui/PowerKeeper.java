@@ -34,12 +34,7 @@ public class PowerKeeper extends Hook {
     public void init() {
         hookAllMethods(ProcessManager,
             kill,
-            new HookAction() {
-                @Override
-                public String hookLog() {
-                    return name;
-                }
-
+            new HookAction(name) {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(false);

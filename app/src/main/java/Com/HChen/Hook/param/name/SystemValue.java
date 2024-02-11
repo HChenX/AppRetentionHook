@@ -26,6 +26,7 @@ public final class SystemValue {
     public static final String checkExcessivePowerUsage = "checkExcessivePowerUsage";
     public static final String checkExcessivePowerUsageLPr = "checkExcessivePowerUsageLPr";
     public static final String pruneStaleProcessesLocked = "pruneStaleProcessesLocked";
+    public static final String getOrCreatePhantomProcessIfNeededLocked = "getOrCreatePhantomProcessIfNeededLocked";
     public static final String killLocked = "killLocked";
     public static final String handleDeviceIdle = "handleDeviceIdle";
     public static final String onSystemReady = "onSystemReady";
@@ -35,7 +36,10 @@ public final class SystemValue {
     public static final String performIdleMaintenance = "performIdleMaintenance";
     public static final String getAppStartModeLOSP = "getAppStartModeLOSP";
     public static final String doLowMemReportIfNeededLocked = "doLowMemReportIfNeededLocked";
+    public static final String getLastMemoryLevelLocked = "getLastMemoryLevelLocked";
+    public static final String isLastMemoryLevelNormal = "isLastMemoryLevelNormal";
     public static final String getMemFactor = "getMemFactor";
+    public static final String isAvailable = "isAvailable";
     public static final String getMemFactorLocked = "getMemFactorLocked";
     public static final String trimMemoryUiHiddenIfNecessaryLSP = "trimMemoryUiHiddenIfNecessaryLSP";
     public static final String killAppIfBgRestrictedAndCachedIdleLocked = "killAppIfBgRestrictedAndCachedIdleLocked";
@@ -53,6 +57,7 @@ public final class SystemValue {
     public static final String killAllBackgroundProcessesExceptLSP = "killAllBackgroundProcessesExceptLSP";
     public static final String getDefaultMaxCachedProcesses = "getDefaultMaxCachedProcesses";
     public static final String updateMaxCachedProcesses = "updateMaxCachedProcesses";
+    public static final String getOverrideMaxCachedProcesses = "getOverrideMaxCachedProcesses";
     public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";
     public static final String updateLowMemStateLSP = "updateLowMemStateLSP";
     public static final String setMemFactorOverride = "setMemFactorOverride";
