@@ -26,6 +26,8 @@ import static Com.HChen.Hook.param.classpath.MiuiName.Build;
 import static Com.HChen.Hook.param.classpath.MiuiName.CameraBooster;
 import static Com.HChen.Hook.param.classpath.MiuiName.DeviceLevelUtils;
 import static Com.HChen.Hook.param.classpath.MiuiName.GameMemoryCleaner;
+import static Com.HChen.Hook.param.classpath.MiuiName.GameProcessCompactor;
+import static Com.HChen.Hook.param.classpath.MiuiName.GameProcessKiller;
 import static Com.HChen.Hook.param.classpath.MiuiName.MemoryStandardProcessControl;
 import static Com.HChen.Hook.param.classpath.MiuiName.PeriodicCleanerService;
 import static Com.HChen.Hook.param.classpath.MiuiName.PreloadAppControllerImpl;
@@ -34,10 +36,12 @@ import static Com.HChen.Hook.param.classpath.MiuiName.ProcessKiller;
 import static Com.HChen.Hook.param.classpath.MiuiName.ProcessKillerIdler;
 import static Com.HChen.Hook.param.classpath.MiuiName.ProcessMemoryCleaner;
 import static Com.HChen.Hook.param.classpath.MiuiName.ProcessPowerCleaner;
+import static Com.HChen.Hook.param.classpath.MiuiName.ProcessUtils;
 import static Com.HChen.Hook.param.classpath.MiuiName.ScoutDisplayMemoryManager;
 import static Com.HChen.Hook.param.classpath.MiuiName.ScoutHelper;
 import static Com.HChen.Hook.param.classpath.MiuiName.SystemPressureController;
 import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerService;
+import static Com.HChen.Hook.param.classpath.SystemName.ProcessRecord;
 import static Com.HChen.Hook.param.name.MiuiValue.boostCameraIfNeeded;
 import static Com.HChen.Hook.param.name.MiuiValue.cleanUpMemory;
 import static Com.HChen.Hook.param.name.MiuiValue.doClean;
@@ -50,6 +54,7 @@ import static Com.HChen.Hook.param.name.MiuiValue.handleScreenOff;
 import static Com.HChen.Hook.param.name.MiuiValue.handleThermalKillProc;
 import static Com.HChen.Hook.param.name.MiuiValue.init;
 import static Com.HChen.Hook.param.name.MiuiValue.isEnableScoutMemory;
+import static Com.HChen.Hook.param.name.MiuiValue.isLowMemory;
 import static Com.HChen.Hook.param.name.MiuiValue.isMiuiLiteVersion;
 import static Com.HChen.Hook.param.name.MiuiValue.killApplication;
 import static Com.HChen.Hook.param.name.MiuiValue.killPackage;
@@ -58,6 +63,7 @@ import static Com.HChen.Hook.param.name.MiuiValue.killProcessByMinAdj;
 import static Com.HChen.Hook.param.name.MiuiValue.nStartPressureMonitor;
 import static Com.HChen.Hook.param.name.MiuiValue.onStartJob;
 import static Com.HChen.Hook.param.name.MiuiValue.reclaimMemoryForGameIfNeed;
+import static Com.HChen.Hook.param.name.MiuiValue.shouldSkip;
 import static Com.HChen.Hook.param.name.MiuiValue.updateScreenState;
 
 import android.app.job.JobParameters;
@@ -76,26 +82,13 @@ public class MiuiService extends Hook {
         /*MiuiLite来自HyperCeiler*/
         PathClassLoader pathClassLoader = pathClassLoader("/system/framework/MiuiBooster.jar",
             loadPackageParam.classLoader);
+        PathClassLoader pathClassLoader1 = pathClassLoader("/system_ext/framework/MiuiBooster.jar",
+            loadPackageParam.classLoader);
         if (pathClassLoader != null) {
-            findAndHookMethod(DeviceLevelUtils, pathClassLoader,
-                isMiuiLiteVersion,
-                new HookAction(name) {
-                    @Override
-                    protected void before(MethodHookParam param) {
-                        param.setResult(false);
-                    }
-                }
-            );
-
-            findAndHookMethod(DeviceLevelUtils, pathClassLoader,
-                getDeviceLevelForRAM,
-                new HookAction(name) {
-                    @Override
-                    protected void before(XC_MethodHook.MethodHookParam param) {
-                        param.setResult(3);
-                    }
-                }
-            );
+            hookDeviceLevelUtils(pathClassLoader);
+        }
+        if (pathClassLoader1 != null) {
+            hookDeviceLevelUtils(pathClassLoader1);
         }
 
         findAndHookMethod(Build,
@@ -115,6 +108,17 @@ public class MiuiService extends Hook {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(3);
+                }
+            }
+        );
+
+        // 谎称非低内存
+        findAndHookMethod(ProcessUtils,
+            isLowMemory,
+            new HookAction(name) {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(false);
                 }
             }
         );
@@ -175,6 +179,27 @@ public class MiuiService extends Hook {
         setStaticBoolean(findClassIfExists(ScoutHelper), "ENABLED_SCOUT_DEBUG", false);
         setStaticBoolean(findClassIfExists(ScoutHelper), "BINDER_FULL_KILL_PROC", false);
 
+        // 跳过游戏进程kill和压缩，待测试
+        findAndHookMethod(GameProcessKiller,
+            shouldSkip, ProcessRecord,
+            new HookAction(name) {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(true);
+                }
+            }
+        );
+
+        findAndHookMethod(GameProcessCompactor,
+            shouldSkip, ProcessRecord,
+            new HookAction(name) {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(true);
+                }
+            }
+        );
+
         /*禁止在开游戏时回收内存*/
         findAndHookMethod(GameMemoryCleaner,
             reclaimMemoryForGameIfNeed, String.class,
@@ -210,9 +235,9 @@ public class MiuiService extends Hook {
         );*/
         setStaticBoolean(findClassIfExists(PreloadAppControllerImpl), "ENABLE", false);
 
-        try {
-            /*findClassIfExists(PeriodicCleanerService).getDeclaredMethod(doClean, int.class, int.class, int.class, String.class);*/
-            checkDeclaredMethod(PeriodicCleanerService, doClean, int.class, int.class, int.class, String.class);
+        /*findClassIfExists(PeriodicCleanerService).getDeclaredMethod(doClean, int.class, int.class, int.class, String.class);*/
+        // checkDeclaredMethod(PeriodicCleanerService, doClean, int.class, int.class, int.class, String.class);
+        if (findClassIfExists(PeriodicCleanerService) != null) {
             /*禁用PeriodicCleaner的clean*/
             findAndHookMethod(PeriodicCleanerService,
                 doClean, int.class, int.class, int.class, String.class,
@@ -270,7 +295,7 @@ public class MiuiService extends Hook {
                     }
                 }
             );
-        } catch (NoSuchMethodException e) {
+        } else {
             /*安卓14的东西*/
             findAndHookConstructor(MemoryStandardProcessControl,
                 new HookAction(name) {
@@ -600,5 +625,27 @@ public class MiuiService extends Hook {
             }
         );*/
         setStaticBoolean(findClassIfExists(PressureStateSettings), "PROCESS_CLEANER_ENABLED", false);
+    }
+
+    private void hookDeviceLevelUtils(PathClassLoader pathClassLoader) {
+        findAndHookMethod(DeviceLevelUtils, pathClassLoader,
+            isMiuiLiteVersion,
+            new HookAction(name) {
+                @Override
+                protected void before(MethodHookParam param) {
+                    param.setResult(false);
+                }
+            }
+        );
+
+        findAndHookMethod(DeviceLevelUtils, pathClassLoader,
+            getDeviceLevelForRAM,
+            new HookAction(name) {
+                @Override
+                protected void before(XC_MethodHook.MethodHookParam param) {
+                    param.setResult(3);
+                }
+            }
+        );
     }
 }

@@ -685,13 +685,14 @@ public class SystemService extends Hook {
                     // 清理后台受限且已经idle的内存是合理的
                     // setBoolean(param.thisObject, "mKillBgRestrictedAndCachedIdle", false);
                     /*似乎是高通的东西？*/
-                    setBoolean(param.thisObject, "USE_TRIM_SETTINGS", false);
+                    // setBoolean(param.thisObject, "USE_TRIM_SETTINGS", false);
                     // setBoolean(param.thisObject, "PROACTIVE_KILLS_ENABLED", false);
                 }
             }
         );
 
         setStaticBoolean(findClassIfExists(ActivityManagerConstants), "PROACTIVE_KILLS_ENABLED", false);
+        setStaticBoolean(findClassIfExists(ActivityManagerConstants), "USE_TRIM_SETTINGS", false);
         setStaticInt(findClassIfExists(ActivityManagerConstants), "DEFAULT_MAX_PHANTOM_PROCESSES", Integer.MAX_VALUE);
 
         /*禁止kill受限的缓存*/

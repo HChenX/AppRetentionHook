@@ -27,7 +27,10 @@ public final class MiuiName {
     public static final String ScoutHelper = "com.android.server.ScoutHelper";
     public static final String DeviceLevelUtils = "com.miui.performance.DeviceLevelUtils";
     public static final String Build = "miui.os.Build";
+    public static final String ProcessUtils = "com.android.server.am.ProcessUtils";
     public static final String GameMemoryCleaner = "com.miui.server.migard.memory.GameMemoryCleaner";
+    public static final String GameProcessKiller = "com.android.server.am.GameProcessKiller";
+    public static final String GameProcessCompactor = "com.android.server.am.GameProcessCompactor";
     public static final String PeriodicCleanerService = "com.android.server.am.PeriodicCleanerService";
     public static final String PreloadAppControllerImpl = "com.android.server.am.PreloadAppControllerImpl";
     public static final String PreloadLifecycle = "com.android.server.wm.PreloadLifecycle";

@@ -26,9 +26,11 @@ public final class MiuiValue {
     public static final String isEnableResumeFeature = "isEnableResumeFeature";
     public static final String isEnableScoutMemory = "isEnableScoutMemory";
     public static final String getDeviceLevelForRAM = "getDeviceLevelForRAM";
+    public static final String isLowMemory = "isLowMemory";
     public static final String isMiuiLiteVersion = "isMiuiLiteVersion";
     public static final String checkKgslLeak = "checkKgslLeak";
     public static final String reclaimMemoryForGameIfNeed = "reclaimMemoryForGameIfNeed";
+    public static final String shouldSkip = "shouldSkip";
     //    public static final String isEnableScoutMemory = "isEnableScoutMemory";
     public static final String handleScreenOff = "handleScreenOff";
     public static final String doClean = "doClean";
