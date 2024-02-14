@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Com.HChen.Hook.mode.log.HookLog;
+import Com.HChen.Hook.mode.log.LogTool;
 import dalvik.system.PathClassLoader;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -145,6 +146,7 @@ public abstract class Hook extends HookLog {
 
     public abstract static class HookAction extends XC_MethodHook {
         private final String mLog;
+        private final LogTool mLogTool;
 
         /*这种情况下报错应主动处理而不是上抛*/
         protected void before(MethodHookParam param) {
@@ -156,11 +158,13 @@ public abstract class Hook extends HookLog {
         public HookAction(String log) {
             super();
             mLog = log;
+            mLogTool = new LogTool(log);
         }
 
         public HookAction(int priority, String log) {
             super(priority);
             mLog = log;
+            mLogTool = new LogTool(log);
         }
 
         public static HookAction returnConstant(final Object result) {
@@ -184,13 +188,13 @@ public abstract class Hook extends HookLog {
         protected void beforeHookedMethod(MethodHookParam param) {
             try {
                 before(param);
-                Info info = paramCheck(param);
-                final Info getInfo = getInfo(info.method, info.thisObject);
+                LogTool.Info info = mLogTool.paramCheck(param);
+                final LogTool.Info getInfo = mLogTool.getInfo(info.method, info.thisObject);
                 /*日志过滤*/
                 /*logFilter(hookLog(), new String[]{"AthenaApp", "OplusBattery"},
                     () -> logI(hookLog(), getInfo.thisObject, getInfo.methodProcessed),
                     () -> logSI(hookLog(), getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param)));*/
-                logSI(mLog, getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param));
+                logSI(mLog, getInfo.mClass, getInfo.mMethod + " " + mLogTool.paramLog(param));
             } catch (Exception e) {
                 logE(mLog + ":" + "before", e.toString());
             }
