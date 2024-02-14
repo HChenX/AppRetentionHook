@@ -232,7 +232,7 @@ public abstract class Hook extends HookLog {
     public void hookMethod(Method method, HookAction callback) {
         try {
             if (method == null) {
-                logW(tag, "method is null!!");
+                logW(tag, "Method is null!!");
                 return;
             }
             XposedBridge.hookMethod(method, callback);
@@ -245,7 +245,7 @@ public abstract class Hook extends HookLog {
     public Method getMethodInstance(MethodData methodData) {
         try {
             if (methodData == null) {
-                logE(tag, "methodData is null");
+                logE(tag, "MethodData is null");
                 return null;
             }
             return methodData.getMethodInstance(loadPackageParam.classLoader);
@@ -356,7 +356,7 @@ public abstract class Hook extends HookLog {
         try {
             return XposedHelpers.callMethod(obj, methodName, args);
         } catch (Throwable e) {
-            logE(tag, "callMethod: " + obj.toString() + " method: "
+            logE(tag, "CallMethod: " + obj.toString() + " method: "
                 + methodName + " args: " + Arrays.toString(args) + " e: " + e);
             return null;
         }
@@ -366,7 +366,7 @@ public abstract class Hook extends HookLog {
         try {
             return XposedHelpers.callStaticMethod(clazz, methodName, args);
         } catch (Throwable e) {
-            logE(tag, "callStaticMethod: " + clazz.getSimpleName() + " method: "
+            logE(tag, "CallStaticMethod: " + clazz.getSimpleName() + " method: "
                 + methodName + " args: " + Arrays.toString(args) + " e: " + e);
             return null;
         }
@@ -466,7 +466,7 @@ public abstract class Hook extends HookLog {
                 try {
                     setString.set(param.thisObject, iNeedTo);
                     Object result = setString.get(param.thisObject);
-                    checkLast("setDeclaredField", iNeedString, iNeedTo, result);
+                    checkLast("SetDeclaredField", iNeedString, iNeedTo, result);
                 } catch (IllegalAccessException e) {
                     logE(tag, "IllegalAccessException: " + iNeedString + " need: " + iNeedTo + " E:" + e);
                 }
@@ -494,46 +494,46 @@ public abstract class Hook extends HookLog {
         try {
             return XposedHelpers.getObjectField(obj, fieldName);
         } catch (Throwable e) {
-            logE(tag, "getObject field E:" + fieldName);
+            logE(tag, "GetObject field E:" + fieldName);
             return null;
         }
     }
 
     public void setStaticBoolean(Class<?> cl, String fieldName, boolean value) {
         if (cl == null) {
-            logE(tag, "setStaticBoolean class can't is null field: " + fieldName + " value: " + value);
+            logE(tag, "SetStaticBoolean class can't is null field: " + fieldName + " value: " + value);
             return;
         }
         checkAndSetField(cl, fieldName, () -> {
             XposedHelpers.setStaticBooleanField(cl, fieldName, value);
         }, () -> {
-            checkLast("setStaticBoolean", fieldName, value,
+            checkLast("SetStaticBoolean", fieldName, value,
                 XposedHelpers.getStaticBooleanField(cl, fieldName));
         });
     }
 
     public void setStaticInt(Class<?> cl, String fieldName, int value) {
         if (cl == null) {
-            logE(tag, "setStaticInt class can't is null field: " + fieldName + " value: " + value);
+            logE(tag, "SetStaticInt class can't is null field: " + fieldName + " value: " + value);
             return;
         }
         checkAndSetField(cl, fieldName, () -> {
             XposedHelpers.setStaticIntField(cl, fieldName, value);
         }, () -> {
-            checkLast("setStaticBoolean", fieldName, value,
+            checkLast("SetStaticBoolean", fieldName, value,
                 XposedHelpers.getStaticIntField(cl, fieldName));
         });
     }
 
     public void setStaticObject(Class<?> cl, String fieldName, Object value) {
         if (cl == null) {
-            logE(tag, "setStaticObject class can't is null field: " + fieldName + " value: " + value);
+            logE(tag, "SetStaticObject class can't is null field: " + fieldName + " value: " + value);
             return;
         }
         checkAndSetField(cl, fieldName, () -> {
             XposedHelpers.setStaticObjectField(cl, fieldName, value);
         }, () -> {
-            checkLast("setStaticBoolean", fieldName, value,
+            checkLast("SetStaticBoolean", fieldName, value,
                 XposedHelpers.getStaticObjectField(cl, fieldName));
         });
     }
@@ -541,21 +541,21 @@ public abstract class Hook extends HookLog {
     public void setInt(Object obj, String fieldName, int value) {
         checkAndSetField(obj, fieldName,
             () -> XposedHelpers.setIntField(obj, fieldName, value),
-            () -> checkLast("setInt", fieldName, value,
+            () -> checkLast("SetInt", fieldName, value,
                 XposedHelpers.getIntField(obj, fieldName)));
     }
 
     public void setBoolean(Object obj, String fieldName, boolean value) {
         checkAndSetField(obj, fieldName,
             () -> XposedHelpers.setBooleanField(obj, fieldName, value),
-            () -> checkLast("setBoolean", fieldName, value,
+            () -> checkLast("SetBoolean", fieldName, value,
                 XposedHelpers.getBooleanField(obj, fieldName)));
     }
 
     public void setObject(Object obj, String fieldName, Object value) {
         checkAndSetField(obj, fieldName,
             () -> XposedHelpers.setObjectField(obj, fieldName, value),
-            () -> checkLast("setObject", fieldName, value,
+            () -> checkLast("SetObject", fieldName, value,
                 XposedHelpers.getObjectField(obj, fieldName)));
     }
 
@@ -627,7 +627,7 @@ public abstract class Hook extends HookLog {
                     "android.app.ActivityThread", null),
                 "currentApplication");
         } catch (Throwable e) {
-            logE("currentApplication", "currentApplication E: " + e);
+            logE("currentApplication", "CurrentApplication E: " + e);
             return null;
         }
     }
@@ -646,7 +646,7 @@ public abstract class Hook extends HookLog {
                     "getSystemUiContext");
             return context;
         } catch (Throwable e) {
-            logE("getSystemContext", "getSystemContext E: " + e);
+            logE("getSystemContext", "GetSystemContext E: " + e);
         }
         return context;
     }
@@ -655,7 +655,7 @@ public abstract class Hook extends HookLog {
         try {
             return new PathClassLoader(path, classLoader);
         } catch (Throwable e) {
-            logE(tag, "pathClassLoader E: " + e);
+            logE(tag, "PathClassLoader E: " + e);
             return null;
         }
     }
