@@ -622,22 +622,32 @@ public abstract class Hook extends HookLog {
     }
 
     private static Context currentApplication() {
-        return (Application) XposedHelpers.callStaticMethod(XposedHelpers.findClass(
-                "android.app.ActivityThread", null),
-            "currentApplication");
+        try {
+            return (Application) XposedHelpers.callStaticMethod(XposedHelpers.findClass(
+                    "android.app.ActivityThread", null),
+                "currentApplication");
+        } catch (Throwable e) {
+            logE("currentApplication", "currentApplication E: " + e);
+            return null;
+        }
     }
 
     private static Context getSystemContext() {
         Context context = null;
-        Object currentActivityThread = XposedHelpers.callStaticMethod(XposedHelpers.findClass("android.app.ActivityThread",
-                null),
-            "currentActivityThread");
-        if (currentActivityThread != null)
-            context = (Context) XposedHelpers.callMethod(currentActivityThread,
-                "getSystemContext");
-        if (context == null)
-            context = (Context) XposedHelpers.callMethod(currentActivityThread,
-                "getSystemUiContext");
+        try {
+            Object currentActivityThread = XposedHelpers.callStaticMethod(XposedHelpers.findClass("android.app.ActivityThread",
+                    null),
+                "currentActivityThread");
+            if (currentActivityThread != null)
+                context = (Context) XposedHelpers.callMethod(currentActivityThread,
+                    "getSystemContext");
+            if (context == null)
+                context = (Context) XposedHelpers.callMethod(currentActivityThread,
+                    "getSystemUiContext");
+            return context;
+        } catch (Throwable e) {
+            logE("getSystemContext", "getSystemContext E: " + e);
+        }
         return context;
     }
 
