@@ -28,7 +28,7 @@ public class ShellUtils {
 
     /* 用于检查是否授予Su权限,执行简单的Shell命令
     和返回执行结果是否成功. */
-    public static boolean RootCommand(String pkgCodePath) {
+    public static boolean RootCommand(String command) {
         Process process;
         DataOutputStream os = null;
         try {
@@ -40,7 +40,7 @@ public class ShellUtils {
             try {
                 process = Runtime.getRuntime().exec("su");
                 os = new DataOutputStream(process.getOutputStream());
-                os.writeBytes(pkgCodePath + "\n");
+                os.writeBytes(command + "\n");
                 os.writeBytes("exit\n");
                 os.flush();
                 process.waitFor();
