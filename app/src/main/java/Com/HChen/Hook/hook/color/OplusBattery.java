@@ -34,7 +34,8 @@ public class OplusBattery extends Hook {
     @Override
     public void init() {
         findAndHookMethod(ControllerCenter,
-            startClearApps, new HookAction(name) {
+            startClearApps,
+            new HookAction(name) {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);
@@ -43,7 +44,8 @@ public class OplusBattery extends Hook {
         );
 
         findAndHookMethod(ControllerCenter,
-            startMorningClearApps, new HookAction(name) {
+            startMorningClearApps,
+            new HookAction(name) {
                 @Override
                 protected void before(MethodHookParam param) {
                     param.setResult(null);

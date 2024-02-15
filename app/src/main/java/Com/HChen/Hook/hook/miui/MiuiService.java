@@ -124,18 +124,6 @@ public class MiuiService extends Hook {
         );
 
         /*设置禁止Scout功能*/
-        /*findAndHookConstructor(ScoutDisplayMemoryManager,
-            new HookAction(name) {
-                @Override
-                protected void after(MethodHookParam param) {
-                    getDeclaredField(param, "ENABLE_SCOUT_MEMORY_MONITOR", false);
-                    *//*报告内存泄露？*//*
-                    // getDeclaredField(param, "SCOUT_MEMORY_DISABLE_KGSL", false);
-                }
-            }
-        );*/
-
-        /*设置禁止Scout功能*/
         findAndHookMethod(ScoutDisplayMemoryManager,
             isEnableScoutMemory, new HookAction(name) {
                 @Override
@@ -145,36 +133,7 @@ public class MiuiService extends Hook {
             }
         );
 
-        /*关闭Scout的一个功能，
-        内存泄露恢复功能，
-        注意启用改功能可能使导致内存泄露的程序被杀，
-        但这是合理的*/
-        /*findAndHookMethod(ScoutDisplayMemoryManager,
-            isEnableResumeFeature, new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(false);
-                }
-            }
-        );*/
-
         /*关闭一堆Scout的功能*/
-        /*findAndHookConstructor(ScoutHelper, new HookAction(name) {
-                @Override
-                protected void after(MethodHookParam param) {
-                    *//*系统监察功能 关闭可以节省功耗？*//*
-                    setBoolean(param.thisObject, "ENABLED_SCOUT", false);
-                    setBoolean(param.thisObject, "ENABLED_SCOUT_DEBUG", false);
-                    setBoolean(param.thisObject, "BINDER_FULL_KILL_PROC", false);
-                    // setBoolean(param.thisObject, "SCOUT_BINDER_GKI", false);
-                    *//*是崩溃相关*//*
-         *//*setBoolean(param.thisObject, "PANIC_D_THREAD", false);
-                    setBoolean(param.thisObject, "SYSRQ_ANR_D_THREAD", false);
-                    setBoolean(param.thisObject, "PANIC_ANR_D_THREAD", false);
-                    setBoolean(param.thisObject, "DISABLE_AOSP_ANR_TRACE_POLICY", true);*//*
-                }
-            }
-        );*/
         setStaticBoolean(findClassIfExists(ScoutHelper), "ENABLED_SCOUT", false);
         setStaticBoolean(findClassIfExists(ScoutHelper), "ENABLED_SCOUT_DEBUG", false);
         setStaticBoolean(findClassIfExists(ScoutHelper), "BINDER_FULL_KILL_PROC", false);
@@ -213,26 +172,9 @@ public class MiuiService extends Hook {
         );
 
         /*关闭内存回收功能，寄生于游戏清理*/
-        /*hookAllConstructors(GameMemoryCleaner,
-            new HookAction(name) {
-                @Override
-                protected void after(MethodHookParam param) {
-                    setDeclaredField(param, "IS_MEMORY_CLEAN_ENABLED", false);
-                }
-            }
-        );*/
         setStaticBoolean(findClassIfExists(GameMemoryCleaner), "IS_MEMORY_CLEAN_ENABLED", false);
 
         /*禁用预加载APP，我对此功能存怀疑态度*/
-        /*findAndHookMethod(PreloadAppControllerImpl,
-            startPreloadApp, PreloadLifecycle,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    setBoolean(param.thisObject, "ENABLE", false);
-                }
-            }
-        );*/
         setStaticBoolean(findClassIfExists(PreloadAppControllerImpl), "ENABLE", false);
 
         /*findClassIfExists(PeriodicCleanerService).getDeclaredMethod(doClean, int.class, int.class, int.class, String.class);*/
@@ -258,32 +200,6 @@ public class MiuiService extends Hook {
                     }
                 }
             );
-
-            /*禁用PeriodicCleaner的响应
-             * 与上面重复*/
-           /*findAndHookMethod(PeriodicCleanerService + "$MyHandler",
-            handleMessage,
-            Message.class,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(null);
-                    logSI(handleMessage, "msg: " + param.args[0]);
-                }
-            }
-           );*/
-
-            /*禁用PeriodicCleaner清理
-             * 与上面重复*/
-           /*findAndHookMethod(PeriodicCleanerService + "$PeriodicShellCmd",
-            runClean, PrintWriter.class,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(null);
-                }
-            }
-           );*/
 
             /*禁用PeriodicCleaner*/
             findAndHookConstructor(PeriodicCleanerService,
@@ -428,28 +344,6 @@ public class MiuiService extends Hook {
             }
         );
 
-        /*禁止kill_用处暂不确定*/
-        /*hookAllMethods("com.android.server.am.ProcessPowerCleaner",
-                "handleKillAll",
-                new HookAction(name) {
-                    @Override
-                    protected void before(MethodHookParam param) {
-                        param.setResult(null);
-                    }
-                }
-        );*/
-
-        /*禁止kill_用处暂不确定*/
-       /* hookAllMethods("com.android.server.am.ProcessPowerCleaner",
-                "handleKillApp",
-                new HookAction(name) {
-                    @Override
-                    protected void before(MethodHookParam param) {
-                        param.setResult(true);l
-                    }
-                }
-        );*/
-
         /*禁止ProcessMemoryCleaner的killPackage*/
         hookAllMethods(ProcessMemoryCleaner,
             killPackage, new HookAction(name) {
@@ -471,17 +365,6 @@ public class MiuiService extends Hook {
             }
         );
 
-        /*禁止ProcessMemoryCleaner$H响应*/
-        /*findAndHookMethod(ProcessMemoryCleaner + "$H",
-            handleMessage, Message.class,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(null);
-                }
-            }
-        );*/
-
         /*禁止ProcessMemoryCleaner的killProcessByMinAdj*/
         hookAllMethods(ProcessMemoryCleaner,
             killProcessByMinAdj, new HookAction(name) {
@@ -491,16 +374,6 @@ public class MiuiService extends Hook {
                 }
             }
         );
-
-       /* hookAllMethods("com.android.server.am.ProcessMemoryCleaner",
-                "checkBackgroundProcCompact",
-                new HookAction(name) {
-                    @Override
-                    protected void before(MethodHookParam param) {
-                        param.setResult(null);
-                    }
-                }
-        );*/
 
         /*谎称清理成功*/
         hookAllMethods(ProcessMemoryCleaner,
@@ -539,91 +412,7 @@ public class MiuiService extends Hook {
             );
         }
 
-        /*禁止Cpu使用检查
-         * 调用killProcess*/
-        /*findAndHookMethod(SmartCpuPolicyManager,
-            handleLimitCpuException, int.class, new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(null);
-                    logSI(handleLimitCpuException, "type: " + param.args[0]);
-                }
-            }
-        );*/
-
-        /*多余操作*/
-        /* *//*禁用MiuiMemoryService*//*
-        findAndHookMethod(MiuiMemoryService + "$MiuiMemServiceThread",
-            run,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    setLog(2, logI, MiuiMemoryService + "$MiuiMemServiceThread", run);
-                    param.setResult(null);
-                }
-            }
-        );
-
-        *//*禁用MiuiMemoryService*//*
-        findAndHookMethod(MiuiMemoryService + "$ConnectionHandler",
-            run,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    setLog(2, logI, MiuiMemoryService + "$ConnectionHandler", run);
-                    param.setResult(null);
-                }
-            }
-        );*/
-
-        /*禁用MiuiMemoryService
-         * 似乎控制内存压缩，不需要关闭*/
-        /*findAndHookConstructor(MiuiMemoryService,
-            Context.class,
-            new HookAction(name) {
-                @Override
-                protected void after(MethodHookParam param) {
-                    getDeclaredField(param, "sCompactionEnable", false);
-                    getDeclaredField(param, "sCompactSingleProcEnable", false);
-                    getDeclaredField(param, "sWriteEnable", false);
-                }
-            }
-        );*/
-
-        /*禁用mi_reclaim
-         * 什么陈年逻辑，看不懂，似乎和压缩有关*/
-        /*findAndHookConstructor(MiuiMemReclaimer,
-            new HookAction(name) {
-                @Override
-                protected void after(MethodHookParam param) {
-                    getDeclaredField(param, "RECLAIM_IF_NEEDED", false);
-                    *//*getDeclaredField(param, "USE_LEGACY_COMPACTION", false);*//*
-                }
-            }
-        );*/
-
-        /*压缩进程的*/
-        /*禁用MiuiMemReclaimer*/
-        /*findAndHookMethod(MiuiMemReclaimer + "$CompactorHandler",
-            handleMessage,
-            Message.class, new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    setLog(2, logI, MiuiMemReclaimer + "$CompactorHandler", handleMessage);
-                    param.setResult(null);
-                }
-            }
-        );*/
-
         /*禁用spc*/
-        /*findAndHookConstructor(PressureStateSettings,
-            new HookAction(name) {
-                @Override
-                protected void after(MethodHookParam param) {
-                    setBoolean(param.thisObject, "PROCESS_CLEANER_ENABLED", false);
-                }
-            }
-        );*/
         setStaticBoolean(findClassIfExists(PressureStateSettings), "PROCESS_CLEANER_ENABLED", false);
     }
 

@@ -24,9 +24,13 @@ package Com.HChen.Hook.param.classpath;
 
 public final class SystemName {
     public static final String ActivityManagerService = "com.android.server.am.ActivityManagerService";
+    public static final String ActiveServices = "com.android.server.am.ActiveServices";
+    public static final String ActivityManagerService$LocalService = "com.android.server.am.ActivityManagerService$LocalService";
+    public static final String ProcessProfileRecord = "com.android.server.am.ProcessProfileRecord";
     public static final String ProcessRecord = "com.android.server.am.ProcessRecord";
     public static final String CachedAppOptimizer = "com.android.server.am.CachedAppOptimizer";
     public static final String ProcessList = "com.android.server.am.ProcessList";
+    public static final String LowMemDetector$LowMemThread = "com.android.server.am.LowMemDetector$LowMemThread";
     public static final String ProcessStateRecord = "com.android.server.am.ProcessStateRecord";
     public static final String ActivityManagerShellCommand = "com.android.server.am.ActivityManagerShellCommand";
     public static final String ProcessList$ImperceptibleKillRunner = "com.android.server.am.ProcessList$ImperceptibleKillRunner";

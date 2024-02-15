@@ -82,42 +82,7 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                     }
                 }
             );
-            /*HookDexKit.beforeDexKit(methodData, loadPackageParam,
-                new ActionTiming() {
-                    @Override
-                    public void before(@NonNull XC_MethodHook.MethodHookParam param) {
-                        String reason = (String) param.args[7];
-                        *//*不稳定*//*
-             *//*int code = (int) param.args[5];*//*
-                        if (!"oneclick".equals(reason)) {
-                            param.setResult(false);
-                        }
-                    }
-                }
-            );*/
-        /*try {
-            HookFactory.createMethodHook(methodData.getMethodInstance(loadPackageParam.classLoader),
-                new Consumer<HookFactory>() {
-                    @Override
-                    public void accept(HookFactory hookFactory) {
-                        hookFactory.before(
-                            new callBack() {
-                                @Override
-                                public void hookMethod(@NonNull XC_MethodHook.MethodHookParam methodHookParam) {
-                                    String reason = (String) methodHookParam.args[7];
-                                    int code = (int) methodHookParam.args[4];
-                                    if (!("oneclick".equals(reason) && code == 2)) {
-                                        methodHookParam.setResult(false);
-                                    }
-                                }
-                            }
-                        );
-                    }
-                }
-            );
-        } catch (Throwable e) {
-            logE("AthenaApp", "NoSuchMethodException :" + e);
-        }*/
+
             /*void b*/
             MethodData methodData1 = DexKit.INSTANCE.getDexKitBridge().findMethod(
                 FindMethod.create()
@@ -140,52 +105,6 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                     }
                 }
             );
-            /*HookDexKit.beforeDexKit(methodData1, loadPackageParam,
-                new ActionTiming() {
-                    @Override
-                    public void before(@NonNull XC_MethodHook.MethodHookParam param) {
-                        String reason = (String) param.args[6];
-                        switch (reason) {
-                            case "swipe up", "removeTask" -> {
-
-                            }
-                            default -> param.setResult(null);
-                        }
-                    }
-                }
-            );*/
-            /*try {*/
-           /* HookFactory.createMethodHook(methodData1.getMethodInstance(loadPackageParam.classLoader), new Consumer<HookFactory>() {
-                @Override
-                public void accept(HookFactory hookFactory) {
-                    hookFactory.before(new callBack() {
-                        @Override
-                        public void hookMethod(@NonNull XC_MethodHook.MethodHookParam methodHookParam) {
-
-                        }
-                    });
-                }
-            });
-        } catch (Throwable e) {
-            logE("AthenaApp", "NoSuchMethodException :" + e);
-        }*/
-            /*与Boolean c重复*/
-        /*MethodData methodData2 = DexKit.INSTANCE.getDexKitBridge().findMethod(
-            FindMethod.create()
-                .matcher(MethodMatcher.create()
-                    .declaredClass(ClassMatcher.create()
-                        .usingStrings("kill process group synchronously"))
-                    .usingStrings("kill process group synchronously"))
-        ).firstOrNull();
-        HookDexKit.beforeDexKit(methodData2, loadPackageParam,
-            new ActionTiming() {
-                @Override
-                public void before(@NonNull XC_MethodHook.MethodHookParam param) {
-
-                }
-            }
-        );*/
-
             MethodData methodData2 = DexKit.INSTANCE.getDexKitBridge().findMethod(
                 FindMethod.create()
                     .matcher(MethodMatcher.create()
@@ -201,14 +120,6 @@ public class AthenaApp extends Hook implements AthenaKill.pidCallBackListener {
                     }
                 }
             );
-            /*HookDexKit.beforeDexKit(methodData2, loadPackageParam,
-                new ActionTiming() {
-                    @Override
-                    public void before(@NonNull XC_MethodHook.MethodHookParam param) {
-                        param.setResult(null);
-                    }
-                }
-            );*/
 
             /*void g*/
             MethodData methodData3 = DexKit.INSTANCE.getDexKitBridge().findMethod(

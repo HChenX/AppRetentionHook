@@ -37,6 +37,7 @@ public final class MiuiValue {
     public static final String startPreloadApp = "startPreloadApp";
     public static final String runClean = "runClean";
     public static final String handleMessage = "handleMessage";
+    public static final String checkBackgroundProcCompact = "checkBackgroundProcCompact";
     public static final String killPackage = "killPackage";
     public static final String cleanUpMemory = "cleanUpMemory";
     public static final String nStartPressureMonitor = "nStartPressureMonitor";

@@ -35,6 +35,7 @@ public final class SystemValue {
     public static final String killProcessesBelowAdj = "killProcessesBelowAdj";
     public static final String performIdleMaintenance = "performIdleMaintenance";
     public static final String getAppStartModeLOSP = "getAppStartModeLOSP";
+    public static final String stopInBackgroundLocked = "stopInBackgroundLocked";
     public static final String doLowMemReportIfNeededLocked = "doLowMemReportIfNeededLocked";
     public static final String getLastMemoryLevelLocked = "getLastMemoryLevelLocked";
     public static final String isLastMemoryLevelNormal = "isLastMemoryLevelNormal";
@@ -52,16 +53,23 @@ public final class SystemValue {
     public static final String trimInactiveRecentTasks = "trimInactiveRecentTasks";
     public static final String isInVisibleRange = "isInVisibleRange";
     public static final String run = "run";
+    public static final String waitForPressure = "waitForPressure";
     public static final String killPids = "killPids";
     public static final String killAllBackgroundProcesses = "killAllBackgroundProcesses";
     public static final String killAllBackgroundProcessesExceptLSP = "killAllBackgroundProcessesExceptLSP";
+    public static final String setOomAdj = "setOomAdj";
+    public static final String killAllBackgroundProcessesExcept = "killAllBackgroundProcessesExcept";
+    public static final String trimApplicationsLocked = "trimApplicationsLocked";
     public static final String getDefaultMaxCachedProcesses = "getDefaultMaxCachedProcesses";
     public static final String updateMaxCachedProcesses = "updateMaxCachedProcesses";
     public static final String getOverrideMaxCachedProcesses = "getOverrideMaxCachedProcesses";
     public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";
     public static final String updateLowMemStateLSP = "updateLowMemStateLSP";
+    public static final String setProcessMemoryTrimLevel = "setProcessMemoryTrimLevel";
     public static final String setMemFactorOverride = "setMemFactorOverride";
+    public static final String killProcessesBelowForeground = "killProcessesBelowForeground";
     public static final String setOverrideMaxCachedProcesses = "setOverrideMaxCachedProcesses";
+    public static final String isKilledByAm = "isKilledByAm";
 
 
 }

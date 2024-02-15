@@ -32,6 +32,8 @@ public final class MiuiName {
     public static final String GameProcessKiller = "com.android.server.am.GameProcessKiller";
     public static final String GameProcessCompactor = "com.android.server.am.GameProcessCompactor";
     public static final String PeriodicCleanerService = "com.android.server.am.PeriodicCleanerService";
+    public static final String PeriodicCleanerService$MyHandler = "com.android.server.am.PeriodicCleanerService$MyHandler";
+    public static final String PeriodicCleanerService$PeriodicShellCmd = "com.android.server.am.PeriodicCleanerService$PeriodicShellCmd";
     public static final String PreloadAppControllerImpl = "com.android.server.am.PreloadAppControllerImpl";
     public static final String PreloadLifecycle = "com.android.server.wm.PreloadLifecycle";
     public static final String MemoryStandardProcessControl = "com.android.server.am.MemoryStandardProcessControl";
@@ -39,11 +41,15 @@ public final class MiuiName {
     public static final String ProcessKillerIdler = "com.android.server.am.ProcessKillerIdler";
     public static final String ProcessPowerCleaner = "com.android.server.am.ProcessPowerCleaner";
     public static final String ProcessMemoryCleaner = "com.android.server.am.ProcessMemoryCleaner";
+    public static final String ProcessMemoryCleaner$H = "com.android.server.am.ProcessMemoryCleaner$H";
     public static final String CameraBooster = "com.android.server.am.CameraBooster";
     public static final String ProcessKiller = "com.android.server.am.ProcessKiller";
     public static final String SmartCpuPolicyManager = "com.miui.server.smartpower.SmartCpuPolicyManager";
     public static final String MiuiMemoryService = "com.android.server.am.MiuiMemoryService";
+    public static final String MiuiMemoryService$ConnectionHandler = "com.android.server.am.MiuiMemoryService$ConnectionHandler";
+    public static final String MiuiMemoryService$MiuiMemServiceThread = "com.android.server.am.MiuiMemoryService$MiuiMemServiceThread";
     public static final String MiuiMemReclaimer = "com.android.server.am.MiuiMemReclaimer";
+    public static final String MiuiMemReclaimer$CompactorHandler = "com.android.server.am.MiuiMemReclaimer$CompactorHandler";
     /*MiuiFramework*/
     public static final String ProcessManager = "miui.process.ProcessManager";
     public static final String PressureStateSettings = "android.os.spc.PressureStateSettings";
