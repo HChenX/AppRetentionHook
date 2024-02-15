@@ -190,7 +190,7 @@ public abstract class Hook extends HookLog {
             try {
                 before(param);
                 LogTool.Info info = mLogTool.paramCheck(param);
-                final LogTool.Info getInfo = mLogTool.getInfo(info.method, info.thisObject);
+                LogTool.Info getInfo = mLogTool.getInfo(info.method, info.thisObject);
                 /*日志过滤*/
                 /*logFilter(hookLog(), new String[]{"AthenaApp", "OplusBattery"},
                     () -> logI(hookLog(), getInfo.thisObject, getInfo.methodProcessed),
@@ -402,7 +402,7 @@ public abstract class Hook extends HookLog {
     }
 
     public Method getDeclaredMethod(Class<?> clazz, String method, Object... type) throws NoSuchMethodException {
-//        String tag = "getDeclaredMethod";
+        // String tag = "getDeclaredMethod";
         ArrayList<Method> haveMethod = new ArrayList<>();
         Method hqMethod = null;
         int methodNum;
@@ -503,15 +503,15 @@ public abstract class Hook extends HookLog {
         }
     }
 
-    public void checkLast(String setObject, Object fieldName, Object value, Object last) {
+    public void checkLast(String method, Object fieldName, Object value, Object last) {
         if (value != null && last != null) {
             if (value == last || value.equals(last)) {
-                logI(tag, setObject + " Success! set " + fieldName + " to " + value);
+                logI(tag, method + " Success! set " + fieldName + " to " + value);
             } else {
-                logE(tag, setObject + " Failed! set " + fieldName + " to " + value + " hope: " + value + " but: " + last);
+                logE(tag, method + " Failed! set " + fieldName + " to " + value + " hope: " + value + " but: " + last);
             }
         } else {
-            logE(tag, setObject + " Error value: " + value + " or last: " + last + " is null");
+            logE(tag, method + " Error value: " + value + " or last: " + last + " is null");
         }
     }
 
@@ -526,7 +526,7 @@ public abstract class Hook extends HookLog {
 
     public void setStaticBoolean(Class<?> cl, String fieldName, boolean value) {
         if (cl == null) {
-            logE(tag, "SetStaticBoolean class can't is null field: " + fieldName + " value: " + value);
+            logE(tag, "SetStaticBoolean class can't is null, field: " + fieldName + " value: " + value);
             return;
         }
         checkAndSetField(null, cl, fieldName,
@@ -537,24 +537,24 @@ public abstract class Hook extends HookLog {
 
     public void setStaticInt(Class<?> cl, String fieldName, int value) {
         if (cl == null) {
-            logE(tag, "SetStaticInt class can't is null field: " + fieldName + " value: " + value);
+            logE(tag, "SetStaticInt class can't is null, field: " + fieldName + " value: " + value);
             return;
         }
         checkAndSetField(null, cl, fieldName,
             () -> XposedHelpers.setStaticIntField(cl, fieldName, value),
             () -> XposedHelpers.getStaticIntField(cl, fieldName),
-            "SetStaticBoolean", value);
+            "setStaticInt", value);
     }
 
     public void setStaticObject(Class<?> cl, String fieldName, Object value) {
         if (cl == null) {
-            logE(tag, "SetStaticObject class can't is null field: " + fieldName + " value: " + value);
+            logE(tag, "SetStaticObject class can't is null, field: " + fieldName + " value: " + value);
             return;
         }
         checkAndSetField(null, cl, fieldName,
             () -> XposedHelpers.setStaticObjectField(cl, fieldName, value),
             () -> XposedHelpers.getStaticObjectField(cl, fieldName),
-            "SetStaticBoolean", value);
+            "setStaticObject", value);
     }
 
     public void setInt(Object obj, String fieldName, int value) {
