@@ -5,7 +5,7 @@
         <item>com.miui.powerkeeper</item>
         <item>com.oplus.athena</item>
         <item>com.oplus.battery</item>
-        <!--<item>Com.HChen.App</item>-->
+        <!--<item>com.hchen.hook</item>-->
         <!--<item>com.android.settings</item>-->
     </string-array>
 </resources>

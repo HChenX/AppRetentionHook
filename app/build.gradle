@@ -20,19 +20,22 @@ android {
             storePassword keyKeyStorePassword
             keyAlias keyKeyAlias
             keyPassword keyKeyAliasPassword
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
         }
     }
 
-    namespace 'Com.HChen.Hook'
+    namespace 'com.hchen.hook'
     compileSdk 34
 
     defaultConfig {
-        applicationId "Com.HChen.Hook"
+        applicationId "com.hchen.hook"
         minSdk 30
         targetSdk 34
         //noinspection HighAppVersionCode
-        versionCode 2024021501
-        versionName "4.2.2"
+        versionCode 2024021502
+        versionName "4.2.3"
         ndk {
             // noinspection ChromeOsAbiSupport
             abiFilters 'arm64-v8a', 'armeabi-v7a'
@@ -44,7 +47,6 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
