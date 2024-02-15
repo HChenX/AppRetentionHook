@@ -196,7 +196,7 @@ public abstract class Hook extends HookLog {
                     () -> logI(hookLog(), getInfo.thisObject, getInfo.methodProcessed),
                     () -> logSI(hookLog(), getInfo.thisObject, getInfo.methodProcessed + " " + paramLog(param)));*/
                 logSI(mLog, getInfo.mClass, getInfo.mMethod + " " + mLogTool.paramLog(param));
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logE(mLog + ":" + "before", e.toString());
             }
         }
@@ -205,7 +205,7 @@ public abstract class Hook extends HookLog {
         protected void afterHookedMethod(MethodHookParam param) {
             try {
                 after(param);
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 logE(mLog + ":" + "after", e.toString());
             }
         }
@@ -254,7 +254,7 @@ public abstract class Hook extends HookLog {
                 return null;
             }
             return methodData.getMethodInstance(loadPackageParam.classLoader);
-        } catch (Exception throwable) {
+        } catch (Throwable throwable) {
             logE(tag, "getMethodInstance: " + throwable);
         }
         return null;
@@ -367,6 +367,9 @@ public abstract class Hook extends HookLog {
         }
     }
 
+    /**
+     * @noinspection UnusedReturnValue
+     */
     public Object callStaticMethod(Class<?> clazz, String methodName, Object... args) {
         try {
             return XposedHelpers.callStaticMethod(clazz, methodName, args);
@@ -375,6 +378,23 @@ public abstract class Hook extends HookLog {
                 + methodName + " args: " + Arrays.toString(args) + " e: " + e);
             return null;
         }
+    }
+
+    public void checkDeclaredMethod(String className, String name, Object... parameterTypes) throws NoSuchMethodException {
+        Class<?> hookClass = findClassIfExists(className);
+        if (hookClass != null) {
+            getDeclaredMethod(hookClass, name, parameterTypes);
+            return;
+        }
+        throw new NoSuchMethodException();
+    }
+
+    public void checkDeclaredMethod(Class<?> clazz, String name, Object... parameterTypes) throws NoSuchMethodException {
+        if (clazz != null) {
+            getDeclaredMethod(clazz, name, parameterTypes);
+            return;
+        }
+        throw new NoSuchMethodException();
     }
 
     public Method getDeclaredMethod(String className, String method, Object... type) throws NoSuchMethodException {
@@ -509,12 +529,10 @@ public abstract class Hook extends HookLog {
             logE(tag, "SetStaticBoolean class can't is null field: " + fieldName + " value: " + value);
             return;
         }
-        checkAndSetField(cl, fieldName, () -> {
-            XposedHelpers.setStaticBooleanField(cl, fieldName, value);
-        }, () -> {
-            checkLast("SetStaticBoolean", fieldName, value,
-                XposedHelpers.getStaticBooleanField(cl, fieldName));
-        });
+        checkAndSetField(null, cl, fieldName,
+            () -> XposedHelpers.setStaticBooleanField(cl, fieldName, value),
+            () -> XposedHelpers.getStaticBooleanField(cl, fieldName),
+            "SetStaticBoolean", value);
     }
 
     public void setStaticInt(Class<?> cl, String fieldName, int value) {
@@ -522,12 +540,10 @@ public abstract class Hook extends HookLog {
             logE(tag, "SetStaticInt class can't is null field: " + fieldName + " value: " + value);
             return;
         }
-        checkAndSetField(cl, fieldName, () -> {
-            XposedHelpers.setStaticIntField(cl, fieldName, value);
-        }, () -> {
-            checkLast("SetStaticBoolean", fieldName, value,
-                XposedHelpers.getStaticIntField(cl, fieldName));
-        });
+        checkAndSetField(null, cl, fieldName,
+            () -> XposedHelpers.setStaticIntField(cl, fieldName, value),
+            () -> XposedHelpers.getStaticIntField(cl, fieldName),
+            "SetStaticBoolean", value);
     }
 
     public void setStaticObject(Class<?> cl, String fieldName, Object value) {
@@ -535,69 +551,53 @@ public abstract class Hook extends HookLog {
             logE(tag, "SetStaticObject class can't is null field: " + fieldName + " value: " + value);
             return;
         }
-        checkAndSetField(cl, fieldName, () -> {
-            XposedHelpers.setStaticObjectField(cl, fieldName, value);
-        }, () -> {
-            checkLast("SetStaticBoolean", fieldName, value,
-                XposedHelpers.getStaticObjectField(cl, fieldName));
-        });
+        checkAndSetField(null, cl, fieldName,
+            () -> XposedHelpers.setStaticObjectField(cl, fieldName, value),
+            () -> XposedHelpers.getStaticObjectField(cl, fieldName),
+            "SetStaticBoolean", value);
     }
 
     public void setInt(Object obj, String fieldName, int value) {
-        checkAndSetField(obj, fieldName,
+        checkAndSetField(obj, null, fieldName,
             () -> XposedHelpers.setIntField(obj, fieldName, value),
-            () -> checkLast("SetInt", fieldName, value,
-                XposedHelpers.getIntField(obj, fieldName)));
+            () -> XposedHelpers.getIntField(obj, fieldName),
+            "SetInt", value);
     }
 
     public void setBoolean(Object obj, String fieldName, boolean value) {
-        checkAndSetField(obj, fieldName,
+        checkAndSetField(obj, null, fieldName,
             () -> XposedHelpers.setBooleanField(obj, fieldName, value),
-            () -> checkLast("SetBoolean", fieldName, value,
-                XposedHelpers.getBooleanField(obj, fieldName)));
+            () -> XposedHelpers.getBooleanField(obj, fieldName),
+            "SetBoolean", value);
     }
 
     public void setObject(Object obj, String fieldName, Object value) {
-        checkAndSetField(obj, fieldName,
+        checkAndSetField(obj, null, fieldName,
             () -> XposedHelpers.setObjectField(obj, fieldName, value),
-            () -> checkLast("SetObject", fieldName, value,
-                XposedHelpers.getObjectField(obj, fieldName)));
+            () -> XposedHelpers.getObjectField(obj, fieldName),
+            "SetObject", value);
     }
 
-    public void checkDeclaredMethod(String className, String name, Class<?>... parameterTypes) throws NoSuchMethodException {
-        Class<?> hookClass = findClassIfExists(className);
-        if (hookClass != null) {
-            hookClass.getDeclaredMethod(name, parameterTypes);
-            return;
-        }
-        throw new NoSuchMethodException();
-    }
-
-    public void checkDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) throws NoSuchMethodException {
-        if (clazz != null) {
-            clazz.getDeclaredMethod(name, parameterTypes);
-            return;
-        }
-        throw new NoSuchMethodException();
-    }
-
-    public void checkAndSetField(Object obj, String fieldName, Runnable setField, Runnable checkLast) {
+    public void checkAndSetField(Object obj, Class<?> clz, String fieldName,
+                                 ISetValue setField, IGetValue getValue, String method, Object value) {
         try {
-            checkField(obj, fieldName);
-        } catch (Exception e) {
+            checkField(obj, clz, fieldName);
+        } catch (Throwable e) {
             logE(tag, "No such field: " + fieldName + " E: " + e);
+            return;
         }
         try {
-            setField.run();
-            checkLast.run();
-        } catch (Exception f) {
-            logE(tag, "Set field: " + fieldName + " E: " + f);
+            setField.setValue();
+            Object result = getValue.getResult();
+            checkLast(method, fieldName, value, result);
+        } catch (Throwable f) {
+            logE(tag, "Get or set field: " + fieldName + " E: " + f);
         }
     }
 
-    private void checkField(Object o, String fieldName) throws NoSuchFieldException {
-        if (o instanceof Class<?>) {
-            ((Class<?>) o).getDeclaredField(fieldName);
+    private void checkField(Object o, Class<?> clz, String fieldName) throws Throwable {
+        if (o == null) {
+            clz.getDeclaredField(fieldName);
         } else {
             o.getClass().getDeclaredField(fieldName);
         }
@@ -663,5 +663,13 @@ public abstract class Hook extends HookLog {
             logE(tag, "PathClassLoader E: " + e);
             return null;
         }
+    }
+
+    private interface IGetValue {
+        Object getResult() throws Throwable;
+    }
+
+    private interface ISetValue {
+        void setValue() throws Throwable;
     }
 }
