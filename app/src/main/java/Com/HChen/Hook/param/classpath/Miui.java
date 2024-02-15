@@ -22,7 +22,7 @@
  */
 package Com.HChen.Hook.param.classpath;
 
-public final class MiuiName {
+public final class Miui {
     public static final String ScoutDisplayMemoryManager = "com.miui.server.stability.ScoutDisplayMemoryManager";
     public static final String ScoutHelper = "com.android.server.ScoutHelper";
     public static final String DeviceLevelUtils = "com.miui.performance.DeviceLevelUtils";

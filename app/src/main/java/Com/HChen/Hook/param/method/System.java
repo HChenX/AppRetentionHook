@@ -20,9 +20,9 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook.param.name;
+package Com.HChen.Hook.param.method;
 
-public final class SystemValue {
+public final class System {
     public static final String checkExcessivePowerUsage = "checkExcessivePowerUsage";
     public static final String checkExcessivePowerUsageLPr = "checkExcessivePowerUsageLPr";
     public static final String pruneStaleProcessesLocked = "pruneStaleProcessesLocked";

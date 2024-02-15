@@ -20,26 +20,11 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook.hook.miui;
+package Com.HChen.Hook.param.method;
 
-import static Com.HChen.Hook.param.classpath.Miui.ProcessManager;
-import static Com.HChen.Hook.param.method.Miui.kill;
-
-import Com.HChen.Hook.mode.Hook;
-
-public class PowerKeeper extends Hook {
-    public static String name = "PowerKeeper";
-
-    @Override
-    public void init() {
-        hookAllMethods(ProcessManager,
-            kill,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(false);
-                }
-            }
-        );
-    }
+public final class Oplus {
+    public static final String killLocked = "killLocked";
+    public static final String onCreate = "onCreate";
+    public static final String startClearApps = "startClearApps";
+    public static final String startMorningClearApps = "startMorningClearApps";
 }

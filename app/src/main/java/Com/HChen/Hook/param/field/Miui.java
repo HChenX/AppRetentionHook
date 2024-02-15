@@ -20,26 +20,16 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook.hook.miui;
+package Com.HChen.Hook.param.field;
 
-import static Com.HChen.Hook.param.classpath.Miui.ProcessManager;
-import static Com.HChen.Hook.param.method.Miui.kill;
-
-import Com.HChen.Hook.mode.Hook;
-
-public class PowerKeeper extends Hook {
-    public static String name = "PowerKeeper";
-
-    @Override
-    public void init() {
-        hookAllMethods(ProcessManager,
-            kill,
-            new HookAction(name) {
-                @Override
-                protected void before(MethodHookParam param) {
-                    param.setResult(false);
-                }
-            }
-        );
-    }
+public final class Miui {
+    public static final String ENABLED_SCOUT = "ENABLED_SCOUT";
+    public static final String ENABLED_SCOUT_DEBUG = "ENABLED_SCOUT_DEBUG";
+    public static final String BINDER_FULL_KILL_PROC = "BINDER_FULL_KILL_PROC";
+    public static final String IS_MEMORY_CLEAN_ENABLED = "IS_MEMORY_CLEAN_ENABLED";
+    public static final String ENABLE = "ENABLE";
+    public static final String mEnable = "mEnable";
+    public static final String mGameOomEnable = "mGameOomEnable";
+    public static final String IS_ENABLE_RECLAIM = "IS_ENABLE_RECLAIM";
+    public static final String PROCESS_CLEANER_ENABLED = "PROCESS_CLEANER_ENABLED";
 }

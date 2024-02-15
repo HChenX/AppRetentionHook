@@ -22,7 +22,7 @@
  */
 package Com.HChen.Hook.param.classpath;
 
-public class OplusName {
+public final class Oplus {
     public static final String OplusOsenseKillAction = "com.android.server.am.OplusOsenseKillAction";
     public static final String ControllerCenter = "com.oplus.deepsleep.ControllerCenter";
     public static final String AthenaApplication = "com.oplus.athena.AthenaApplication";

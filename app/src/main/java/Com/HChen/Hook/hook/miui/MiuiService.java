@@ -22,49 +22,58 @@
  */
 package Com.HChen.Hook.hook.miui;
 
-import static Com.HChen.Hook.param.classpath.MiuiName.Build;
-import static Com.HChen.Hook.param.classpath.MiuiName.CameraBooster;
-import static Com.HChen.Hook.param.classpath.MiuiName.DeviceLevelUtils;
-import static Com.HChen.Hook.param.classpath.MiuiName.GameMemoryCleaner;
-import static Com.HChen.Hook.param.classpath.MiuiName.GameProcessCompactor;
-import static Com.HChen.Hook.param.classpath.MiuiName.GameProcessKiller;
-import static Com.HChen.Hook.param.classpath.MiuiName.MemoryStandardProcessControl;
-import static Com.HChen.Hook.param.classpath.MiuiName.PeriodicCleanerService;
-import static Com.HChen.Hook.param.classpath.MiuiName.PreloadAppControllerImpl;
-import static Com.HChen.Hook.param.classpath.MiuiName.PressureStateSettings;
-import static Com.HChen.Hook.param.classpath.MiuiName.ProcessKiller;
-import static Com.HChen.Hook.param.classpath.MiuiName.ProcessKillerIdler;
-import static Com.HChen.Hook.param.classpath.MiuiName.ProcessMemoryCleaner;
-import static Com.HChen.Hook.param.classpath.MiuiName.ProcessPowerCleaner;
-import static Com.HChen.Hook.param.classpath.MiuiName.ProcessUtils;
-import static Com.HChen.Hook.param.classpath.MiuiName.ScoutDisplayMemoryManager;
-import static Com.HChen.Hook.param.classpath.MiuiName.ScoutHelper;
-import static Com.HChen.Hook.param.classpath.MiuiName.SystemPressureController;
-import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerService;
-import static Com.HChen.Hook.param.classpath.SystemName.ProcessRecord;
-import static Com.HChen.Hook.param.name.MiuiValue.boostCameraIfNeeded;
-import static Com.HChen.Hook.param.name.MiuiValue.cleanUpMemory;
-import static Com.HChen.Hook.param.name.MiuiValue.doClean;
-import static Com.HChen.Hook.param.name.MiuiValue.getDeviceLevelForRAM;
-import static Com.HChen.Hook.param.name.MiuiValue.getGameOomEnable;
-import static Com.HChen.Hook.param.name.MiuiValue.handleAutoLockOff;
-import static Com.HChen.Hook.param.name.MiuiValue.handleKillAll;
-import static Com.HChen.Hook.param.name.MiuiValue.handleKillApp;
-import static Com.HChen.Hook.param.name.MiuiValue.handleScreenOff;
-import static Com.HChen.Hook.param.name.MiuiValue.handleThermalKillProc;
-import static Com.HChen.Hook.param.name.MiuiValue.init;
-import static Com.HChen.Hook.param.name.MiuiValue.isEnableScoutMemory;
-import static Com.HChen.Hook.param.name.MiuiValue.isLowMemory;
-import static Com.HChen.Hook.param.name.MiuiValue.isMiuiLiteVersion;
-import static Com.HChen.Hook.param.name.MiuiValue.killApplication;
-import static Com.HChen.Hook.param.name.MiuiValue.killPackage;
-import static Com.HChen.Hook.param.name.MiuiValue.killProcess;
-import static Com.HChen.Hook.param.name.MiuiValue.killProcessByMinAdj;
-import static Com.HChen.Hook.param.name.MiuiValue.nStartPressureMonitor;
-import static Com.HChen.Hook.param.name.MiuiValue.onStartJob;
-import static Com.HChen.Hook.param.name.MiuiValue.reclaimMemoryForGameIfNeed;
-import static Com.HChen.Hook.param.name.MiuiValue.shouldSkip;
-import static Com.HChen.Hook.param.name.MiuiValue.updateScreenState;
+import static Com.HChen.Hook.param.classpath.Miui.Build;
+import static Com.HChen.Hook.param.classpath.Miui.CameraBooster;
+import static Com.HChen.Hook.param.classpath.Miui.DeviceLevelUtils;
+import static Com.HChen.Hook.param.classpath.Miui.GameMemoryCleaner;
+import static Com.HChen.Hook.param.classpath.Miui.GameProcessCompactor;
+import static Com.HChen.Hook.param.classpath.Miui.GameProcessKiller;
+import static Com.HChen.Hook.param.classpath.Miui.MemoryStandardProcessControl;
+import static Com.HChen.Hook.param.classpath.Miui.PeriodicCleanerService;
+import static Com.HChen.Hook.param.classpath.Miui.PreloadAppControllerImpl;
+import static Com.HChen.Hook.param.classpath.Miui.PressureStateSettings;
+import static Com.HChen.Hook.param.classpath.Miui.ProcessKiller;
+import static Com.HChen.Hook.param.classpath.Miui.ProcessKillerIdler;
+import static Com.HChen.Hook.param.classpath.Miui.ProcessMemoryCleaner;
+import static Com.HChen.Hook.param.classpath.Miui.ProcessPowerCleaner;
+import static Com.HChen.Hook.param.classpath.Miui.ProcessUtils;
+import static Com.HChen.Hook.param.classpath.Miui.ScoutDisplayMemoryManager;
+import static Com.HChen.Hook.param.classpath.Miui.ScoutHelper;
+import static Com.HChen.Hook.param.classpath.Miui.SystemPressureController;
+import static Com.HChen.Hook.param.classpath.System.ActivityManagerService;
+import static Com.HChen.Hook.param.classpath.System.ProcessRecord;
+import static Com.HChen.Hook.param.field.Miui.BINDER_FULL_KILL_PROC;
+import static Com.HChen.Hook.param.field.Miui.ENABLE;
+import static Com.HChen.Hook.param.field.Miui.ENABLED_SCOUT;
+import static Com.HChen.Hook.param.field.Miui.ENABLED_SCOUT_DEBUG;
+import static Com.HChen.Hook.param.field.Miui.IS_ENABLE_RECLAIM;
+import static Com.HChen.Hook.param.field.Miui.IS_MEMORY_CLEAN_ENABLED;
+import static Com.HChen.Hook.param.field.Miui.PROCESS_CLEANER_ENABLED;
+import static Com.HChen.Hook.param.field.Miui.mEnable;
+import static Com.HChen.Hook.param.field.Miui.mGameOomEnable;
+import static Com.HChen.Hook.param.method.Miui.boostCameraIfNeeded;
+import static Com.HChen.Hook.param.method.Miui.cleanUpMemory;
+import static Com.HChen.Hook.param.method.Miui.doClean;
+import static Com.HChen.Hook.param.method.Miui.getDeviceLevelForRAM;
+import static Com.HChen.Hook.param.method.Miui.getGameOomEnable;
+import static Com.HChen.Hook.param.method.Miui.handleAutoLockOff;
+import static Com.HChen.Hook.param.method.Miui.handleKillAll;
+import static Com.HChen.Hook.param.method.Miui.handleKillApp;
+import static Com.HChen.Hook.param.method.Miui.handleScreenOff;
+import static Com.HChen.Hook.param.method.Miui.handleThermalKillProc;
+import static Com.HChen.Hook.param.method.Miui.init;
+import static Com.HChen.Hook.param.method.Miui.isEnableScoutMemory;
+import static Com.HChen.Hook.param.method.Miui.isLowMemory;
+import static Com.HChen.Hook.param.method.Miui.isMiuiLiteVersion;
+import static Com.HChen.Hook.param.method.Miui.killApplication;
+import static Com.HChen.Hook.param.method.Miui.killPackage;
+import static Com.HChen.Hook.param.method.Miui.killProcess;
+import static Com.HChen.Hook.param.method.Miui.killProcessByMinAdj;
+import static Com.HChen.Hook.param.method.Miui.nStartPressureMonitor;
+import static Com.HChen.Hook.param.method.Miui.onStartJob;
+import static Com.HChen.Hook.param.method.Miui.reclaimMemoryForGameIfNeed;
+import static Com.HChen.Hook.param.method.Miui.shouldSkip;
+import static Com.HChen.Hook.param.method.Miui.updateScreenState;
 
 import android.app.job.JobParameters;
 import android.content.Context;
@@ -134,9 +143,9 @@ public class MiuiService extends Hook {
         );
 
         /*关闭一堆Scout的功能*/
-        setStaticBoolean(findClassIfExists(ScoutHelper), "ENABLED_SCOUT", false);
-        setStaticBoolean(findClassIfExists(ScoutHelper), "ENABLED_SCOUT_DEBUG", false);
-        setStaticBoolean(findClassIfExists(ScoutHelper), "BINDER_FULL_KILL_PROC", false);
+        setStaticBoolean(findClassIfExists(ScoutHelper), ENABLED_SCOUT, false);
+        setStaticBoolean(findClassIfExists(ScoutHelper), ENABLED_SCOUT_DEBUG, false);
+        setStaticBoolean(findClassIfExists(ScoutHelper), BINDER_FULL_KILL_PROC, false);
 
         // 跳过游戏进程kill和压缩，待测试
         findAndHookMethod(GameProcessKiller,
@@ -172,10 +181,10 @@ public class MiuiService extends Hook {
         );
 
         /*关闭内存回收功能，寄生于游戏清理*/
-        setStaticBoolean(findClassIfExists(GameMemoryCleaner), "IS_MEMORY_CLEAN_ENABLED", false);
+        setStaticBoolean(findClassIfExists(GameMemoryCleaner), IS_MEMORY_CLEAN_ENABLED, false);
 
         /*禁用预加载APP，我对此功能存怀疑态度*/
-        setStaticBoolean(findClassIfExists(PreloadAppControllerImpl), "ENABLE", false);
+        setStaticBoolean(findClassIfExists(PreloadAppControllerImpl), ENABLE, false);
 
         /*findClassIfExists(PeriodicCleanerService).getDeclaredMethod(doClean, int.class, int.class, int.class, String.class);*/
         // checkDeclaredMethod(PeriodicCleanerService, doClean, int.class, int.class, int.class, String.class);
@@ -207,7 +216,7 @@ public class MiuiService extends Hook {
                 new HookAction(name) {
                     @Override
                     protected void after(MethodHookParam param) {
-                        setDeclaredField(param, "mEnable", false);
+                        setDeclaredField(param, mEnable, false);
                     }
                 }
             );
@@ -217,7 +226,7 @@ public class MiuiService extends Hook {
                 new HookAction(name) {
                     @Override
                     protected void after(MethodHookParam param) {
-                        setBoolean(param.thisObject, "mEnable", false);
+                        setBoolean(param.thisObject, mEnable, false);
                     }
                 }
             );
@@ -252,11 +261,11 @@ public class MiuiService extends Hook {
                 @Override
                 protected void after(MethodHookParam param) {
                     // setBoolean(param.thisObject, "IS_ENABLE_RECLAIM", false);
-                    setBoolean(param.thisObject, "mGameOomEnable", false);
+                    setBoolean(param.thisObject, mGameOomEnable, false);
                 }
             }
         );
-        setStaticBoolean(findClassIfExists(SystemPressureController), "IS_ENABLE_RECLAIM", false);
+        setStaticBoolean(findClassIfExists(SystemPressureController), IS_ENABLE_RECLAIM, false);
 
         findAndHookMethod(SystemPressureController,
             getGameOomEnable,
@@ -413,7 +422,7 @@ public class MiuiService extends Hook {
         }
 
         /*禁用spc*/
-        setStaticBoolean(findClassIfExists(PressureStateSettings), "PROCESS_CLEANER_ENABLED", false);
+        setStaticBoolean(findClassIfExists(PressureStateSettings), PROCESS_CLEANER_ENABLED, false);
     }
 
     private void hookDeviceLevelUtils(PathClassLoader pathClassLoader) {

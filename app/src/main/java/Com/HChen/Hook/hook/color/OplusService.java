@@ -22,8 +22,8 @@
  */
 package Com.HChen.Hook.hook.color;
 
-import static Com.HChen.Hook.param.classpath.OplusName.OplusOsenseKillAction;
-import static Com.HChen.Hook.param.name.OplusValue.killLocked;
+import static Com.HChen.Hook.param.classpath.Oplus.OplusOsenseKillAction;
+import static Com.HChen.Hook.param.method.Oplus.killLocked;
 
 import Com.HChen.Hook.mode.Hook;
 

@@ -22,7 +22,7 @@
  */
 package Com.HChen.Hook.param.classpath;
 
-public final class SystemName {
+public final class System {
     public static final String ActivityManagerService = "com.android.server.am.ActivityManagerService";
     public static final String ActiveServices = "com.android.server.am.ActiveServices";
     public static final String ActivityManagerService$LocalService = "com.android.server.am.ActivityManagerService$LocalService";

@@ -22,41 +22,48 @@
  */
 package Com.HChen.Hook.hook.android;
 
-import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerConstants;
-import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerService;
-import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerServiceStub;
-import static Com.HChen.Hook.param.classpath.SystemName.ActivityManagerShellCommand;
-import static Com.HChen.Hook.param.classpath.SystemName.AmsExtImpl;
-import static Com.HChen.Hook.param.classpath.SystemName.AppProfiler;
-import static Com.HChen.Hook.param.classpath.SystemName.LowMemDetector;
-import static Com.HChen.Hook.param.classpath.SystemName.OomAdjuster;
-import static Com.HChen.Hook.param.classpath.SystemName.PhantomProcessList;
-import static Com.HChen.Hook.param.classpath.SystemName.ProcessList$ImperceptibleKillRunner;
-import static Com.HChen.Hook.param.classpath.SystemName.ProcessStatsService;
-import static Com.HChen.Hook.param.classpath.SystemName.RecentTasks;
-import static Com.HChen.Hook.param.name.SystemValue.checkExcessivePowerUsageLPr;
-import static Com.HChen.Hook.param.name.SystemValue.doLowMemReportIfNeededLocked;
-import static Com.HChen.Hook.param.name.SystemValue.getDefaultMaxCachedProcesses;
-import static Com.HChen.Hook.param.name.SystemValue.getLastMemoryLevelLocked;
-import static Com.HChen.Hook.param.name.SystemValue.getMemFactor;
-import static Com.HChen.Hook.param.name.SystemValue.getMemFactorLocked;
-import static Com.HChen.Hook.param.name.SystemValue.getOrCreatePhantomProcessIfNeededLocked;
-import static Com.HChen.Hook.param.name.SystemValue.getOverrideMaxCachedProcesses;
-import static Com.HChen.Hook.param.name.SystemValue.handleDeviceIdle;
-import static Com.HChen.Hook.param.name.SystemValue.isAvailable;
-import static Com.HChen.Hook.param.name.SystemValue.isInVisibleRange;
-import static Com.HChen.Hook.param.name.SystemValue.isLastMemoryLevelNormal;
-import static Com.HChen.Hook.param.name.SystemValue.killPids;
-import static Com.HChen.Hook.param.name.SystemValue.killProcessesBelowAdj;
-import static Com.HChen.Hook.param.name.SystemValue.onSystemReady;
-import static Com.HChen.Hook.param.name.SystemValue.performIdleMaintenance;
-import static Com.HChen.Hook.param.name.SystemValue.pruneStaleProcessesLocked;
-import static Com.HChen.Hook.param.name.SystemValue.runKillAll;
-import static Com.HChen.Hook.param.name.SystemValue.shouldKillExcessiveProcesses;
-import static Com.HChen.Hook.param.name.SystemValue.trimInactiveRecentTasks;
-import static Com.HChen.Hook.param.name.SystemValue.trimPhantomProcessesIfNecessary;
-import static Com.HChen.Hook.param.name.SystemValue.updateAndTrimProcessLSP;
-import static Com.HChen.Hook.param.name.SystemValue.updateMaxCachedProcesses;
+import static Com.HChen.Hook.param.classpath.System.ActivityManagerConstants;
+import static Com.HChen.Hook.param.classpath.System.ActivityManagerService;
+import static Com.HChen.Hook.param.classpath.System.ActivityManagerServiceStub;
+import static Com.HChen.Hook.param.classpath.System.ActivityManagerShellCommand;
+import static Com.HChen.Hook.param.classpath.System.AmsExtImpl;
+import static Com.HChen.Hook.param.classpath.System.AppProfiler;
+import static Com.HChen.Hook.param.classpath.System.LowMemDetector;
+import static Com.HChen.Hook.param.classpath.System.OomAdjuster;
+import static Com.HChen.Hook.param.classpath.System.PhantomProcessList;
+import static Com.HChen.Hook.param.classpath.System.ProcessList$ImperceptibleKillRunner;
+import static Com.HChen.Hook.param.classpath.System.ProcessStatsService;
+import static Com.HChen.Hook.param.classpath.System.RecentTasks;
+import static Com.HChen.Hook.param.field.System.DEFAULT_MAX_PHANTOM_PROCESSES;
+import static Com.HChen.Hook.param.field.System.MAX_PHANTOM_PROCESSES;
+import static Com.HChen.Hook.param.field.System.PROACTIVE_KILLS_ENABLED;
+import static Com.HChen.Hook.param.field.System.USE_TRIM_SETTINGS;
+import static Com.HChen.Hook.param.field.System.duraspeed;
+import static Com.HChen.Hook.param.field.System.isDuraSpeedSupport;
+import static Com.HChen.Hook.param.field.System.mNextNoKillDebugMessageTime;
+import static Com.HChen.Hook.param.method.System.checkExcessivePowerUsageLPr;
+import static Com.HChen.Hook.param.method.System.doLowMemReportIfNeededLocked;
+import static Com.HChen.Hook.param.method.System.getDefaultMaxCachedProcesses;
+import static Com.HChen.Hook.param.method.System.getLastMemoryLevelLocked;
+import static Com.HChen.Hook.param.method.System.getMemFactor;
+import static Com.HChen.Hook.param.method.System.getMemFactorLocked;
+import static Com.HChen.Hook.param.method.System.getOrCreatePhantomProcessIfNeededLocked;
+import static Com.HChen.Hook.param.method.System.getOverrideMaxCachedProcesses;
+import static Com.HChen.Hook.param.method.System.handleDeviceIdle;
+import static Com.HChen.Hook.param.method.System.isAvailable;
+import static Com.HChen.Hook.param.method.System.isInVisibleRange;
+import static Com.HChen.Hook.param.method.System.isLastMemoryLevelNormal;
+import static Com.HChen.Hook.param.method.System.killPids;
+import static Com.HChen.Hook.param.method.System.killProcessesBelowAdj;
+import static Com.HChen.Hook.param.method.System.onSystemReady;
+import static Com.HChen.Hook.param.method.System.performIdleMaintenance;
+import static Com.HChen.Hook.param.method.System.pruneStaleProcessesLocked;
+import static Com.HChen.Hook.param.method.System.runKillAll;
+import static Com.HChen.Hook.param.method.System.shouldKillExcessiveProcesses;
+import static Com.HChen.Hook.param.method.System.trimInactiveRecentTasks;
+import static Com.HChen.Hook.param.method.System.trimPhantomProcessesIfNecessary;
+import static Com.HChen.Hook.param.method.System.updateAndTrimProcessLSP;
+import static Com.HChen.Hook.param.method.System.updateMaxCachedProcesses;
 
 import android.content.Context;
 import android.os.Handler;
@@ -80,8 +87,8 @@ public class SystemService extends Hook {
                     @Override
                     protected void before(MethodHookParam param) {
                         Context context = (Context) param.args[0];
-                        Settings.System.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
-                        Settings.Global.putInt(context.getContentResolver(), "setting.duraspeed.enabled", 0);
+                        Settings.System.putInt(context.getContentResolver(), duraspeed, 0);
+                        Settings.Global.putInt(context.getContentResolver(), duraspeed, 0);
                     }
                 }
             );
@@ -90,7 +97,7 @@ public class SystemService extends Hook {
                 new HookAction(name) {
                     @Override
                     protected void after(MethodHookParam param) {
-                        setBoolean(param.thisObject, "isDuraSpeedSupport", false);
+                        setBoolean(param.thisObject, isDuraSpeedSupport, false);
                     }
                 }
             );
@@ -289,7 +296,7 @@ public class SystemService extends Hook {
             new HookAction(name) {
                 @Override
                 protected void after(MethodHookParam param) {
-                    setObject(param.thisObject, "mNextNoKillDebugMessageTime", Long.MAX_VALUE);
+                    setObject(param.thisObject, mNextNoKillDebugMessageTime, Long.MAX_VALUE);
                 }
             }
         );
@@ -360,7 +367,7 @@ public class SystemService extends Hook {
             new HookAction(name) {
                 @Override
                 protected void after(MethodHookParam param) {
-                    setInt(param.thisObject, "MAX_PHANTOM_PROCESSES", Integer.MAX_VALUE);
+                    setInt(param.thisObject, MAX_PHANTOM_PROCESSES, Integer.MAX_VALUE);
                     // 清理后台受限且已经idle的内存是合理的
                     // setBoolean(param.thisObject, "mKillBgRestrictedAndCachedIdle", false);
                     /*似乎是高通的东西？*/
@@ -370,9 +377,9 @@ public class SystemService extends Hook {
             }
         );
 
-        setStaticBoolean(findClassIfExists(ActivityManagerConstants), "PROACTIVE_KILLS_ENABLED", false);
-        setStaticBoolean(findClassIfExists(ActivityManagerConstants), "USE_TRIM_SETTINGS", false);
-        setStaticInt(findClassIfExists(ActivityManagerConstants), "DEFAULT_MAX_PHANTOM_PROCESSES", Integer.MAX_VALUE);
+        setStaticBoolean(findClassIfExists(ActivityManagerConstants), PROACTIVE_KILLS_ENABLED, false);
+        setStaticBoolean(findClassIfExists(ActivityManagerConstants), USE_TRIM_SETTINGS, false);
+        setStaticInt(findClassIfExists(ActivityManagerConstants), DEFAULT_MAX_PHANTOM_PROCESSES, Integer.MAX_VALUE);
 
         /*Hook获取更合理*/
         findAndHookMethod(ActivityManagerConstants,

@@ -22,8 +22,8 @@
  */
 package Com.HChen.Hook.hook.color;
 
-import static Com.HChen.Hook.param.classpath.OplusName.AthenaApplication;
-import static Com.HChen.Hook.param.name.OplusValue.onCreate;
+import static Com.HChen.Hook.param.classpath.Oplus.AthenaApplication;
+import static Com.HChen.Hook.param.method.Oplus.onCreate;
 
 import Com.HChen.Hook.mode.log.HookLog;
 import de.robv.android.xposed.XC_MethodHook;
@@ -51,7 +51,8 @@ public class AthenaKill {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
                         myPid = (int) XposedHelpers.callStaticMethod(
-                            XposedHelpers.findClassIfExists("android.os.Process", loadPackageParam.classLoader), "myPid");
+                            XposedHelpers.findClassIfExists("android.os.Process", loadPackageParam.classLoader),
+                            "myPid");
 //                    myUid = (int) XposedHelpers.callStaticMethod(
 //                        XposedHelpers.findClassIfExists("android.os.Process", loadPackageParam.classLoader), "myUid");
                         mPid.pidCallBack(myPid);

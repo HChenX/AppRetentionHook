@@ -22,13 +22,13 @@
  */
 package Com.HChen.Hook.hook.color;
 
-import static Com.HChen.Hook.param.classpath.OplusName.AppIAthenaKillCallback$Stub;
-import static Com.HChen.Hook.param.classpath.OplusName.AppIAthenaKillCallback$Stub$Proxy;
-import static Com.HChen.Hook.param.classpath.OplusName.AthenaService$OKillerBinder$AthenaKillCallback;
-import static Com.HChen.Hook.param.classpath.OplusName.IAthenaKillCallback$Stub;
-import static Com.HChen.Hook.param.classpath.OplusName.IAthenaKillCallback$Stub$Proxy;
-import static Com.HChen.Hook.param.classpath.OplusName.IAthenaService$Stub$Proxy;
-import static Com.HChen.Hook.param.classpath.OplusName.RemoteService;
+import static Com.HChen.Hook.param.classpath.Oplus.AppIAthenaKillCallback$Stub;
+import static Com.HChen.Hook.param.classpath.Oplus.AppIAthenaKillCallback$Stub$Proxy;
+import static Com.HChen.Hook.param.classpath.Oplus.AthenaService$OKillerBinder$AthenaKillCallback;
+import static Com.HChen.Hook.param.classpath.Oplus.IAthenaKillCallback$Stub;
+import static Com.HChen.Hook.param.classpath.Oplus.IAthenaKillCallback$Stub$Proxy;
+import static Com.HChen.Hook.param.classpath.Oplus.IAthenaService$Stub$Proxy;
+import static Com.HChen.Hook.param.classpath.Oplus.RemoteService;
 
 import org.luckypray.dexkit.query.FindMethod;
 import org.luckypray.dexkit.query.matchers.ClassMatcher;

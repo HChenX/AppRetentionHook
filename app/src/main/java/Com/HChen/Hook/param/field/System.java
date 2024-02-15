@@ -20,11 +20,14 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook.param.name;
+package Com.HChen.Hook.param.field;
 
-public final class OplusValue {
-    public static final String killLocked = "killLocked";
-    public static final String onCreate = "onCreate";
-    public static final String startClearApps = "startClearApps";
-    public static final String startMorningClearApps = "startMorningClearApps";
+public final class System {
+    public static final String isDuraSpeedSupport = "isDuraSpeedSupport";
+    public static final String duraspeed = "setting.duraspeed.enabled";
+    public static final String mNextNoKillDebugMessageTime = "mNextNoKillDebugMessageTime";
+    public static final String MAX_PHANTOM_PROCESSES = "MAX_PHANTOM_PROCESSES";
+    public static final String PROACTIVE_KILLS_ENABLED = "PROACTIVE_KILLS_ENABLED";
+    public static final String USE_TRIM_SETTINGS = "USE_TRIM_SETTINGS";
+    public static final String DEFAULT_MAX_PHANTOM_PROCESSES = "DEFAULT_MAX_PHANTOM_PROCESSES";
 }

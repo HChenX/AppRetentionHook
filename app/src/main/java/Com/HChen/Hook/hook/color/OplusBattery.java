@@ -22,9 +22,9 @@
  */
 package Com.HChen.Hook.hook.color;
 
-import static Com.HChen.Hook.param.classpath.OplusName.ControllerCenter;
-import static Com.HChen.Hook.param.name.OplusValue.startClearApps;
-import static Com.HChen.Hook.param.name.OplusValue.startMorningClearApps;
+import static Com.HChen.Hook.param.classpath.Oplus.ControllerCenter;
+import static Com.HChen.Hook.param.method.Oplus.startClearApps;
+import static Com.HChen.Hook.param.method.Oplus.startMorningClearApps;
 
 import Com.HChen.Hook.mode.Hook;
 

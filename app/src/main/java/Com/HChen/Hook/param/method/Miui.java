@@ -20,9 +20,9 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package Com.HChen.Hook.param.name;
+package Com.HChen.Hook.param.method;
 
-public final class MiuiValue {
+public final class Miui {
     public static final String isEnableResumeFeature = "isEnableResumeFeature";
     public static final String isEnableScoutMemory = "isEnableScoutMemory";
     public static final String getDeviceLevelForRAM = "getDeviceLevelForRAM";
