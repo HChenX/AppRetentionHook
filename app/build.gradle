@@ -26,11 +26,11 @@ android {
         }
     }
 
-    namespace 'com.hchen.hook'
+    namespace 'com.hchen.appretention'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.hchen.hook"
+        applicationId "com.hchen.appretention"
         minSdk 30
         targetSdk 34
         //noinspection HighAppVersionCode
