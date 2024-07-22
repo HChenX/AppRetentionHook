@@ -34,7 +34,7 @@
 - After personal testing, the retention time of the background App has increased greatly, and there
   has been no background killing for a long time.
 - To my great surprise, even after one night, the app survived in the background and was not killed.
-- `These include, but are not limited to: TikTok GitHub(Android) Twitter(X) Telegram YouTobe and other software`
+- `These include, but are not limited to: TikTok GitHub(Android) Twitter(X) Telegram YouTube and other software`
 
 # 💡Module Description
 
