@@ -32,7 +32,7 @@
 
 - 经过个人测试，后台App留存时间大大增长在较长时间内未出现任何杀后台现象。
 - 令我十分惊讶的是甚至经过一个晚上App依然在后台存活没有被杀死。
-- `其中包括但不限于：QQ(腾讯) B站 抖音 GitHub(安卓) Twitter(X) Telegram(电报) YouTobe 等软件`
+- `其中包括但不限于：QQ(腾讯) B站 抖音 GitHub(安卓) Twitter(X) Telegram(电报) YouTube 等软件`
 
 # 💡模块说明
 
