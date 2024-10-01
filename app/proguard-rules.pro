@@ -20,5 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class com.hchen.appretention.HookInlet
--keep class * extends com.hchen.appretention.mode.Hook
+-keep class com.hchen.appretention.HookInit
+-keep class com.hchen.appretention.hook.**
+-keep class com.hchen.appretention.hook.**$*

@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AppRetentionHook"
 include ':app'
+include ':HookTool'
