@@ -429,4 +429,8 @@ public class AndroidU extends BaseHC {
          * */
         setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
     }
+
+    @Override
+    public void copy() {
+    }
 }

@@ -88,14 +88,17 @@ public class HyperV1 extends BaseHC {
 
     @Override
     public void init() {
+        // FURRY! [MiuiV14, AndroidU] STATE: NONE
         setStaticField(ScoutHelper, ENABLED_SCOUT, false); // 关闭 scout 功能
         setStaticField(ScoutHelper, BINDER_FULL_KILL_PROC, false); // 关闭 scout 功能
         setStaticField(ScoutDisplayMemoryManager, ENABLE_SCOUT_MEMORY_MONITOR, false); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_GPU, true); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
+        // DONE!!
 
         setStaticField(PreloadAppControllerImpl, ENABLE, false); // 禁止预加载
 
+        // FURRY! [MiuiV14, AndroidU] STATE: NONE
         /*
          * 禁止为了游戏回收内存。
          *
@@ -107,6 +110,7 @@ public class HyperV1 extends BaseHC {
             long.class,
             doNothing()
         );
+        // DONE!
 
         /*
          * 阻止定期清洁。
@@ -175,7 +179,7 @@ public class HyperV1 extends BaseHC {
                  * 无奖竞猜。
                  * */
                 .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-                .doNothing()
+                .doNothing(false)
         );
 
         /*
@@ -293,7 +297,7 @@ public class HyperV1 extends BaseHC {
                 }
             }
         );
-    }
+    } // END
 
     // 执行对 cameraOpt 的 hook 动作，保持同步
     private synchronized void doHookCameraOpt(ClassLoader classLoader) {
@@ -387,5 +391,9 @@ public class HyperV1 extends BaseHC {
             )
         };
         mCameraOptHookList.addAll(Arrays.asList(unHooks));
+    }
+
+    @Override
+    public void copy() {
     }
 }

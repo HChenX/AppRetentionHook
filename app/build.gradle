@@ -1,7 +1,16 @@
+import java.util.stream.Collectors
+
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    // id 'android.aop'
 }
+
+/*androidAopConfig {
+    enabled true
+    cutInfoJson true
+    include 'com.hchen.appretention', 'com.hchen.hooktool'
+}*/
 
 android {
     Properties properties = new Properties()
@@ -80,11 +89,40 @@ android {
     }
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+
+tasks.register('runProcessTasks', JavaExec) {
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+
+    mainClass = android.sourceSets.main.java.sourceFiles.getFiles().find {
+        it.name.contains("ProcessTasks.java")
+    }.toString()
+
+    args = [android.sourceSets.main.java.sourceFiles.getFiles().stream().map {
+        it.toString()
+    }.collect(Collectors.toCollection { new ArrayList<String>() })]
+
+    jvmArgs = ['-Xmx2024m', '-Dfile.encoding=UTF-8', '-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8']
+}
+
+afterEvaluate {
+    tasks.forEach {
+        def name = it.getName()
+        if (name.contains("JavaWithJavac") && !name.contains("Test")) {
+            it.dependsOn(runProcessTasks)
+        }
+    }
+}
 
 dependencies {
     compileOnly 'de.robv.android.xposed:api:82'
     implementation 'org.luckypray:dexkit:2.0.2'
     implementation 'androidx.annotation:annotation:1.8.2'
     implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
+    // implementation 'androidx.appcompat:appcompat:1.7.0'
+    // implementation 'io.github.FlyJingFish.AndroidAop:android-aop-core:2.2.3'
+    // annotationProcessor 'io.github.FlyJingFish.AndroidAop:android-aop-processor:2.2.3'
     implementation(project(':HookTool'))
 }
