@@ -68,7 +68,7 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
             .setLogLevel(HCInit.LOG_D)
         );
         HCInit.useLogExpand(new String[]{
-            "com.hchen.appretention.hook"
+            "com.hchen.appretention"
         });
         HCInit.initStartupParam(startupParam);
     }

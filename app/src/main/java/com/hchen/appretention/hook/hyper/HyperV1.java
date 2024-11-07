@@ -23,9 +23,12 @@ import static com.hchen.appretention.data.method.Hyper.doClean;
 import static com.hchen.appretention.data.method.Hyper.doFgTrim;
 import static com.hchen.appretention.data.method.Hyper.doReclaimMemory;
 import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
+import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
+import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
 import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
 import static com.hchen.appretention.data.method.Hyper.handleScreenOff;
 import static com.hchen.appretention.data.method.Hyper.interceptAppRestartIfNeeded;
+import static com.hchen.appretention.data.method.Hyper.isMiuiLiteVersion;
 import static com.hchen.appretention.data.method.Hyper.killApplication;
 import static com.hchen.appretention.data.method.Hyper.killBackgroundApps;
 import static com.hchen.appretention.data.method.Hyper.killPackage;
@@ -41,6 +44,7 @@ import static com.hchen.appretention.data.method.Hyper.reportCleanProcess;
 import static com.hchen.appretention.data.method.Hyper.reportStartProcess;
 import static com.hchen.appretention.data.method.Hyper.sendDataToLmkd;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
+import static com.hchen.appretention.data.path.Hyper.Build;
 import static com.hchen.appretention.data.path.Hyper.CameraAdjAdjuster;
 import static com.hchen.appretention.data.path.Hyper.CameraKillPolicy;
 import static com.hchen.appretention.data.path.Hyper.CameraLmkdSocket;
@@ -54,6 +58,7 @@ import static com.hchen.appretention.data.path.Hyper.IAppState$IRunningProcess;
 import static com.hchen.appretention.data.path.Hyper.MemoryFreezeStubImpl;
 import static com.hchen.appretention.data.path.Hyper.MemoryStandardProcessControl;
 import static com.hchen.appretention.data.path.Hyper.MiuiMemReclaimer;
+import static com.hchen.appretention.data.path.Hyper.OomAdjusterImpl;
 import static com.hchen.appretention.data.path.Hyper.PeriodicCleanerService;
 import static com.hchen.appretention.data.path.Hyper.PreloadAppControllerImpl;
 import static com.hchen.appretention.data.path.Hyper.PressureStateSettings;
@@ -74,7 +79,7 @@ import android.content.Intent;
 
 import com.hchen.appretention.data.field.Hyper;
 import com.hchen.hooktool.BaseHC;
-import com.hchen.hooktool.hook.IAction;
+import com.hchen.hooktool.hook.IHook;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -88,17 +93,14 @@ public class HyperV1 extends BaseHC {
 
     @Override
     public void init() {
-        // FURRY! [MiuiV14, AndroidU] STATE: NONE
         setStaticField(ScoutHelper, ENABLED_SCOUT, false); // 关闭 scout 功能
         setStaticField(ScoutHelper, BINDER_FULL_KILL_PROC, false); // 关闭 scout 功能
         setStaticField(ScoutDisplayMemoryManager, ENABLE_SCOUT_MEMORY_MONITOR, false); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_GPU, true); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
-        // DONE!!
 
         setStaticField(PreloadAppControllerImpl, ENABLE, false); // 禁止预加载
 
-        // FURRY! [MiuiV14, AndroidU] STATE: NONE
         /*
          * 禁止为了游戏回收内存。
          *
@@ -110,7 +112,31 @@ public class HyperV1 extends BaseHC {
             long.class,
             doNothing()
         );
-        // DONE!
+
+        /*
+         * 不是低内存设备！
+         * */
+        hookMethod(Build,
+            isMiuiLiteVersion,
+            returnResult(false)
+        );
+
+        /*
+         * 谎报内存等级。
+         * */
+        hookMethod(Build,
+            getDeviceLevelForRAM,
+            int.class,
+            returnResult(3)
+        );
+
+        /*
+         * 解除后台 app 最大计数限制。
+         * */
+        hookMethod(OomAdjusterImpl,
+            getBackgroundAppCount,
+            returnResult(100)
+        );
 
         /*
          * 阻止定期清洁。
@@ -179,7 +205,7 @@ public class HyperV1 extends BaseHC {
                  * 无奖竞猜。
                  * */
                 .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-                .doNothing(false)
+                .doNothing().shouldObserveCall(false)
         );
 
         /*
@@ -257,7 +283,7 @@ public class HyperV1 extends BaseHC {
         /*
          * 从此开始，下方为针对相机杀后台而 hook 的内容。
          * */
-        Class<?> mCameraOpt = findClass(CameraOpt);
+        Class<?> mCameraOpt = findClass(CameraOpt).get();
         if (mCameraOpt != null) {
             // 帮助 CameraOpt 初始化
             Class<?> mCameraBoosterClazz = getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
@@ -273,12 +299,12 @@ public class HyperV1 extends BaseHC {
         hookMethod(CameraOpt,
             callStaticMethod,
             Class.class, String.class, Object[].class,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
                     if (isCameraOptFinalHooked)
                         return;
-                    Class<?> clazz = first();
+                    Class<?> clazz = getArgs(0);
                     if (clazz == null) return;
                     if (mCameraOptClassLoader == null) {
                         mCameraOptClassLoader = clazz.getClassLoader();
@@ -286,7 +312,10 @@ public class HyperV1 extends BaseHC {
                     } else {
                         if (!mCameraOptClassLoader.equals(clazz.getClassLoader())) {
                             if (!mCameraOptHookList.isEmpty()) {
-                                mCameraOptHookList.forEach(UnHook::unHook);
+                                mCameraOptHookList.forEach(unHook -> {
+                                    if (unHook != null)
+                                        unHook.unHook();
+                                });
                                 mCameraOptHookList.clear();
                             }
                             doHookCameraOpt(mCameraOptClassLoader);
@@ -348,7 +377,7 @@ public class HyperV1 extends BaseHC {
                 classLoader,
                 sendDataToLmkd,
                 ByteBuffer.class,
-                new IAction() {
+                new IHook() {
                     @Override
                     public void before() {
                         callThisMethod(closeLmkdSocket); // 关闭连接
@@ -363,12 +392,12 @@ public class HyperV1 extends BaseHC {
             * 调用了 CamOptFileUtils 方法 writeToFile
             * 被调用 CameraMemLimit 方法 restoreProcessMemCgroup, getMemLimitAppProcessList
             * */
-            hookMethod(CameraMemLimit,
+            existsClass(CameraMemLimit) ? hookMethod(CameraMemLimit,
                 classLoader,
                 changeProcessMemCgroup,
                 Integer.class, String.class,
                 doNothing()
-            ),
+            ) : null,
 
             /*
             * cameraOpt 的表面上最终的 kill 调用点。

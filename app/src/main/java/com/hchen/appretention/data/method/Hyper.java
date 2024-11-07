@@ -4,6 +4,9 @@ public class Hyper {
     public static final String resumeMemLeak = "resumeMemLeak";
     public static final String reclaimMemoryForGameIfNeed = "reclaimMemoryForGameIfNeed";
     public static final String reclaimBackground = "reclaimBackground";
+    public static final String isMiuiLiteVersion = "isMiuiLiteVersion";
+    public static final String getDeviceLevelForRAM = "getDeviceLevelForRAM";
+    public static final String getBackgroundAppCount = "getBackgroundAppCount";
     public static final String doClean = "doClean";
     public static final String doFgTrim = "doFgTrim";
     public static final String handleScreenOff = "handleScreenOff";

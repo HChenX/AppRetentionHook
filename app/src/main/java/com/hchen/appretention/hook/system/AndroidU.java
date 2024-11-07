@@ -53,7 +53,7 @@ import android.os.Looper;
 
 import com.hchen.appretention.data.field.System;
 import com.hchen.hooktool.BaseHC;
-import com.hchen.hooktool.hook.IAction;
+import com.hchen.hooktool.hook.IHook;
 
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -106,7 +106,7 @@ public class AndroidU extends BaseHC {
         /*hook(ProcessList,
             getMemLevel,
             int.class,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void after() {
                     int[] mOomAdj = getThisField("mOomAdj");
@@ -123,7 +123,7 @@ public class AndroidU extends BaseHC {
          * 获取 ProcessList 的实例
          * */
         hookConstructor(ProcessList,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void after() {
                     processListInstance = thisObject();
@@ -137,7 +137,7 @@ public class AndroidU extends BaseHC {
          * */
         hookMethod(ProcessList,
             onLmkdConnect,
-            OutputStream.class, new IAction() {
+            OutputStream.class, new IHook() {
                 @Override
                 public void before() {
                     if (Boolean.TRUE.equals(getThisAdditionalInstanceField(isChangedOomMinFree)))
@@ -157,7 +157,7 @@ public class AndroidU extends BaseHC {
         hookMethod(ProcessList,
             updateOomLevels,
             int.class, int.class, boolean.class,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
                     setThisAdditionalInstanceField(isChangedOomMinFree, false);
@@ -165,7 +165,7 @@ public class AndroidU extends BaseHC {
 
                 @Override
                 public void after() {
-                    if ((third() instanceof Boolean b) && !b) {
+                    if ((getArgs(2) instanceof Boolean b) && !b) {
                         int[] mOomMinFree = getThisField(System.mOomMinFree);
                         if (mOomMinFree == null) return;
                         int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
@@ -182,10 +182,10 @@ public class AndroidU extends BaseHC {
         hookMethod(ProcessList,
             writeLmkd,
             ByteBuffer.class, ByteBuffer.class,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
-                    ByteBuffer buffer = first();
+                    ByteBuffer buffer = getArgs(0);
                     ByteBuffer bufCopy = buffer.duplicate();
                     bufCopy.rewind();
                     if (bufCopy.getInt() == 0) {
@@ -195,7 +195,7 @@ public class AndroidU extends BaseHC {
                         // false 说明 oomMinFree 未被更改。
                         if (Boolean.FALSE.equals(getAdditionalInstanceField(processListInstance, isChangedOomMinFree))) {
                             setOomMinFreeBuf(bufCopy);
-                            first(buffer);
+                            setArgs(0, buffer);
                         }
                     }
                 }
@@ -279,7 +279,7 @@ public class AndroidU extends BaseHC {
          * */
         hookConstructor(AppProfiler,
             ActivityManagerService, Looper.class, LowMemDetector,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
                     setThisField(mMemFactorOverride, 0);
@@ -294,7 +294,7 @@ public class AndroidU extends BaseHC {
         hookMethod(AppProfiler,
             updateLowMemStateLSP,
             int.class, int.class, int.class, long.class,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
                     setThisField(mMemFactorOverride, 0);
@@ -347,11 +347,11 @@ public class AndroidU extends BaseHC {
             updateAndTrimProcessLSP,
             long.class, long.class, long.class,
             ActiveUids, int.class,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
                     setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
-                    third(0L);
+                    setArgs(2, 0L);
                 }
             }.shouldObserveCall(false)
         );
@@ -363,7 +363,7 @@ public class AndroidU extends BaseHC {
          * */
         hookMethod(RecentTasks,
             trimInactiveRecentTasks,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
                     setThisField(mGlobalMaxNumTasks, Integer.MAX_VALUE);
@@ -379,10 +379,10 @@ public class AndroidU extends BaseHC {
         hookMethod(RecentTasks,
             isInVisibleRange,
             Task, int.class, int.class, boolean.class,
-            new IAction() {
+            new IHook() {
                 @Override
                 public void before() {
-                    third(0);
+                    setArgs(2, 0);
                 }
             }.shouldObserveCall(false)
         );
@@ -393,7 +393,7 @@ public class AndroidU extends BaseHC {
          * */
         chain(ActivityManagerConstants, constructor(
             Context.class, ActivityManagerService, Handler.class)
-            .hook(new IAction() {
+            .hook(new IHook() {
                 @Override
                 public void after() {
                     setThisField(CUR_MAX_CACHED_PROCESSES, 6144); // 最大缓存进程数

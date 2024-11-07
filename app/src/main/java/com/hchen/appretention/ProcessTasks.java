@@ -15,7 +15,7 @@ import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 public class ProcessTasks {
-    private static final String TAG = "ProcessTasks";
+    private static final String TAG = "[FURRY!!]";
     private static final ArrayList<FutureTask<String>> futureTaskList = new ArrayList<>();
     private static final ArrayList<String> importList = new ArrayList<>();
     private static final ConcurrentHashMap<String, String> hookFilesHashMap = new ConcurrentHashMap<>();
@@ -106,8 +106,10 @@ public class ProcessTasks {
             new Thread(futureTask).start();
         });
         waitDone();
-        if (readCopyContentHashMap.isEmpty())
+        if (readCopyContentHashMap.isEmpty()) {
+            log("本次无需生成任何内容！跳过！");
             System.exit(0);
+        }
     }
 
     public static void writeCopyContent() {
@@ -169,6 +171,7 @@ public class ProcessTasks {
         hookContentHashMap.forEach((s, list) -> {
             String path = hookFilesHashMap.get(s);
             FileHelper.write(path, list);
+            log("成功生成并写入！目标文件>>>>>" + path);
         });
     }
 

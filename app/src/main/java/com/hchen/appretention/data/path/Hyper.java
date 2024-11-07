@@ -6,6 +6,8 @@ public class Hyper {
     public static final String ScoutDisplayMemoryManager$DiaplayMemoryErrorInfo = "com.miui.server.stability.ScoutDisplayMemoryManager$DiaplayMemoryErrorInfo";
     public static final String GameMemoryCleaner = "com.miui.server.migard.memory.GameMemoryCleaner";
     public static final String GameMemoryReclaimer = "com.android.server.am.GameMemoryReclaimer";
+    public static final String Build = "miui.os.Build";
+    public static final String OomAdjusterImpl = "com.android.server.am.OomAdjusterImpl";
     public static final String PeriodicCleanerService = "com.android.server.am.PeriodicCleanerService";
     public static final String MemoryFreezeStubImpl = "com.android.server.am.MemoryFreezeStubImpl";
     public static final String MemoryStandardProcessControl = "com.android.server.am.MemoryStandardProcessControl";
