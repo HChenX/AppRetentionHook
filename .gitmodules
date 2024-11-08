@@ -1,4 +1,4 @@
 [submodule "HookTool"]
 	path = HookTool
 	url = https://github.com/HChenX/HookTool_module.git
-	branch = master
+	branch = private
