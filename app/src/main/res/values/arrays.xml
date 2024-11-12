@@ -5,6 +5,7 @@
         <item>com.miui.powerkeeper</item>
         <item>com.oplus.athena</item>
         <item>com.oplus.battery</item>
+        <item>com.android.systemui</item>
         <!--<item>com.android.settings</item>-->
     </string-array>
 </resources>

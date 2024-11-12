@@ -1,3 +1,25 @@
+/*
+ * This file is part of AppRetentionHook.
+
+ * AppRetentionHook is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+ * Author of this project: 焕晨HChen
+ * You can reference the code of this project,
+ * but as a project developer, I hope you can indicate it when referencing.
+
+ * Copyright (C) 2023-2024 AppRetentionHook Contributions
+ */
 package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.field.System.CUR_MAX_CACHED_PROCESSES;
@@ -9,17 +31,34 @@ import static com.hchen.appretention.data.field.System.MAX_PHANTOM_PROCESSES;
 import static com.hchen.appretention.data.field.System.PROACTIVE_KILLS_ENABLED;
 import static com.hchen.appretention.data.field.System.USE_MODERN_TRIM;
 import static com.hchen.appretention.data.field.System.isChangedOomMinFree;
+import static com.hchen.appretention.data.field.System.mCompactionHandler;
 import static com.hchen.appretention.data.field.System.mGlobalMaxNumTasks;
 import static com.hchen.appretention.data.field.System.mKillBgRestrictedAndCachedIdle;
 import static com.hchen.appretention.data.field.System.mMemFactorOverride;
 import static com.hchen.appretention.data.field.System.mNextNoKillDebugMessageTime;
+import static com.hchen.appretention.data.field.System.mOptRecord;
+import static com.hchen.appretention.data.field.System.mPendingCompactionProcesses;
+import static com.hchen.appretention.data.field.System.mState;
+import static com.hchen.appretention.data.field.System.mUseBootCompact;
+import static com.hchen.appretention.data.field.System.mUseCompaction;
 import static com.hchen.appretention.data.method.System.checkExcessivePowerUsageLPr;
+import static com.hchen.appretention.data.method.System.getCurAdj;
+import static com.hchen.appretention.data.method.System.getSetAdj;
+import static com.hchen.appretention.data.method.System.getSetProcState;
+import static com.hchen.appretention.data.method.System.hasPendingCompact;
 import static com.hchen.appretention.data.method.System.isInVisibleRange;
 import static com.hchen.appretention.data.method.System.killProcessLocked;
 import static com.hchen.appretention.data.method.System.killProcessesWhenImperceptible;
 import static com.hchen.appretention.data.method.System.onLmkdConnect;
+import static com.hchen.appretention.data.method.System.onOomAdjustChanged;
 import static com.hchen.appretention.data.method.System.performIdleMaintenance;
+import static com.hchen.appretention.data.method.System.resolveCompactionProfile;
+import static com.hchen.appretention.data.method.System.setHasPendingCompact;
+import static com.hchen.appretention.data.method.System.setReqCompactProfile;
+import static com.hchen.appretention.data.method.System.setReqCompactSource;
 import static com.hchen.appretention.data.method.System.shouldKillExcessiveProcesses;
+import static com.hchen.appretention.data.method.System.shouldOomAdjThrottleCompaction;
+import static com.hchen.appretention.data.method.System.shouldThrottleMiscCompaction;
 import static com.hchen.appretention.data.method.System.trimInactiveRecentTasks;
 import static com.hchen.appretention.data.method.System.trimPhantomProcessesIfNecessary;
 import static com.hchen.appretention.data.method.System.updateAndTrimProcessLSP;
@@ -30,12 +69,19 @@ import static com.hchen.appretention.data.method.System.updateMaxPhantomProcesse
 import static com.hchen.appretention.data.method.System.updateOomLevels;
 import static com.hchen.appretention.data.method.System.updateProactiveKillsEnabled;
 import static com.hchen.appretention.data.method.System.updateProcessCpuStatesLocked;
+import static com.hchen.appretention.data.method.System.updateUseCompaction;
 import static com.hchen.appretention.data.method.System.updateUseModernTrim;
 import static com.hchen.appretention.data.method.System.writeLmkd;
 import static com.hchen.appretention.data.path.System.ActiveUids;
 import static com.hchen.appretention.data.path.System.ActivityManagerConstants;
 import static com.hchen.appretention.data.path.System.ActivityManagerService;
 import static com.hchen.appretention.data.path.System.AppProfiler;
+import static com.hchen.appretention.data.path.System.CachedAppOptimizer;
+import static com.hchen.appretention.data.path.System.CachedAppOptimizer$CompactProfile;
+import static com.hchen.appretention.data.path.System.CachedAppOptimizer$CompactSource;
+import static com.hchen.appretention.data.path.System.CachedAppOptimizer$MemCompactionHandler;
+import static com.hchen.appretention.data.path.System.CachedAppOptimizer$ProcessDependencies;
+import static com.hchen.appretention.data.path.System.CachedAppOptimizer$PropertyChangedCallbackForTest;
 import static com.hchen.appretention.data.path.System.LowMemDetector;
 import static com.hchen.appretention.data.path.System.OomAdjuster;
 import static com.hchen.appretention.data.path.System.PhantomProcessList;
@@ -57,6 +103,7 @@ import com.hchen.hooktool.hook.IHook;
 
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -387,6 +434,115 @@ public class AndroidU extends BaseHC {
             }.shouldObserveCall(false)
         );
 
+        // --------------- CachedAppOptimizer ----------------
+        /*
+         * 接管系统的压缩流程，并激进化流程。
+         * */
+        chain(CachedAppOptimizer, method(onOomAdjustChanged,
+            int.class, int.class, ProcessRecord).hook(
+                new IHook() {
+                    private static final Object SOME = getStaticField(CachedAppOptimizer$CompactProfile, System.SOME);
+                    private static final Object FULL = getStaticField(CachedAppOptimizer$CompactProfile, System.FULL);
+                    private static final Object SHEll = getStaticField(CachedAppOptimizer$CompactSource, System.SHELL);
+                    private static final Object APP = getStaticField(CachedAppOptimizer$CompactSource, System.APP);
+                    private Object state;
+                    private Object optRecord;
+                    private Handler compactionHandler;
+                    private ArrayList pendingCompactionProcesses;
+
+                    @Override
+                    public void before() {
+                        Object app = getArgs(2);
+                        if (app == null) return;
+                        state = getField(app, mState);
+                        optRecord = getField(app, mOptRecord);
+                        compactionHandler = getThisField(mCompactionHandler);
+                        pendingCompactionProcesses = getThisField(mPendingCompactionProcesses);
+                        if (getSetAdj() <= PrecessAdjInfo.PERCEPTIBLE_APP_ADJ &&
+                            getCurAdj() >= PrecessAdjInfo.SERVICE_ADJ && getCurAdj() < PrecessAdjInfo.PREVIOUS_APP_ADJ
+                        ) {
+                            setReqCompactSource(SHEll);
+                            setReqCompactProfile(SOME);
+                            if (!hasPendingCompact()) {
+                                setHasPendingCompact(true);
+                                pendingCompactionProcesses.add(app);
+                                compactionHandler.sendMessage(compactionHandler.obtainMessage(1, getCurAdj(), getSetProcState()));
+                            }
+                        } else if (getSetAdj() >= PrecessAdjInfo.PREVIOUS_APP_ADJ && getCurAdj() < PrecessAdjInfo.CACHED_APP_MAX_ADJ) {
+                            setReqCompactSource(SHEll);
+                            setReqCompactProfile(FULL);
+                            if (!hasPendingCompact()) {
+                                setHasPendingCompact(true);
+                                pendingCompactionProcesses.add(app);
+                                compactionHandler.sendMessage(compactionHandler.obtainMessage(1, getCurAdj(), getSetProcState()));
+                            }
+                        }
+                        returnNull();
+                    }
+
+                    private int getSetAdj() {
+                        return callMethod(state, getSetAdj);
+                    }
+
+                    private int getCurAdj() {
+                        return callMethod(state, getCurAdj);
+                    }
+
+                    private int getSetProcState() {
+                        return callMethod(state, getSetProcState);
+                    }
+
+                    private void setReqCompactProfile(Object obj) {
+                        callMethod(optRecord, setReqCompactProfile, obj);
+                    }
+
+                    private void setReqCompactSource(Object obj) {
+                        callMethod(optRecord, setReqCompactSource, obj);
+                    }
+
+                    private boolean hasPendingCompact() {
+                        return callMethod(optRecord, hasPendingCompact);
+                    }
+
+                    private void setHasPendingCompact(boolean pendingCompact) {
+                        callMethod(optRecord, setHasPendingCompact, pendingCompact);
+                    }
+                }).shouldObserveCall(false)
+
+            .method(resolveCompactionProfile, CachedAppOptimizer$CompactProfile)
+            .hook(new IHook() {
+                @Override
+                public void before() {
+                    setResult(getArgs(0));
+                }
+            }).shouldObserveCall(false)
+
+            .method(updateUseCompaction)
+            .hook(new IHook() {
+                @Override
+                public void after() {
+                    setThisField(mUseCompaction, true);
+                }
+            }).shouldObserveCall(false)
+
+            .constructor(ActivityManagerService,
+                CachedAppOptimizer$PropertyChangedCallbackForTest,
+                CachedAppOptimizer$ProcessDependencies)
+            .hook(new IHook() {
+                @Override
+                public void after() {
+                    setThisField(mUseBootCompact, true);
+                }
+            }).shouldObserveCall(false)
+        );
+
+        chain(CachedAppOptimizer$MemCompactionHandler, method(shouldOomAdjThrottleCompaction, ProcessRecord)
+            .returnResult(false).shouldObserveCall(false)
+
+            .method(shouldThrottleMiscCompaction, ProcessRecord, int.class)
+            .returnResult(false).shouldObserveCall(false)
+        );
+
         // ----------- ActivityManagerConstants -------------
         /*
          * 各种基本常量设置。
@@ -432,5 +588,104 @@ public class AndroidU extends BaseHC {
 
     @Override
     public void copy() {
+    }
+
+    private static class PrecessAdjInfo {
+        // OOM adjustments for processes in various states:
+
+        // Uninitialized value for any major or minor adj fields
+        static final int INVALID_ADJ = -10000;
+
+        // Adjustment used in certain places where we don't know it yet.
+        // (Generally this is something that is going to be cached, but we
+        // don't know the exact value in the cached range to assign yet.)
+        static final int UNKNOWN_ADJ = 1001;
+
+        // This is a process only hosting activities that are not visible,
+        // so it can be killed without any disruption.
+        static final int CACHED_APP_MAX_ADJ = 999;
+        static final int CACHED_APP_MIN_ADJ = 900;
+
+        // This is the oom_adj level that we allow to die first. This cannot be equal to
+        // CACHED_APP_MAX_ADJ unless processes are actively being assigned an oom_score_adj of
+        // CACHED_APP_MAX_ADJ.
+        static final int CACHED_APP_LMK_FIRST_ADJ = 950;
+
+        // Number of levels we have available for different service connection group importance
+        // levels.
+        static final int CACHED_APP_IMPORTANCE_LEVELS = 5;
+
+        // The B list of SERVICE_ADJ -- these are the old and decrepit
+        // services that aren't as shiny and interesting as the ones in the A list.
+        static final int SERVICE_B_ADJ = 800;
+
+        // This is the process of the previous application that the user was in.
+        // This process is kept above other things, because it is very common to
+        // switch back to the previous app.  This is important both for recent
+        // task switch (toggling between the two top recent apps) as well as normal
+        // UI flow such as clicking on a URI in the e-mail app to view in the browser,
+        // and then pressing back to return to e-mail.
+        static final int PREVIOUS_APP_ADJ = 700;
+
+        // This is a process holding the home application -- we want to try
+        // avoiding killing it, even if it would normally be in the background,
+        // because the user interacts with it so much.
+        static final int HOME_APP_ADJ = 600;
+
+        // This is a process holding an application service -- killing it will not
+        // have much of an impact as far as the user is concerned.
+        static final int SERVICE_ADJ = 500;
+
+        // This is a process with a heavy-weight application.  It is in the
+        // background, but we want to try to avoid killing it.  Value set in
+        // system/rootdir/init.rc on startup.
+        static final int HEAVY_WEIGHT_APP_ADJ = 400;
+
+        // This is a process currently hosting a backup operation.  Killing it
+        // is not entirely fatal but is generally a bad idea.
+        static final int BACKUP_APP_ADJ = 300;
+
+        // This is a process bound by the system (or other app) that's more important than services but
+        // not so perceptible that it affects the user immediately if killed.
+        static final int PERCEPTIBLE_LOW_APP_ADJ = 250;
+
+        // This is a process hosting services that are not perceptible to the user but the
+        // client (system) binding to it requested to treat it as if it is perceptible and avoid killing
+        // it if possible.
+        static final int PERCEPTIBLE_MEDIUM_APP_ADJ = 225;
+
+        // This is a process only hosting components that are perceptible to the
+        // user, and we really want to avoid killing them, but they are not
+        // immediately visible. An example is background music playback.
+        static final int PERCEPTIBLE_APP_ADJ = 200;
+
+        // This is a process only hosting activities that are visible to the
+        // user, so we'd prefer they don't disappear.
+        static final int VISIBLE_APP_ADJ = 100;
+        static final int VISIBLE_APP_LAYER_MAX = PERCEPTIBLE_APP_ADJ - VISIBLE_APP_ADJ - 1;
+
+        // This is a process that was recently TOP and moved to FGS. Continue to treat it almost
+        // like a foreground app for a while.
+        // @see TOP_TO_FGS_GRACE_PERIOD
+        static final int PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ = 50;
+
+        // This is the process running the current foreground app.  We'd really
+        // rather not kill it!
+        static final int FOREGROUND_APP_ADJ = 0;
+
+        // This is a process that the system or a persistent process has bound to,
+        // and indicated it is important.
+        static final int PERSISTENT_SERVICE_ADJ = -700;
+
+        // This is a system persistent process, such as telephony.  Definitely
+        // don't want to kill it, but doing so is not completely fatal.
+        static final int PERSISTENT_PROC_ADJ = -800;
+
+        // The system process runs at the default adjustment.
+        static final int SYSTEM_ADJ = -900;
+
+        // Special code for native processes that are not being managed by the system (so
+        // don't have an oom adj assigned by the system).
+        static final int NATIVE_ADJ = -1000;
     }
 }

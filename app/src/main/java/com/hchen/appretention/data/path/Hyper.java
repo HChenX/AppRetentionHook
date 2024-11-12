@@ -3,6 +3,7 @@ package com.hchen.appretention.data.path;
 public class Hyper {
     public static final String ScoutHelper = "com.android.server.ScoutHelper";
     public static final String ScoutDisplayMemoryManager = "com.miui.server.stability.ScoutDisplayMemoryManager";
+    public static final String ActivityThreadImpl = "android.app.ActivityThreadImpl";
     public static final String ScoutDisplayMemoryManager$DiaplayMemoryErrorInfo = "com.miui.server.stability.ScoutDisplayMemoryManager$DiaplayMemoryErrorInfo";
     public static final String GameMemoryCleaner = "com.miui.server.migard.memory.GameMemoryCleaner";
     public static final String GameMemoryReclaimer = "com.android.server.am.GameMemoryReclaimer";

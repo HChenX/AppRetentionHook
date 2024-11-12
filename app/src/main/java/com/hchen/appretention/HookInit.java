@@ -22,13 +22,19 @@
  */
 package com.hchen.appretention;
 
+import com.hchen.appretention.hook.LogPuppet;
 import com.hchen.appretention.hook.hyper.HyperV1;
 import com.hchen.appretention.hook.powerkeeper.PowerKeeper;
 import com.hchen.appretention.hook.system.AndroidU;
+import com.hchen.appretention.hook.system.UserUnlockListener;
+import com.hchen.appretention.log.LogToFile;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.HCInit;
 
 import org.luckypray.dexkit.DexKitBridge;
+
+import java.util.Arrays;
+import java.util.HashMap;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -39,25 +45,36 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     private static final String TAG = "AppRetention";
     private static final AndroidU androidU = new AndroidU();
     private static final HyperV1 hyperV1 = new HyperV1();
+    private static final UserUnlockListener userUnlockListener = new UserUnlockListener();
     private static final PowerKeeper powerKeeper = new PowerKeeper();
+    private static final HashMap<String, BaseHC[]> baseHCs = new HashMap<>();
+    private static final HashMap<String, String> hookAsTag = new HashMap<>();
+    private static final String[] hookPackages = {
+        "android",
+        "com.miui.powerkeeper",
+        "com.oplus.athena",
+        "com.oplus.battery",
+        "com.android.systemui"
+    };
+
+    static {
+        baseHCs.put("android", new BaseHC[]{androidU, hyperV1, userUnlockListener});
+        baseHCs.put("com.miui.powerkeeper", new BaseHC[]{powerKeeper});
+        baseHCs.put("com.android.systemui", new BaseHC[]{new LogPuppet()});
+        hookAsTag.put("android", "Android");
+        hookAsTag.put("com.miui.powerkeeper", "PowerKeeper");
+        hookAsTag.put("com.android.systemui", "LogPuppet");
+    }
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        HCInit.initLoadPackageParam(loadPackageParam);
-        switch (loadPackageParam.packageName) {
-            case "android" -> {
-                androidU.onLoadPackage();
-                hyperV1.onLoadPackage();
+        baseHCs.forEach((packageName, baseHCs) -> {
+            if (packageName.equals(loadPackageParam.packageName)) {
+                LogToFile.initLogToFile(hookAsTag.get(packageName));
+                HCInit.initLoadPackageParam(loadPackageParam);
+                Arrays.stream(baseHCs).forEach(BaseHC::onLoadPackage);
             }
-            case "com.miui.powerkeeper" -> {
-                powerKeeper.onLoadPackage();
-            }
-            case "com.oplus.athena" -> {
-
-            }
-            case "com.oplus.battery" -> {
-            }
-        }
+        });
     }
 
     @Override
@@ -70,6 +87,8 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
         HCInit.useLogExpand(new String[]{
             "com.hchen.appretention"
         });
+        HCInit.setLogFileRootName("AppRetention");
+        HCInit.setModuleVersion(BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")");
         HCInit.initStartupParam(startupParam);
     }
 

@@ -1,3 +1,25 @@
+/*
+ * This file is part of AppRetentionHook.
+
+ * AppRetentionHook is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+ * Author of this project: 焕晨HChen
+ * You can reference the code of this project,
+ * but as a project developer, I hope you can indicate it when referencing.
+
+ * Copyright (C) 2023-2024 AppRetentionHook Contributions
+ */
 package com.hchen.appretention.hook.hyper;
 
 import static com.hchen.appretention.data.field.Hyper.BINDER_FULL_KILL_PROC;
@@ -44,6 +66,7 @@ import static com.hchen.appretention.data.method.Hyper.reportCleanProcess;
 import static com.hchen.appretention.data.method.Hyper.reportStartProcess;
 import static com.hchen.appretention.data.method.Hyper.sendDataToLmkd;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
+import static com.hchen.appretention.data.path.Hyper.ActivityThreadImpl;
 import static com.hchen.appretention.data.path.Hyper.Build;
 import static com.hchen.appretention.data.path.Hyper.CameraAdjAdjuster;
 import static com.hchen.appretention.data.path.Hyper.CameraKillPolicy;
@@ -98,6 +121,8 @@ public class HyperV1 extends BaseHC {
         setStaticField(ScoutDisplayMemoryManager, ENABLE_SCOUT_MEMORY_MONITOR, false); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_GPU, true); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
+
+        setStaticField(ActivityThreadImpl, ENABLED_SCOUT, false); // 关闭 scout 功能
 
         setStaticField(PreloadAppControllerImpl, ENABLE, false); // 禁止预加载
 
