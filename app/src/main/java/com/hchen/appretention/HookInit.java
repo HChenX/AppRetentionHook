@@ -26,6 +26,7 @@ import com.hchen.appretention.hook.LogPuppet;
 import com.hchen.appretention.hook.hyper.HyperV1;
 import com.hchen.appretention.hook.powerkeeper.PowerKeeper;
 import com.hchen.appretention.hook.system.AndroidU;
+import com.hchen.appretention.hook.system.CrashListener;
 import com.hchen.appretention.hook.system.UserUnlockListener;
 import com.hchen.appretention.log.LogToFile;
 import com.hchen.hooktool.BaseHC;
@@ -40,12 +41,17 @@ import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-/* Hook入口。*/
+/**
+ * Hook 入口
+ *
+ * @author 焕晨HChen
+ */
 public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     private static final String TAG = "AppRetention";
     private static final AndroidU androidU = new AndroidU();
     private static final HyperV1 hyperV1 = new HyperV1();
     private static final UserUnlockListener userUnlockListener = new UserUnlockListener();
+    private static final CrashListener crashListener = new CrashListener();
     private static final PowerKeeper powerKeeper = new PowerKeeper();
     private static final HashMap<String, BaseHC[]> baseHCs = new HashMap<>();
     private static final HashMap<String, String> hookAsTag = new HashMap<>();
@@ -58,7 +64,7 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     };
 
     static {
-        baseHCs.put("android", new BaseHC[]{androidU, hyperV1, userUnlockListener});
+        baseHCs.put("android", new BaseHC[]{androidU, hyperV1, userUnlockListener, crashListener});
         baseHCs.put("com.miui.powerkeeper", new BaseHC[]{powerKeeper});
         baseHCs.put("com.android.systemui", new BaseHC[]{new LogPuppet()});
         hookAsTag.put("android", "Android");

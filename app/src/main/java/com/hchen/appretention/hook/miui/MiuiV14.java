@@ -24,6 +24,11 @@ package com.hchen.appretention.hook.miui;
 
 import com.hchen.hooktool.BaseHC;
 
+/**
+ * Miui14
+ *
+ * @author 焕晨HChen
+ */
 public class MiuiV14 extends BaseHC {
     @Override
     public void init() {

@@ -109,6 +109,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Hyper OS v1
+ *
+ * @author 焕晨HChen
+ */
 public class HyperV1 extends BaseHC {
     private static final ArrayList<UnHook> mCameraOptHookList = new ArrayList<>();
     private static ClassLoader mCameraOptClassLoader = null;

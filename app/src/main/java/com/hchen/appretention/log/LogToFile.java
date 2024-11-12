@@ -47,6 +47,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,6 +69,7 @@ public class LogToFile {
     public static final String SETTINGS_LOG_SERVICE_COMPLETED = "log_service_boot_complete";
     private static final String TAG = "LogToFile";
     private static final String LOG_FILE_PATH = "/storage/emulated/0/Android/" + ToolData.mLogFileRootName + "/";
+    private static final String LOG_OLD_FILE_PATH = "/storage/emulated/0/Android/" + ToolData.mLogFileRootName + "/old/";
     private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
     private static String LOG_FILE_FULL_PATH = "";
     private static boolean isWaitingSystemBootCompleted = false;
@@ -204,6 +207,39 @@ public class LogToFile {
         }
     }
 
+    public static void removeAllOldLogFileAndCopyLogFileToOldPathIfNeed() {
+        File oldFilePath = new File(LOG_OLD_FILE_PATH);
+        if (!oldFilePath.exists()) {
+            if (!oldFilePath.mkdirs()) {
+                logENoSave(TAG, "Create old log dirs failed! Path: " + LOG_OLD_FILE_PATH);
+                return;
+            }
+        }
+        File[] oldFiles = oldFilePath.listFiles();
+        if (oldFiles != null)
+            for (File f : oldFiles) {
+                if (f.delete()) {
+                    AndroidLog.logI(TAG, "success to delete old log file: " + f.getPath());
+                } else
+                    AndroidLog.logE(TAG, "failed to delete old log file: " + f.getPath());
+            }
+
+        File filePath = new File(LOG_FILE_PATH);
+        if (!filePath.exists()) return;
+        File[] files = filePath.listFiles(File::isFile);
+        if (files != null) {
+            for (File file : files) {
+                File targetFile = new File(LOG_OLD_FILE_PATH, file.getName());
+                try {
+                    Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    AndroidLog.logI(TAG, "success to copy log file to old path: " + targetFile.getPath());
+                } catch (IOException e) {
+                    logENoSave(TAG, "failed to copy log file to old path: " + file.getPath(), e);
+                }
+            }
+        }
+    }
+
     private static boolean shouldResetFile(String key, String logId) {
         LogFileStateData data = mLogFileStateDataMap.get(key);
         if (data == null) return false;
@@ -277,7 +313,7 @@ public class LogToFile {
         return "1".equals(result);
     }
 
-    private static boolean isUserUnlockedCompeted() {
+    public static boolean isUserUnlockedCompeted() {
         return SystemPropTool.getProp(USER_UNLOCKED_COMPLETED_PROP, "false").equals("true");
     }
 

@@ -24,6 +24,7 @@ package com.hchen.appretention.hook;
 
 import static com.hchen.appretention.log.LogToFile.ACTION_LOG_SERVICE_CONTENT;
 import static com.hchen.appretention.log.LogToFile.SETTINGS_LOG_SERVICE_COMPLETED;
+import static com.hchen.appretention.log.LogToFile.isUserUnlockedCompeted;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -42,6 +43,11 @@ import com.hchen.hooktool.log.AndroidLog;
 
 import java.util.ArrayList;
 
+/**
+ * 劫持系统界面作为傀儡日志写入工具
+ *
+ * @author 焕晨HChen
+ */
 public class LogPuppet extends BaseHC {
     private boolean isRegisterReceiver = false;
 
@@ -56,29 +62,48 @@ public class LogPuppet extends BaseHC {
                     Application application = thisObject();
                     Settings.System.putString(application.getContentResolver(), SETTINGS_LOG_SERVICE_COMPLETED, "0");
 
-                    IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
-                    intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-                    intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+                    if (!isUserUnlockedCompeted()) {
+                        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_BOOT_COMPLETED);
+                        application.registerReceiver(new BroadcastReceiver() {
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                if (isRegisterReceiver) return;
+                                registerLogBroadcastReceiver(application);
+
+                                Settings.System.putString(application.getContentResolver(), SETTINGS_LOG_SERVICE_COMPLETED, "1");
+                                AndroidLog.logI(TAG, "system boot completed!!!!!");
+                                application.unregisterReceiver(this);
+                                isRegisterReceiver = true;
+                            }
+                        }, intentFilter);
+                    } else {
+                        registerLogBroadcastReceiver(application);
+                        Settings.System.putString(application.getContentResolver(), SETTINGS_LOG_SERVICE_COMPLETED, "1");
+                    }
+
+                    IntentFilter intentFilter = new IntentFilter();
+                    intentFilter.addAction(Intent.ACTION_SHUTDOWN);
+                    intentFilter.addAction(Intent.ACTION_REBOOT);
                     application.registerReceiver(new BroadcastReceiver() {
                         @Override
-                        @SuppressLint("UnspecifiedRegisterReceiverFlag")
                         public void onReceive(Context context, Intent intent) {
-                            if (isRegisterReceiver) return;
-                            IntentFilter filter = new IntentFilter(ACTION_LOG_SERVICE_CONTENT);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                application.registerReceiver(new LogServiceBroadcastReceiver(), filter, Context.RECEIVER_EXPORTED);
-                            } else
-                                application.registerReceiver(new LogServiceBroadcastReceiver(), filter);
-
-                            Settings.System.putString(application.getContentResolver(), SETTINGS_LOG_SERVICE_COMPLETED, "1");
-                            AndroidLog.logI(TAG, "system boot completed!!!!!");
-                            application.unregisterReceiver(this);
-                            isRegisterReceiver = true;
+                            LogToFile.removeAllOldLogFileAndCopyLogFileToOldPathIfNeed();
+                            AndroidLog.logI(TAG, "system will shutdown or reboot!!!");
                         }
                     }, intentFilter);
                 }
             }
         );
+    }
+
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    private void registerLogBroadcastReceiver(Application application) {
+        IntentFilter filter = new IntentFilter(ACTION_LOG_SERVICE_CONTENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            application.registerReceiver(new LogServiceBroadcastReceiver(), filter, Context.RECEIVER_EXPORTED);
+        } else
+            application.registerReceiver(new LogServiceBroadcastReceiver(), filter);
+        AndroidLog.logI(TAG, "register log broadcast receiver!!");
     }
 
     public static class LogServiceBroadcastReceiver extends BroadcastReceiver {

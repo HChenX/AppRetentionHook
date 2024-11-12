@@ -36,6 +36,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
+/**
+ * 自动生成代码的流程
+ *
+ * @author 焕晨HChen
+ */
 public class ProcessTasks {
     private static final String TAG = "[FURRY!!]";
     private static final ArrayList<FutureTask<String>> futureTaskList = new ArrayList<>();

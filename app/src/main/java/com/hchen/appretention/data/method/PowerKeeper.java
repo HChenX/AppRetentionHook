@@ -22,6 +22,11 @@
  */
 package com.hchen.appretention.data.method;
 
+/**
+ * 电量和性能方法名
+ *
+ * @author 焕晨HChen
+ */
 public class PowerKeeper {
     public static final String kill = "kill";
 }

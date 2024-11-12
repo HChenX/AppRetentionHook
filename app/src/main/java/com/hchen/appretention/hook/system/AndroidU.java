@@ -108,6 +108,8 @@ import java.util.Arrays;
 
 /**
  * 安卓 14
+ *
+ * @author 焕晨HChen
  */
 public class AndroidU extends BaseHC {
     private static final int OOM_MIN_FREE_DISCOUNT = 4;

@@ -22,6 +22,11 @@
  */
 package com.hchen.appretention.data.field;
 
+/**
+ * 系统框架类名
+ *
+ * @author 焕晨HChen
+ */
 public class System {
     public static final String mNextNoKillDebugMessageTime = "mNextNoKillDebugMessageTime";
     public static final String mGlobalMaxNumTasks = "mGlobalMaxNumTasks";

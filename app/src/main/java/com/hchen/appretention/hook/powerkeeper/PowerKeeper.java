@@ -27,6 +27,11 @@ import static com.hchen.appretention.data.path.PowerKeeper.ProcessManager;
 
 import com.hchen.hooktool.BaseHC;
 
+/**
+ * 禁止电量和性能杀后台
+ *
+ * @author 焕晨HChen
+ */
 public class PowerKeeper extends BaseHC {
     @Override
     public void init() {

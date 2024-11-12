@@ -22,5 +22,10 @@
  */
 package com.hchen.appretention.data.field;
 
+/**
+ * Miui 类名
+ *
+ * @author 焕晨HChen
+ */
 public class Miui {
 }

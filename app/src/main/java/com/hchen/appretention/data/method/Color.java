@@ -22,5 +22,10 @@
  */
 package com.hchen.appretention.data.method;
 
+/**
+ * Color 方法名
+ *
+ * @author 焕晨HChen
+ */
 public class Color {
 }

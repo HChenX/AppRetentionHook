@@ -22,6 +22,11 @@
  */
 package com.hchen.appretention.data.field;
 
+/**
+ * Hyper 类名
+ *
+ * @author 焕晨HChen
+ */
 public class Hyper {
     public static final String ENABLED_SCOUT = "ENABLED_SCOUT";
     public static final String BINDER_FULL_KILL_PROC = "BINDER_FULL_KILL_PROC";

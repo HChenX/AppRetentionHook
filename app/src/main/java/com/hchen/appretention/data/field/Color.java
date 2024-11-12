@@ -22,5 +22,10 @@
  */
 package com.hchen.appretention.data.field;
 
+/**
+ * Color 字段名
+ *
+ * @author 焕晨HChen
+ */
 public class Color {
 }

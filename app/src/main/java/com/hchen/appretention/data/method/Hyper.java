@@ -22,6 +22,11 @@
  */
 package com.hchen.appretention.data.method;
 
+/**
+ * Hyper 方法名
+ *
+ * @author 焕晨HChen
+ */
 public class Hyper {
     public static final String resumeMemLeak = "resumeMemLeak";
     public static final String reclaimMemoryForGameIfNeed = "reclaimMemoryForGameIfNeed";

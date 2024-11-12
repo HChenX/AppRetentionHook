@@ -22,6 +22,11 @@
  */
 package com.hchen.appretention.data.method;
 
+/**
+ * 系统框架方法名
+ *
+ * @author 焕晨HChen
+ */
 public class System {
     public static final String killProcessesWhenImperceptible = "killProcessesWhenImperceptible";
     public static final String killProcessLocked = "killProcessLocked";
