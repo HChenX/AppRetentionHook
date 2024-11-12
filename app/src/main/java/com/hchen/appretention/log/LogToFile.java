@@ -352,7 +352,8 @@ public class LogToFile {
                     if (!mLogContentData.mLogContent.isEmpty()) {
                         sendLogContentBroadcast(context);
                     }
-                }
+                } else
+                    hasProcessingBroadcast = false; // 处理失败, 接收方可能尚未注册, 跳过！可能丢失日志数据！
                 AndroidLog.logI(TAG, "broadcast result code: " + getResultCode());
             }
 
