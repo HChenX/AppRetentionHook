@@ -25,6 +25,7 @@ package com.hchen.appretention.hook;
 import static com.hchen.appretention.log.LogToFile.ACTION_LOG_SERVICE_CONTENT;
 import static com.hchen.appretention.log.LogToFile.SETTINGS_LOG_SERVICE_COMPLETED;
 import static com.hchen.appretention.log.LogToFile.isUserUnlockedCompeted;
+import static com.hchen.hooktool.log.XposedLog.logE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -33,15 +34,23 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 
+import com.hchen.appretention.BuildConfig;
 import com.hchen.appretention.log.LogToFile;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * 劫持系统界面作为傀儡日志写入工具
@@ -50,6 +59,8 @@ import java.util.ArrayList;
  */
 public class LogPuppet extends BaseHC {
     private boolean isRegisterReceiver = false;
+    private static final String SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE = "kill_event_log_record_enable";
+    private static boolean isKillEventRecording = false;
 
     @Override
     public void init() {
@@ -104,6 +115,16 @@ public class LogPuppet extends BaseHC {
         } else
             application.registerReceiver(new LogServiceBroadcastReceiver(), filter);
         AndroidLog.logI(TAG, "register log broadcast receiver!!");
+        KillEventLogRecord.init(application);
+        application.getContentResolver().registerContentObserver(Settings.System.getUriFor(SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE),
+            false, new ContentObserver(new Handler(application.getMainLooper())) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    if (selfChange) return;
+                    KillEventLogRecord.init(application);
+                }
+            }
+        );
     }
 
     public static class LogServiceBroadcastReceiver extends BroadcastReceiver {
@@ -123,6 +144,85 @@ public class LogPuppet extends BaseHC {
                 setResultCode(Activity.RESULT_OK);
                 AndroidLog.logI(TAG, "broadcast receiver: key: " + key + ", id: " + id + ", content: " + content);
             }
+        }
+    }
+
+    private static class KillEventLogRecord {
+        private static final String TAG = "KillEventLogRecord";
+        private static final String mKillEventRecordFile = "KillEventLogRecord";
+        private static ExecutorService mExecutorService;
+        private static BufferedReader mReader;
+        private static Process mLogcat;
+
+        private static void init(Application application) {
+            if (BuildConfig.DEBUG || Settings.System.getString(application.getContentResolver(), SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE).equals("true")) {
+                if (!isKillEventRecording)
+                    startRecord();
+                else
+                    AndroidLog.logW(TAG, "kill event log record is already started!!!");
+            } else if (!BuildConfig.DEBUG) {
+                if (isKillEventRecording && mExecutorService != null) {
+                    mExecutorService.shutdownNow();
+                    clear();
+                    AndroidLog.logI(TAG, "stop record kill event!!!!");
+                }
+            }
+        }
+
+        private static void startRecord() {
+            LogToFile.createFile(mKillEventRecordFile);
+            LogToFile.openFile(mKillEventRecordFile, LogToFile.getRandomNumber());
+            mExecutorService = Executors.newSingleThreadExecutor();
+            mExecutorService.submit(() -> {
+                try {
+                    AndroidLog.logI(TAG, "start record kill event!!!!");
+                    isKillEventRecording = true;
+                    mLogcat = Runtime.getRuntime().exec("logcat");
+                    mReader = new BufferedReader(new InputStreamReader(mLogcat.getInputStream()));
+                    String line;
+                    while ((line = mReader.readLine()) != null) {
+                        if (line.isEmpty())
+                            continue;
+                        if (line.contains("kill"))
+                            LogToFile.writeFile(mKillEventRecordFile, line);
+                    }
+                } catch (IOException e) {
+                    logE(TAG, "start record kill event failed!", e);
+                    isKillEventRecording = false;
+                    LogToFile.closeFile(mKillEventRecordFile);
+                } finally {
+                    if (mLogcat != null) {
+                        mLogcat.destroy();
+                        mLogcat = null;
+                    }
+                    if (mReader != null) {
+                        try {
+                            mReader.close();
+                            mReader = null;
+                        } catch (IOException e) {
+                            AndroidLog.logE(TAG, "close reader failed!", e);
+                        }
+                    }
+                }
+            });
+        }
+
+        private static void clear() {
+            LogToFile.closeFile(mKillEventRecordFile);
+            if (mLogcat != null) {
+                mLogcat.destroy();
+                mLogcat = null;
+            }
+            if (mReader != null) {
+                try {
+                    mReader.close();
+                    mReader = null;
+                } catch (IOException e) {
+                    AndroidLog.logE(TAG, "close reader failed!", e);
+                }
+            }
+            isKillEventRecording = false;
+            AndroidLog.logI(TAG, "clear kll log event record process!!!");
         }
     }
 }

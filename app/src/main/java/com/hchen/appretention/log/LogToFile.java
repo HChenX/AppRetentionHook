@@ -68,7 +68,7 @@ public class LogToFile {
     public static final String USER_UNLOCKED_COMPLETED_PROP = "persist.sys.user.unlocked.completed";
     public static final String SETTINGS_LOG_SERVICE_COMPLETED = "log_service_boot_complete";
     private static final String TAG = "LogToFile";
-    private static final String LOG_FILE_PATH = "/storage/emulated/0/Android/" + ToolData.mLogFileRootName + "/";
+    public static final String LOG_FILE_PATH = "/storage/emulated/0/Android/" + ToolData.mLogFileRootName + "/";
     private static final String LOG_OLD_FILE_PATH = "/storage/emulated/0/Android/" + ToolData.mLogFileRootName + "/old/";
     private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
     private static String LOG_FILE_FULL_PATH = "";
@@ -163,15 +163,19 @@ public class LogToFile {
     }
 
     public static void writeFile(String key, ArrayList<String> logs) {
+        for (String log : logs) {
+            writeFile(key, log);
+        }
+    }
+
+    public static void writeFile(String key, String log) {
         LogFileStateData data = mLogFileStateDataMap.get(key);
         if (data == null) return;
         if (!data.isCreatedFile) return;
         if (!data.isOpened || data.mWriter == null) return;
         try {
-            for (String log : logs) {
-                data.mWriter.write(log);
-                data.mWriter.newLine();
-            }
+            data.mWriter.write(log);
+            data.mWriter.newLine();
             data.mWriter.flush();
         } catch (IOException e) {
             logENoSave(TAG, "Write log file failed! Path: " + LOG_FILE_FULL_PATH, e);
@@ -362,7 +366,7 @@ public class LogToFile {
         }
     }
 
-    private static String getRandomNumber() {
+    public static String getRandomNumber() {
         long randomNumber = 1000000000000L + ThreadLocalRandom.current().nextLong(9000000000000L);
         return String.valueOf(randomNumber);
     }
