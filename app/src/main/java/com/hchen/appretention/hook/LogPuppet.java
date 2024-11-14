@@ -177,13 +177,14 @@ public class LogPuppet extends BaseHC {
                 try {
                     AndroidLog.logI(TAG, "start record kill event!!!!");
                     isKillEventRecording = true;
-                    mLogcat = Runtime.getRuntime().exec("logcat");
+                    mLogcat = Runtime.getRuntime().exec("logcat -b events");
                     mReader = new BufferedReader(new InputStreamReader(mLogcat.getInputStream()));
                     String line;
                     while ((line = mReader.readLine()) != null) {
                         if (line.isEmpty())
                             continue;
-                        if (line.contains("kill"))
+                        String lowerCaseLine = line.toLowerCase();
+                        if (lowerCaseLine.contains("kill"))
                             LogToFile.writeFile(mKillEventRecordFile, line);
                     }
                 } catch (IOException e) {

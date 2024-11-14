@@ -47,5 +47,6 @@ public class System {
     public static final String CachedAppOptimizer$CompactProfile = "com.android.server.am.CachedAppOptimizer$CompactProfile";
     public static final String CachedAppOptimizer$CompactSource = "com.android.server.am.CachedAppOptimizer$CompactSource";
     public static final String ActivityManagerConstants = "com.android.server.am.ActivityManagerConstants";
+    public static final String AppErrors = "com.android.server.am.AppErrors";
     public static final String UserController$3 = "com.android.server.am.UserController$3";
 }

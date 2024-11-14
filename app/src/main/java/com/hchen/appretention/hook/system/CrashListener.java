@@ -22,11 +22,14 @@
  */
 package com.hchen.appretention.hook.system;
 
+import static com.hchen.appretention.data.method.System.handleAppCrashInActivityController;
+import static com.hchen.appretention.data.path.System.AppErrors;
 import static com.hchen.hooktool.log.XposedLog.logE;
 
 import android.app.ApplicationErrorReport;
 import android.content.Context;
 
+import com.hchen.appretention.data.field.System;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
@@ -40,14 +43,14 @@ import java.lang.reflect.Method;
 public class CrashListener extends BaseHC {
     @Override
     public void init() {
-        Class<?> appError = findClass("com.android.server.am.AppErrors").get();
+        Class<?> appError = findClass(AppErrors).get();
         if (appError == null) {
             logE(TAG, "No such 'com.android.server.am.AppErrors'");
             return;
         }
         Method hookError = null;
         for (Method error : appError.getDeclaredMethods()) {
-            if ("handleAppCrashInActivityController".equals(error.getName()))
+            if (handleAppCrashInActivityController.equals(error.getName()))
                 if (error.getReturnType().equals(boolean.class)) {
                     hookError = error;
                     break;
@@ -61,7 +64,7 @@ public class CrashListener extends BaseHC {
         hook(hookError, new IHook() {
                 @Override
                 public void after() {
-                    Context mContext = getThisField("mContext");
+                    Context mContext = getThisField(System.mContext);
                     Object proc = getArgs(0);
                     ApplicationErrorReport.CrashInfo crashInfo = getArgs(1);
                     String shortMsg = getArgs(2);
@@ -70,6 +73,10 @@ public class CrashListener extends BaseHC {
                     long timeMillis = getArgs(5);
                     int callingPid = getArgs(6);
                     int callingUid = getArgs(7);
+                    if (crashInfo == null) return;
+                    if ("Native crash".equals(crashInfo.exceptionClassName))
+                        return; // 跳过 Native crash 事件
+
                     logE(TAG, "A crash event has occurred! Caught! Please note that crashes are not necessarily caused by modules!" +
                         "\n[Crash Package]: " + mContext.getPackageName() + "\n[Proc]: " + proc +
                         "\n[Time]: " + timeMillis + "ms\n[Calling PID]: " + callingPid + "\n[Calling UID]: " + callingUid +

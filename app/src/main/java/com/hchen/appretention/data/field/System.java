@@ -54,4 +54,5 @@ public class System {
     public static final String mCustomOomMinFree = "mCustomOomMinFree";
     public static final String mMemFactorOverride = "mMemFactorOverride";
     public static final String isChangedOomMinFree = "isChangedOomMinFree";
+    public static final String mContext = "mContext";
 }

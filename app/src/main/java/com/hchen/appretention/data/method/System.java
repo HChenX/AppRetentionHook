@@ -64,4 +64,5 @@ public class System {
     public static final String updateMaxCachedProcesses = "updateMaxCachedProcesses";
     public static final String updateMaxPhantomProcesses = "updateMaxPhantomProcesses";
     public static final String performReceive = "performReceive";
+    public static final String handleAppCrashInActivityController = "handleAppCrashInActivityController";
 }
