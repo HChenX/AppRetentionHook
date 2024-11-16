@@ -37,10 +37,14 @@ public class Hyper {
     public static final String Build = "miui.os.Build";
     public static final String OomAdjusterImpl = "com.android.server.am.OomAdjusterImpl";
     public static final String PeriodicCleanerService = "com.android.server.am.PeriodicCleanerService";
+    public static final String SystemServerImpl = "com.android.server.SystemServerImpl";
+    public static final String ActivityTaskManagerService = "com.android.server.wm.ActivityTaskManagerService";
     public static final String MemoryFreezeStubImpl = "com.android.server.am.MemoryFreezeStubImpl";
     public static final String MemoryStandardProcessControl = "com.android.server.am.MemoryStandardProcessControl";
     public static final String SystemPressureController = "com.android.server.am.SystemPressureController";
+    public static final String ProcessPowerCleaner = "com.android.server.am.ProcessPowerCleaner";
     public static final String ProcessMemoryCleaner = "com.android.server.am.ProcessMemoryCleaner";
+    public static final String ProcessSceneCleaner = "com.android.server.am.ProcessSceneCleaner";
     public static final String IAppState$IRunningProcess = "com.miui.server.smartpower.IAppState$IRunningProcess";
     public static final String ControllerActivityInfo = "com.android.server.am.ControllerActivityInfo";
     public static final String ProcessPowerCleaner$ScreenStatusReceiver = "com.android.server.am.ProcessPowerCleaner$ScreenStatusReceiver";
@@ -51,6 +55,8 @@ public class Hyper {
     public static final String PressureStateSettings = "android.os.spc.PressureStateSettings";
     public static final String ProcessConfig = "miui.process.ProcessConfig";
     public static final String PreloadAppControllerImpl = "com.android.server.am.PreloadAppControllerImpl";
+    public static final String LifecycleConfig = "miui.process.LifecycleConfig";
+    public static final String PreloadLifecycle = "com.android.server.wm.PreloadLifecycle";
     public static final String CameraBooster = "com.miui.cameraopt.booster.CameraBooster";
     public static final String CameraOpt = "com.android.server.camera.CameraOpt";
     public static final String CameraKillPolicy = "com.miui.cameraopt.booster.CameraKillPolicy";

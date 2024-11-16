@@ -43,6 +43,7 @@ public class System {
     public static final String mOomAdj = "mOomAdj";
     public static final String SOME = "SOME";
     public static final String FULL = "FULL";
+    public static final String ANON = "ANON";
     public static final String SHELL = "SHELL";
     public static final String APP = "APP";
     public static final String mUseCompaction = "mUseCompaction";

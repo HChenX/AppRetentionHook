@@ -43,9 +43,11 @@ import static com.hchen.appretention.data.field.System.mUseBootCompact;
 import static com.hchen.appretention.data.field.System.mUseCompaction;
 import static com.hchen.appretention.data.method.System.checkExcessivePowerUsageLPr;
 import static com.hchen.appretention.data.method.System.getCurAdj;
+import static com.hchen.appretention.data.method.System.getLastCompactTime;
 import static com.hchen.appretention.data.method.System.getSetAdj;
 import static com.hchen.appretention.data.method.System.getSetProcState;
 import static com.hchen.appretention.data.method.System.hasPendingCompact;
+import static com.hchen.appretention.data.method.System.interruptProcCompaction;
 import static com.hchen.appretention.data.method.System.isInVisibleRange;
 import static com.hchen.appretention.data.method.System.killProcessLocked;
 import static com.hchen.appretention.data.method.System.killProcessesWhenImperceptible;
@@ -53,12 +55,14 @@ import static com.hchen.appretention.data.method.System.onLmkdConnect;
 import static com.hchen.appretention.data.method.System.onOomAdjustChanged;
 import static com.hchen.appretention.data.method.System.performIdleMaintenance;
 import static com.hchen.appretention.data.method.System.resolveCompactionProfile;
+import static com.hchen.appretention.data.method.System.setAppStartingMode;
 import static com.hchen.appretention.data.method.System.setHasPendingCompact;
 import static com.hchen.appretention.data.method.System.setReqCompactProfile;
 import static com.hchen.appretention.data.method.System.setReqCompactSource;
 import static com.hchen.appretention.data.method.System.shouldKillExcessiveProcesses;
-import static com.hchen.appretention.data.method.System.shouldOomAdjThrottleCompaction;
+import static com.hchen.appretention.data.method.System.shouldRssThrottleCompaction;
 import static com.hchen.appretention.data.method.System.shouldThrottleMiscCompaction;
+import static com.hchen.appretention.data.method.System.shouldTimeThrottleCompaction;
 import static com.hchen.appretention.data.method.System.trimInactiveRecentTasks;
 import static com.hchen.appretention.data.method.System.trimPhantomProcessesIfNecessary;
 import static com.hchen.appretention.data.method.System.updateAndTrimProcessLSP;
@@ -79,6 +83,7 @@ import static com.hchen.appretention.data.path.System.AppProfiler;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$CompactProfile;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$CompactSource;
+import static com.hchen.appretention.data.path.System.CachedAppOptimizer$DefaultProcessDependencies;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$MemCompactionHandler;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$ProcessDependencies;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$PropertyChangedCallbackForTest;
@@ -445,6 +450,7 @@ public class AndroidU extends BaseHC {
                 new IHook() {
                     private static final Object SOME = getStaticField(CachedAppOptimizer$CompactProfile, System.SOME);
                     private static final Object FULL = getStaticField(CachedAppOptimizer$CompactProfile, System.FULL);
+                    private static final Object ANON = getStaticField(CachedAppOptimizer$CompactProfile, System.ANON);
                     private static final Object SHEll = getStaticField(CachedAppOptimizer$CompactSource, System.SHELL);
                     private static final Object APP = getStaticField(CachedAppOptimizer$CompactSource, System.APP);
                     private Object state;
@@ -460,17 +466,15 @@ public class AndroidU extends BaseHC {
                         optRecord = getField(app, mOptRecord);
                         compactionHandler = getThisField(mCompactionHandler);
                         pendingCompactionProcesses = getThisField(mPendingCompactionProcesses);
-                        if (getSetAdj() <= PrecessAdjInfo.PERCEPTIBLE_APP_ADJ &&
-                            getCurAdj() >= PrecessAdjInfo.SERVICE_ADJ && getCurAdj() < PrecessAdjInfo.PREVIOUS_APP_ADJ
-                        ) {
+                        if (getCurAdj() > PrecessAdjInfo.PERCEPTIBLE_APP_ADJ && getCurAdj() < PrecessAdjInfo.PREVIOUS_APP_ADJ) {
                             setReqCompactSource(SHEll);
-                            setReqCompactProfile(SOME);
+                            setReqCompactProfile(ANON);
                             if (!hasPendingCompact()) {
                                 setHasPendingCompact(true);
                                 pendingCompactionProcesses.add(app);
                                 compactionHandler.sendMessage(compactionHandler.obtainMessage(1, getCurAdj(), getSetProcState()));
                             }
-                        } else if (getSetAdj() >= PrecessAdjInfo.PREVIOUS_APP_ADJ && getCurAdj() < PrecessAdjInfo.CACHED_APP_MAX_ADJ) {
+                        } else if (getCurAdj() >= PrecessAdjInfo.PREVIOUS_APP_ADJ && getCurAdj() <= PrecessAdjInfo.CACHED_APP_MAX_ADJ) {
                             setReqCompactSource(SHEll);
                             setReqCompactProfile(FULL);
                             if (!hasPendingCompact()) {
@@ -538,11 +542,59 @@ public class AndroidU extends BaseHC {
             }).shouldObserveCall(false)
         );
 
-        chain(CachedAppOptimizer$MemCompactionHandler, method(shouldOomAdjThrottleCompaction, ProcessRecord)
-            .returnResult(false).shouldObserveCall(false)
+        chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
+            .returnResult(false).shouldObserveCall(false) 进程恢复到可感知状态了 */
 
-            .method(shouldThrottleMiscCompaction, ProcessRecord, int.class)
-            .returnResult(false).shouldObserveCall(false)
+            method(shouldThrottleMiscCompaction, ProcessRecord, int.class)
+                .returnResult(false).shouldObserveCall(false)
+
+                .method(shouldTimeThrottleCompaction, ProcessRecord, long.class, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource)
+                .hook(new IHook() {
+                    @Override
+                    public void before() {
+                        Object opt = getField(getArgs(0), mOptRecord);
+                        long lastCompactTime = callMethod(opt, getLastCompactTime);
+                        long start = getArgs(1);
+                        // 10 秒内不允许再次触发。
+                        if (lastCompactTime != 0) {
+                            if (start - lastCompactTime < 10000) {
+                                setResult(true);
+                                return;
+                            }
+                        }
+                        setResult(false);
+                    }
+                }).shouldObserveCall(false)
+
+                .method(shouldRssThrottleCompaction, CachedAppOptimizer$CompactProfile, int.class, String.class, long[].class)
+                .hook(new IHook() {
+                    @Override
+                    public void before() {
+                        long[] rssBefore = getArgs(3);
+                        long anonRssBefore = rssBefore[2];
+                        if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
+                            setResult(true); // 进程可能被杀。
+                            return;
+                        }
+                        if (anonRssBefore < (1024 * 6)) {
+                            setResult(true);
+                            return;
+                        }
+                        setResult(false);
+                    }
+                }).shouldObserveCall(false)
+        );
+
+        chain(CachedAppOptimizer$DefaultProcessDependencies, method(interruptProcCompaction)
+            .doNothing().shouldObserveCall(false)
+
+            .method(setAppStartingMode, boolean.class)
+            .hook(new IHook() {
+                @Override
+                public void before() {
+                    setArgs(0, false);
+                }
+            }).shouldObserveCall(false)
         );
 
         // ----------- ActivityManagerConstants -------------
@@ -555,7 +607,7 @@ public class AndroidU extends BaseHC {
                 @Override
                 public void after() {
                     setThisField(CUR_MAX_CACHED_PROCESSES, 6144); // 最大缓存进程数
-                    setThisField(CUR_MAX_EMPTY_PROCESSES, (6144 / 2)); // 最大空进程数
+                    setThisField(CUR_MAX_EMPTY_PROCESSES, (6144 / 6)); // 最大空进程数
                     setThisField(CUR_TRIM_CACHED_PROCESSES, -1); // 修剪缓存进程数 (别问为啥是 -1
                     setThisField(CUR_TRIM_EMPTY_PROCESSES, Integer.MAX_VALUE); // 修剪空进程数 (别问为啥是又是 max 了
                     setThisField(MAX_PHANTOM_PROCESSES, Integer.MAX_VALUE); // 最大虚幻进程数量

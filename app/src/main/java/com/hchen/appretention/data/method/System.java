@@ -56,7 +56,12 @@ public class System {
     public static final String hasPendingCompact = "hasPendingCompact";
     public static final String setHasPendingCompact = "setHasPendingCompact";
     public static final String shouldOomAdjThrottleCompaction = "shouldOomAdjThrottleCompaction";
+    public static final String interruptProcCompaction = "interruptProcCompaction";
+    public static final String setAppStartingMode = "setAppStartingMode";
     public static final String shouldThrottleMiscCompaction = "shouldThrottleMiscCompaction";
+    public static final String shouldTimeThrottleCompaction = "shouldTimeThrottleCompaction";
+    public static final String getLastCompactTime = "getLastCompactTime";
+    public static final String shouldRssThrottleCompaction = "shouldRssThrottleCompaction";
     public static final String updateUseCompaction = "updateUseCompaction";
     public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";
     public static final String updateUseModernTrim = "updateUseModernTrim";

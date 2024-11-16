@@ -40,4 +40,5 @@ public class Hyper {
     public static final String PROCESS_TRACKER_ENABLE = "PROCESS_TRACKER_ENABLE";
     public static final String mCameraBoosterClazz = "mCameraBoosterClazz";
     public static final String mQuickCameraClazz = "mQuickCameraClazz";
+    public static final String START_PRELOAD_IS_DISABLE = "START_PRELOAD_IS_DISABLE";
 }

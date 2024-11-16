@@ -149,7 +149,7 @@ public class LogPuppet extends BaseHC {
 
     private static class KillEventLogRecord {
         private static final String TAG = "KillEventLogRecord";
-        private static final String mKillEventRecordFile = "KillEventLogRecord";
+        private static final String mKillEventRecordFile = "KillEventRecord";
         private static ExecutorService mExecutorService;
         private static BufferedReader mReader;
         private static Process mLogcat;

@@ -42,6 +42,7 @@ public class System {
     public static final String Task = "com.android.server.wm.Task";
     public static final String CachedAppOptimizer = "com.android.server.am.CachedAppOptimizer";
     public static final String CachedAppOptimizer$MemCompactionHandler = "com.android.server.am.CachedAppOptimizer$MemCompactionHandler";
+    public static final String CachedAppOptimizer$DefaultProcessDependencies = "com.android.server.am.CachedAppOptimizer$DefaultProcessDependencies";
     public static final String CachedAppOptimizer$PropertyChangedCallbackForTest = "com.android.server.am.CachedAppOptimizer$PropertyChangedCallbackForTest";
     public static final String CachedAppOptimizer$ProcessDependencies = "com.android.server.am.CachedAppOptimizer$ProcessDependencies";
     public static final String CachedAppOptimizer$CompactProfile = "com.android.server.am.CachedAppOptimizer$CompactProfile";

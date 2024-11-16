@@ -23,7 +23,6 @@
 package com.hchen.appretention.hook.hyper;
 
 import static com.hchen.appretention.data.field.Hyper.BINDER_FULL_KILL_PROC;
-import static com.hchen.appretention.data.field.Hyper.ENABLE;
 import static com.hchen.appretention.data.field.Hyper.ENABLED_SCOUT;
 import static com.hchen.appretention.data.field.Hyper.ENABLE_SCOUT_MEMORY_MONITOR;
 import static com.hchen.appretention.data.field.Hyper.PROCESS_CLEANER_ENABLED;
@@ -32,40 +31,44 @@ import static com.hchen.appretention.data.field.Hyper.PROC_CPU_EXCEPTION_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.RECLAIM_IF_NEEDED;
 import static com.hchen.appretention.data.field.Hyper.SCOUT_MEMORY_DISABLE_DMABUF;
 import static com.hchen.appretention.data.field.Hyper.SCOUT_MEMORY_DISABLE_GPU;
+import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
+import static com.hchen.appretention.data.method.Hyper.addMiuiPeriodicCleanerService;
 import static com.hchen.appretention.data.method.Hyper.boostCameraIfNeeded;
 import static com.hchen.appretention.data.method.Hyper.callStaticMethod;
 import static com.hchen.appretention.data.method.Hyper.changeProcessMemCgroup;
-import static com.hchen.appretention.data.method.Hyper.checkAndFreeze;
 import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
 import static com.hchen.appretention.data.method.Hyper.checkUnused;
 import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
 import static com.hchen.appretention.data.method.Hyper.closeLmkdSocket;
 import static com.hchen.appretention.data.method.Hyper.doAdjBoost;
-import static com.hchen.appretention.data.method.Hyper.doClean;
-import static com.hchen.appretention.data.method.Hyper.doFgTrim;
 import static com.hchen.appretention.data.method.Hyper.doReclaimMemory;
 import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
 import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
+import static com.hchen.appretention.data.method.Hyper.getPolicy;
+import static com.hchen.appretention.data.method.Hyper.handleAutoLockOff;
+import static com.hchen.appretention.data.method.Hyper.handleKillAll;
+import static com.hchen.appretention.data.method.Hyper.handleKillAny;
+import static com.hchen.appretention.data.method.Hyper.handleKillApp;
 import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
-import static com.hchen.appretention.data.method.Hyper.handleScreenOff;
+import static com.hchen.appretention.data.method.Hyper.handleThermalKillProc;
 import static com.hchen.appretention.data.method.Hyper.interceptAppRestartIfNeeded;
 import static com.hchen.appretention.data.method.Hyper.isMiuiLiteVersion;
+import static com.hchen.appretention.data.method.Hyper.isNeedCompact;
 import static com.hchen.appretention.data.method.Hyper.killApplication;
 import static com.hchen.appretention.data.method.Hyper.killBackgroundApps;
 import static com.hchen.appretention.data.method.Hyper.killPackage;
 import static com.hchen.appretention.data.method.Hyper.killProcess;
 import static com.hchen.appretention.data.method.Hyper.killProcessByMinAdj;
 import static com.hchen.appretention.data.method.Hyper.nStartPressureMonitor;
-import static com.hchen.appretention.data.method.Hyper.onReceive;
 import static com.hchen.appretention.data.method.Hyper.onStartJob;
 import static com.hchen.appretention.data.method.Hyper.performCompaction;
-import static com.hchen.appretention.data.method.Hyper.powerKillProcess;
+import static com.hchen.appretention.data.method.Hyper.preloadAppEnqueue;
 import static com.hchen.appretention.data.method.Hyper.reclaimBackground;
-import static com.hchen.appretention.data.method.Hyper.reportCleanProcess;
-import static com.hchen.appretention.data.method.Hyper.reportStartProcess;
 import static com.hchen.appretention.data.method.Hyper.sendDataToLmkd;
+import static com.hchen.appretention.data.method.Hyper.startPreloadApp;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
+import static com.hchen.appretention.data.path.Hyper.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.Hyper.ActivityThreadImpl;
 import static com.hchen.appretention.data.path.Hyper.Build;
 import static com.hchen.appretention.data.path.Hyper.CameraAdjAdjuster;
@@ -78,27 +81,29 @@ import static com.hchen.appretention.data.path.Hyper.ControllerActivityInfo;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryCleanerDeprecated;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.Hyper.IAppState$IRunningProcess;
+import static com.hchen.appretention.data.path.Hyper.LifecycleConfig;
 import static com.hchen.appretention.data.path.Hyper.MemoryFreezeStubImpl;
 import static com.hchen.appretention.data.path.Hyper.MemoryStandardProcessControl;
 import static com.hchen.appretention.data.path.Hyper.MiuiMemReclaimer;
 import static com.hchen.appretention.data.path.Hyper.OomAdjusterImpl;
-import static com.hchen.appretention.data.path.Hyper.PeriodicCleanerService;
 import static com.hchen.appretention.data.path.Hyper.PreloadAppControllerImpl;
+import static com.hchen.appretention.data.path.Hyper.PreloadLifecycle;
 import static com.hchen.appretention.data.path.Hyper.PressureStateSettings;
 import static com.hchen.appretention.data.path.Hyper.ProcessConfig;
 import static com.hchen.appretention.data.path.Hyper.ProcessKillerIdler;
 import static com.hchen.appretention.data.path.Hyper.ProcessManagerAdapter;
 import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
-import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner$ScreenStatusReceiver;
+import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessRecord;
+import static com.hchen.appretention.data.path.Hyper.ProcessSceneCleaner;
 import static com.hchen.appretention.data.path.Hyper.ScoutDisplayMemoryManager;
 import static com.hchen.appretention.data.path.Hyper.ScoutHelper;
 import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
+import static com.hchen.appretention.data.path.Hyper.SystemServerImpl;
 
 import android.app.job.JobParameters;
 import android.content.Context;
-import android.content.Intent;
 
 import com.hchen.appretention.data.field.Hyper;
 import com.hchen.hooktool.BaseHC;
@@ -121,15 +126,22 @@ public class HyperV1 extends BaseHC {
 
     @Override
     public void init() {
-        setStaticField(ScoutHelper, ENABLED_SCOUT, false); // 关闭 scout 功能
-        setStaticField(ScoutHelper, BINDER_FULL_KILL_PROC, false); // 关闭 scout 功能
+        /*
+         * 关闭 scout。
+         * */
+        setStaticField(ScoutHelper, ENABLED_SCOUT, false);
+        setStaticField(ActivityThreadImpl, ENABLED_SCOUT, false);
+        setStaticField(ScoutHelper, BINDER_FULL_KILL_PROC, false);
         setStaticField(ScoutDisplayMemoryManager, ENABLE_SCOUT_MEMORY_MONITOR, false); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_GPU, true); // 关闭内存监视器
         setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
 
-        setStaticField(ActivityThreadImpl, ENABLED_SCOUT, false); // 关闭 scout 功能
-
-        setStaticField(PreloadAppControllerImpl, ENABLE, false); // 禁止预加载
+        /*
+         * 关闭 spc。
+         * */
+        setStaticField(PressureStateSettings, PROCESS_CLEANER_ENABLED, false);
+        setStaticField(PressureStateSettings, PROC_CPU_EXCEPTION_ENABLE, false);
+        setStaticField(PressureStateSettings, PROCESS_TRACKER_ENABLE, false);
 
         /*
          * 禁止为了游戏回收内存。
@@ -160,53 +172,37 @@ public class HyperV1 extends BaseHC {
             returnResult(3)
         );
 
-        /*
-         * 解除后台 app 最大计数限制。
-         * */
-        hookMethod(OomAdjusterImpl,
-            getBackgroundAppCount,
-            returnResult(100)
+        chain(OomAdjusterImpl,
+            method(getBackgroundAppCount).returnResult(100) // 后台限制。
         );
 
         /*
          * 阻止定期清洁。
+         * 由于 PeriodicCleanerService 继承 SystemService 并由如下方法启动；
+         * 所以使此方法失效即可彻底禁用 PeriodicCleanerService。
          * */
-        chain(PeriodicCleanerService, method(doClean,
-            int.class, int.class, int.class, String.class)
-            .doNothing()
-
-            .method(doFgTrim, int.class)
-            .doNothing()
-
-            .method(handleScreenOff)
-            .doNothing()
-
-            .method(reportCleanProcess, int.class, int.class, String.class)
-            .doNothing()
-
-            .method(reportStartProcess, String.class)
-            .doNothing()
+        hookMethod(SystemServerImpl,
+            addMiuiPeriodicCleanerService,
+            ActivityTaskManagerService,
+            doNothing()
         );
 
         /*
-         * 禁止冻结软件
+         * 禁用 MemoryFreezeStubImpl 的 kill。
          * */
-        chain(MemoryFreezeStubImpl, method(checkUnused)
-            .doNothing()
-
-            .method(checkAndFreeze, int.class, String.class)
-            .doNothing()
+        hookMethod(MemoryFreezeStubImpl,
+            checkUnused,
+            doNothing()
         );
 
         /*
-         * 一个很神奇的东西，我不知道它存在的意义，也不知道它是否应该存在 >.<
-         * 就像这个模块一样，存在的意义是什么？
-         * 直接禁止。
-         * */
+         * 禁用 MemoryStandardProcessControl。
+         * 它由一个后台 job (MemoryControlServiceImpl) 启动并执行 kill 逻辑，同时会监听广播。
+         *  */
         hookMethod(MemoryStandardProcessControl,
             killProcess,
             boolean.class,
-            doNothing()
+            returnResult(false)
         );
 
         /*
@@ -226,20 +222,44 @@ public class HyperV1 extends BaseHC {
                 .doNothing()
 
                 /*
-                 * 禁止因为阿巴阿巴 kill。
-                 * */
-                .method(powerKillProcess, ProcessConfig)
-                .returnResult(true)
-
-                /*
                  * 无奖竞猜。
                  * */
                 .method(foregroundActivityChangedLocked, ControllerActivityInfo)
                 .doNothing().shouldObserveCall(false)
         );
 
+        chain(ProcessPowerCleaner,
+            /*
+             * 禁止因温度 kill。
+             * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_1
+             * */
+            method(handleThermalKillProc, ProcessConfig)
+                .doNothing()
+
+                /*
+                 * REASON_AUTO_SLEEP_CLEAN
+                 * REASON_AUTO_SYSTEM_ABNORMAL_CLEAN
+                 * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2
+                 * */
+                .method(handleKillAll, ProcessConfig, boolean.class)
+                .doNothing()
+
+                /*
+                 * ProcessPolicy.REASON_AUTO_POWER_KILL
+                 * ProcessPolicy.REASON_AUTO_THERMAL_KILL
+                 * ProcessPolicy.REASON_AUTO_IDLE_KILL
+                 */
+                .method(handleKillApp, ProcessConfig)
+                .returnResult(true)
+
+                /*
+                 * 禁止锁屏 kill。
+                 * */
+                .method(handleAutoLockOff).doNothing()
+        );
+
         /*
-         * 是 MiuiMemoryService 几个核心的 kill 方法。
+         * 是 MiuiMemoryService 几个核心方法。
          * */
         chain(ProcessMemoryCleaner, method(cleanUpMemory, List.class, long.class)
             .returnResult(true)
@@ -255,27 +275,46 @@ public class HyperV1 extends BaseHC {
 
             .method(checkBackgroundAppException, String.class, int.class)
             .returnResult(0)
+
+            .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
         );
 
-        /*
-         * 不要监测屏幕状态！
-         * */
-        hookMethod(ProcessPowerCleaner$ScreenStatusReceiver,
-            onReceive,
-            Context.class, Intent.class,
-            doNothing()
+        chain(ProcessSceneCleaner,
+            /*
+             * REASON_ONE_KEY_CLEAN
+             * REASON_FORCE_CLEAN
+             * REASON_GAME_CLEAN
+             * REASON_OPTIMIZATION_CLEAN
+             * */
+            method(handleKillAll, ProcessConfig)
+                .hook(new IHook() {
+                    @Override
+                    public void before() {
+                        Object config = getArgs(0);
+                        int mPolicy = callMethod(config, getPolicy);
+                        if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN))
+                            returnNull();
+                    }
+                })
+
+                /*
+                 * REASON_LOCK_SCREEN_CLEAN
+                 * REASON_GARBAGE_CLEAN
+                 * REASON_USER_DEFINED
+                 * */
+                .method(handleKillAny, ProcessConfig)
+                .doNothing()
         );
 
         /*
          * 禁止压缩进程。
          * */
+        setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
         hookMethod(MiuiMemReclaimer,
             performCompaction,
             String.class, int.class,
             doNothing()
         );
-
-        setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
 
         /*
          * 管理游戏内存，可能已经弃用。
@@ -304,11 +343,19 @@ public class HyperV1 extends BaseHC {
         );
 
         /*
-         * 关闭 spc。
+         * 禁止预启动。
          * */
-        setStaticField(PressureStateSettings, PROCESS_CLEANER_ENABLED, false);
-        setStaticField(PressureStateSettings, PROC_CPU_EXCEPTION_ENABLE, false);
-        setStaticField(PressureStateSettings, PROCESS_TRACKER_ENABLE, false);
+        chain(PreloadAppControllerImpl, method(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
+            .doNothing().shouldObserveCall(false)
+
+            .method(startPreloadApp, PreloadLifecycle)
+            .hook(new IHook() {
+                @Override
+                public void before() {
+                    setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
+                }
+            }).shouldObserveCall(false)
+        );
 
         /*
          * 从此开始，下方为针对相机杀后台而 hook 的内容。
@@ -454,5 +501,54 @@ public class HyperV1 extends BaseHC {
 
     @Override
     public void copy() {
+    }
+
+    private static class ProcessPolicy {
+        public static final String REASON_ANR = "anr";
+        public static final String REASON_AUTO_IDLE_KILL = "AutoIdleKill";
+        public static final String REASON_AUTO_LOCK_OFF_CLEAN = "AutoLockOffClean";
+        public static final String REASON_AUTO_LOCK_OFF_CLEAN_BY_PRIORITY = "AutoLockOffCleanByPriority";
+        public static final String REASON_AUTO_POWER_KILL = "AutoPowerKill";
+        public static final String REASON_AUTO_SLEEP_CLEAN = "AutoSleepClean";
+        public static final String REASON_AUTO_SYSTEM_ABNORMAL_CLEAN = "AutoSystemAbnormalClean";
+        public static final String REASON_AUTO_THERMAL_KILL = "AutoThermalKill";
+        public static final String REASON_AUTO_THERMAL_KILL_ALL_LEVEL_1 = "AutoThermalKillAll1";
+        public static final String REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2 = "AutoThermalKillAll2";
+        public static final String REASON_CRASH = "crash";
+        public static final String REASON_DISPLAY_SIZE_CHANGED = "DisplaySizeChanged";
+        public static final String REASON_FORCE_CLEAN = "ForceClean";
+        public static final String REASON_GAME_CLEAN = "GameClean";
+        public static final String REASON_GARBAGE_CLEAN = "GarbageClean";
+        public static final String REASON_LOCK_SCREEN_CLEAN = "LockScreenClean";
+        public static final String REASON_LOW_MEMO = "lowMemory";
+        public static final String REASON_MIUI_MEMO_SERVICE = "MiuiMemoryService";
+        public static final String REASON_ONE_KEY_CLEAN = "OneKeyClean";
+        public static final String REASON_OPTIMIZATION_CLEAN = "OptimizationClean";
+        public static final String REASON_SCREEN_OFF_CPU_CHECK_KILL = "ScreenOffCPUCheckKill";
+        public static final String REASON_SWIPE_UP_CLEAN = "SwipeUpClean";
+        public static final String REASON_UNKNOWN = "Unknown";
+        public static final String REASON_USER_DEFINED = "UserDefined";
+
+        public static String getKillReason(int policy) {
+            return switch (policy) {
+                case 1 -> ProcessPolicy.REASON_ONE_KEY_CLEAN;
+                case 2 -> ProcessPolicy.REASON_FORCE_CLEAN;
+                case 3 -> ProcessPolicy.REASON_LOCK_SCREEN_CLEAN;
+                case 4 -> ProcessPolicy.REASON_GAME_CLEAN;
+                case 5 -> ProcessPolicy.REASON_OPTIMIZATION_CLEAN;
+                case 6 -> ProcessPolicy.REASON_GARBAGE_CLEAN;
+                case 7 -> ProcessPolicy.REASON_SWIPE_UP_CLEAN;
+                case 10 -> ProcessPolicy.REASON_USER_DEFINED;
+                case 11 -> ProcessPolicy.REASON_AUTO_POWER_KILL;
+                case 12 -> ProcessPolicy.REASON_AUTO_THERMAL_KILL;
+                case 13 -> ProcessPolicy.REASON_AUTO_IDLE_KILL;
+                case 14 -> ProcessPolicy.REASON_AUTO_SLEEP_CLEAN;
+                case 16 -> ProcessPolicy.REASON_AUTO_SYSTEM_ABNORMAL_CLEAN;
+                case 19 -> ProcessPolicy.REASON_AUTO_THERMAL_KILL_ALL_LEVEL_1;
+                case 20 -> ProcessPolicy.REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2;
+                case 22 -> ProcessPolicy.REASON_SCREEN_OFF_CPU_CHECK_KILL;
+                default -> ProcessPolicy.REASON_UNKNOWN;
+            };
+        }
     }
 }
