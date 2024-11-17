@@ -58,6 +58,7 @@ import static com.hchen.appretention.data.method.Hyper.killProcess;
 import static com.hchen.appretention.data.method.Hyper.killProcessByMinAdj;
 import static com.hchen.appretention.data.method.Hyper.nStartPressureMonitor;
 import static com.hchen.appretention.data.method.Hyper.newInstance;
+import static com.hchen.appretention.data.method.Hyper.notifyActivityChanged;
 import static com.hchen.appretention.data.method.Hyper.notifyCameraForegroundChange;
 import static com.hchen.appretention.data.method.Hyper.notifyCameraForegroundState;
 import static com.hchen.appretention.data.method.Hyper.notifyCameraPostProcessState;
@@ -73,6 +74,7 @@ import static com.hchen.appretention.data.path.Hyper.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.Hyper.ActivityThreadImpl;
 import static com.hchen.appretention.data.path.Hyper.Build;
 import static com.hchen.appretention.data.path.Hyper.CameraBooster;
+import static com.hchen.appretention.data.path.Hyper.CameraBoosterNew;
 import static com.hchen.appretention.data.path.Hyper.CameraOpt;
 import static com.hchen.appretention.data.path.Hyper.ControllerActivityInfo;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryCleanerDeprecated;
@@ -169,9 +171,9 @@ public class HyperV1 extends BaseHC {
             returnResult(3)
         );
 
-        chain(OomAdjusterImpl,
-            method(getBackgroundAppCount).returnResult(100) // 后台限制。
-        );
+        // 后台限制。
+        if (existsMethod(OomAdjusterImpl, getBackgroundAppCount))
+            hookMethod(OomAdjusterImpl, getBackgroundAppCount, returnResult(100));
 
         /*
          * 阻止定期清洁。
@@ -365,14 +367,14 @@ public class HyperV1 extends BaseHC {
         /*
          * 从此开始，下方为针对相机杀后台而 hook 的内容。
          * */
-        Class<?> mCameraOpt = findClass(CameraOpt).get();
+        Class<?> mCameraOpt = findClass(CameraOpt).getIfExists();
         if (mCameraOpt != null) {
             // 帮助 CameraOpt 初始化
             Class<?> mCameraBoosterClazz = getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
             Class<?> mQuickCameraClazz = getStaticField(mCameraOpt, Hyper.mQuickCameraClazz);
             if (mCameraBoosterClazz != null || mQuickCameraClazz != null) {
                 mCameraOptClassLoader = mCameraBoosterClazz != null ? mCameraBoosterClazz.getClassLoader() : mQuickCameraClazz.getClassLoader();
-                doHookCameraOpt(mCameraOptClassLoader);
+                doHookCameraOpt(findClass(CameraBooster, mCameraOptClassLoader).get());
             }
         } else {
             hookMethod(ICameraBooster,
@@ -383,7 +385,7 @@ public class HyperV1 extends BaseHC {
                     public void after() {
                         Object mICameraBooster = getResult();
                         mCameraOptClassLoader = mICameraBooster.getClass().getClassLoader();
-                        doHookCameraOpt(mCameraOptClassLoader);
+                        doHookCameraOpt(findClass(CameraBoosterNew, mCameraOptClassLoader).get());
                     }
                 }
             );
@@ -391,7 +393,7 @@ public class HyperV1 extends BaseHC {
     } // END
 
     // 执行对 cameraOpt 的 hook 动作
-    private void doHookCameraOpt(ClassLoader classLoader) {
+    private void doHookCameraOpt(Class<?> cameraBooster) {
         String[] mCameraOptShouldHookMethodList = new String[]{
             boostCameraByThreshold,
             doAdjBoost, // 禁用 adj 加速
@@ -400,20 +402,21 @@ public class HyperV1 extends BaseHC {
             notifyCameraForegroundChange,
             notifyCameraForegroundState,
             notifyCameraPostProcessState,
+            notifyActivityChanged,
             reclaimMemoryForCamera, // 禁止压缩进程
             updateCameraBoosterCloudData // 禁止云更新
         };
 
         for (String m : mCameraOptShouldHookMethodList) {
-            if (existsAnyMethod(CameraBooster, classLoader, m)) {
-                Method method = findAnyMethod(CameraBooster, classLoader, m).first();
+            if (existsAnyMethod(cameraBooster, m)) {
+                Method method = findAnyMethod(cameraBooster, m).first();
                 if (method == null) continue;
                 if (method.getName().equals(interceptAppRestartIfNeeded)) {
-                    hook(method, returnResult(false));
+                    hook(method, returnResult(false).shouldObserveCall(false));
                 } else if (isAllowAdjBoost.equals(method.getName())) {
-                    hook(method, returnResult(true));
+                    hook(method, returnResult(true).shouldObserveCall(false));
                 } else
-                    hook(method, doNothing());
+                    hook(method, doNothing().shouldObserveCall(false));
             }
         }
     }

@@ -82,6 +82,7 @@ public class Hyper {
     public static final String notifyCameraForegroundChange = "notifyCameraForegroundChange";
     public static final String notifyCameraForegroundState = "notifyCameraForegroundState";
     public static final String notifyCameraPostProcessState = "notifyCameraPostProcessState";
+    public static final String notifyActivityChanged = "notifyActivityChanged";
     public static final String sendDataToLmkd = "sendDataToLmkd";
     public static final String closeLmkdSocket = "closeLmkdSocket";
     public static final String changeProcessMemCgroup = "changeProcessMemCgroup";
