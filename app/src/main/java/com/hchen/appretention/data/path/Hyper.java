@@ -59,6 +59,9 @@ public class Hyper {
     public static final String PreloadLifecycle = "com.android.server.wm.PreloadLifecycle";
     public static final String CameraBooster = "com.miui.cameraopt.booster.CameraBooster";
     public static final String CameraOpt = "com.android.server.camera.CameraOpt";
+    public static final String ICameraBooster = "com.android.server.camera.ICameraBooster";
+    public static final String ProcessManagerInternal = "com.miui.server.process.ProcessManagerInternal";
+    public static final String ServiceThread = "com.android.server.ServiceThread";
     public static final String CameraKillPolicy = "com.miui.cameraopt.booster.CameraKillPolicy";
     public static final String CameraMemoryReclaim = "com.miui.cameraopt.booster.CameraMemoryReclaim";
     public static final String CameraLmkdSocket = "com.miui.cameraopt.booster.CameraLmkdSocket";

@@ -68,6 +68,7 @@ public class System {
     public static final String updateProactiveKillsEnabled = "updateProactiveKillsEnabled";
     public static final String updateMaxCachedProcesses = "updateMaxCachedProcesses";
     public static final String updateMaxPhantomProcesses = "updateMaxPhantomProcesses";
+    public static final String updatePerfConfigConstants = "updatePerfConfigConstants";
     public static final String performReceive = "performReceive";
     public static final String handleAppCrashInActivityController = "handleAppCrashInActivityController";
 }

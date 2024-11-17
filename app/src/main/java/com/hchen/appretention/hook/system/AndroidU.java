@@ -71,6 +71,7 @@ import static com.hchen.appretention.data.method.System.updateLowMemStateLSP;
 import static com.hchen.appretention.data.method.System.updateMaxCachedProcesses;
 import static com.hchen.appretention.data.method.System.updateMaxPhantomProcesses;
 import static com.hchen.appretention.data.method.System.updateOomLevels;
+import static com.hchen.appretention.data.method.System.updatePerfConfigConstants;
 import static com.hchen.appretention.data.method.System.updateProactiveKillsEnabled;
 import static com.hchen.appretention.data.method.System.updateProcessCpuStatesLocked;
 import static com.hchen.appretention.data.method.System.updateUseCompaction;
@@ -631,6 +632,9 @@ public class AndroidU extends BaseHC {
             .doNothing()
 
             .method(updateMaxPhantomProcesses)
+            .doNothing()
+
+            .methodIfExist(updatePerfConfigConstants) // 高通的东西
             .doNothing()
         );
 
