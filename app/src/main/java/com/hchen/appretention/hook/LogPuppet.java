@@ -184,7 +184,7 @@ public class LogPuppet extends BaseHC {
                         if (line.isEmpty())
                             continue;
                         String lowerCaseLine = line.toLowerCase();
-                        if (lowerCaseLine.contains("kill"))
+                        if (lowerCaseLine.contains("kill") && !lowerCaseLine.contains("killinfo"))
                             LogToFile.writeFile(mKillEventRecordFile, line);
                     }
                 } catch (IOException e) {
