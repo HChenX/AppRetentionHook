@@ -35,6 +35,7 @@ public class Hyper {
     public static final String SCOUT_MEMORY_DISABLE_DMABUF = "SCOUT_MEMORY_DISABLE_DMABUF";
     public static final String ENABLE = "ENABLE";
     public static final String RECLAIM_IF_NEEDED = "RECLAIM_IF_NEEDED";
+    public static final String IS_ENABLE_RECLAIM = "IS_ENABLE_RECLAIM";
     public static final String PROCESS_CLEANER_ENABLED = "PROCESS_CLEANER_ENABLED";
     public static final String PROC_CPU_EXCEPTION_ENABLE = "PROC_CPU_EXCEPTION_ENABLE";
     public static final String PROCESS_TRACKER_ENABLE = "PROCESS_TRACKER_ENABLE";

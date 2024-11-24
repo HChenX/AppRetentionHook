@@ -31,6 +31,7 @@ import android.content.Intent;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.service.restrictions.RestrictionsReceiver;
+import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
@@ -285,7 +286,9 @@ public class LogToFile {
             data.mWriter.newLine();
             data.mWriter.write("# SDK Version: " + SystemPropTool.getProp("ro.build.version.sdk", "Unknown"));
             data.mWriter.newLine();
-            data.mWriter.write("# Memory Info: " + (totalMemory != null ? totalMemory + "(" + ((totalMemory / 1024 / 1024 / 1024) + 1) + "GB)" : "Unknown"));
+            data.mWriter.write("# CPU Info: " + SystemPropTool.getProp("ro.soc.model", "Unknown"));
+            data.mWriter.newLine();
+            data.mWriter.write("# Memory Info: " + getRam());
             data.mWriter.newLine();
             data.mWriter.write("# Module Version: " + ToolData.mModuleVersion);
             data.mWriter.newLine();
@@ -422,5 +425,31 @@ public class LogToFile {
         public String mLogId = "";
         public String mLogFileName = "";
         public ArrayList<String> mLogContent = new ArrayList<>();
+    }
+
+    private static String getRam() {
+        if (!new File("proc/mv").exists()) {
+            Long totalMemory = InvokeTool.callStaticMethod(InvokeTool.findClass("android.os.Process"), "getTotalMemory", new Class[]{});
+            if (totalMemory == null) return "Unknown";
+            return ((totalMemory / 1024 / 1024 / 1024) + 1) + "GB";
+        }
+
+        String[] split;
+        int indexOf;
+        try (FileReader fileReader = new FileReader("proc/mv")) {
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String readLine = bufferedReader.readLine();
+            if (readLine.startsWith("D:") && (split = readLine.split(" ")) != null && split.length >= 3) {
+                String str = split[2];
+                if (TextUtils.isDigitsOnly(str)) {
+                    return str + "GB";
+                } else if ((indexOf = str.indexOf("G")) != -1) {
+                    return str.substring(0, indexOf) + "GB";
+                }
+            }
+        } catch (IOException e) {
+            logENoSave(TAG, "Reader /proc/mv failed!", e);
+        }
+        return "Unknown";
     }
 }

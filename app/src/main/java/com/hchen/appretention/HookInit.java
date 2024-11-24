@@ -81,6 +81,10 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                 Arrays.stream(baseHCs).forEach(BaseHC::onLoadPackage);
             }
         });
+        /*if (loadPackageParam.packageName.equals("com.android.settings")) {
+            HCInit.initLoadPackageParam(loadPackageParam);
+            new TestHook().onLoadPackage();
+        }*/
     }
 
     @Override

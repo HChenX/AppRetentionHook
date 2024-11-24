@@ -43,6 +43,7 @@ public class Hyper {
     public static final String reportStartProcess = "reportStartProcess";
     public static final String checkUnused = "checkUnused";
     public static final String isEnable = "isEnable";
+    public static final String init = "init";
     public static final String killProcess = "killProcess";
     public static final String killProcessByMinAdj = "killProcessByMinAdj";
     public static final String checkBackgroundAppException = "checkBackgroundAppException";

@@ -22,20 +22,15 @@
  */
 package com.hchen.appretention.hook.hyper;
 
-import static com.hchen.appretention.data.field.Hyper.BINDER_FULL_KILL_PROC;
-import static com.hchen.appretention.data.field.Hyper.ENABLED_SCOUT;
-import static com.hchen.appretention.data.field.Hyper.ENABLE_SCOUT_MEMORY_MONITOR;
+import static com.hchen.appretention.data.field.Hyper.IS_ENABLE_RECLAIM;
 import static com.hchen.appretention.data.field.Hyper.PROCESS_CLEANER_ENABLED;
 import static com.hchen.appretention.data.field.Hyper.PROCESS_TRACKER_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.PROC_CPU_EXCEPTION_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.RECLAIM_IF_NEEDED;
-import static com.hchen.appretention.data.field.Hyper.SCOUT_MEMORY_DISABLE_DMABUF;
-import static com.hchen.appretention.data.field.Hyper.SCOUT_MEMORY_DISABLE_GPU;
 import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
 import static com.hchen.appretention.data.method.Hyper.addMiuiPeriodicCleanerService;
 import static com.hchen.appretention.data.method.Hyper.boostCameraByThreshold;
 import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
-import static com.hchen.appretention.data.method.Hyper.checkUnused;
 import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
 import static com.hchen.appretention.data.method.Hyper.doAdjBoost;
 import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
@@ -48,8 +43,10 @@ import static com.hchen.appretention.data.method.Hyper.handleKillAny;
 import static com.hchen.appretention.data.method.Hyper.handleKillApp;
 import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
 import static com.hchen.appretention.data.method.Hyper.handleThermalKillProc;
+import static com.hchen.appretention.data.method.Hyper.init;
 import static com.hchen.appretention.data.method.Hyper.interceptAppRestartIfNeeded;
 import static com.hchen.appretention.data.method.Hyper.isAllowAdjBoost;
+import static com.hchen.appretention.data.method.Hyper.isEnable;
 import static com.hchen.appretention.data.method.Hyper.isMiuiLiteVersion;
 import static com.hchen.appretention.data.method.Hyper.isNeedCompact;
 import static com.hchen.appretention.data.method.Hyper.killBackgroundApps;
@@ -71,7 +68,6 @@ import static com.hchen.appretention.data.method.Hyper.startPreloadApp;
 import static com.hchen.appretention.data.method.Hyper.updateCameraBoosterCloudData;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
 import static com.hchen.appretention.data.path.Hyper.ActivityTaskManagerService;
-import static com.hchen.appretention.data.path.Hyper.ActivityThreadImpl;
 import static com.hchen.appretention.data.path.Hyper.Build;
 import static com.hchen.appretention.data.path.Hyper.CameraBooster;
 import static com.hchen.appretention.data.path.Hyper.CameraBoosterNew;
@@ -95,8 +91,6 @@ import static com.hchen.appretention.data.path.Hyper.ProcessManagerInternal;
 import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessSceneCleaner;
-import static com.hchen.appretention.data.path.Hyper.ScoutDisplayMemoryManager;
-import static com.hchen.appretention.data.path.Hyper.ScoutHelper;
 import static com.hchen.appretention.data.path.Hyper.ServiceThread;
 import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
@@ -111,7 +105,6 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -120,7 +113,6 @@ import java.util.List;
  * @author 焕晨HChen
  */
 public class HyperV1 extends BaseHC {
-    private static final ArrayList<UnHook> mCameraOptHookList = new ArrayList<>();
     private static ClassLoader mCameraOptClassLoader = null;
 
     @Override
@@ -128,12 +120,15 @@ public class HyperV1 extends BaseHC {
         /*
          * 关闭 scout。
          * */
-        setStaticField(ScoutHelper, ENABLED_SCOUT, false);
-        setStaticField(ActivityThreadImpl, ENABLED_SCOUT, false);
-        setStaticField(ScoutHelper, BINDER_FULL_KILL_PROC, false);
-        setStaticField(ScoutDisplayMemoryManager, ENABLE_SCOUT_MEMORY_MONITOR, false); // 关闭内存监视器
-        setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_GPU, true); // 关闭内存监视器
-        setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
+        /*
+         * 禁用意义不大，主要针对内存泄漏的检查。
+         * setStaticField(ScoutHelper, ENABLED_SCOUT, false);
+         * setStaticField(ActivityThreadImpl, ENABLED_SCOUT, false);
+         * setStaticField(ScoutHelper, BINDER_FULL_KILL_PROC, false);
+         * setStaticField(ScoutDisplayMemoryManager, ENABLE_SCOUT_MEMORY_MONITOR, false); // 关闭内存监视器
+         * setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_GPU, true); // 关闭内存监视器
+         * setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
+         * */
 
         /*
          * 关闭 spc。
@@ -191,26 +186,28 @@ public class HyperV1 extends BaseHC {
         }
 
         /*
-         * 禁用 MemoryFreezeStubImpl 的 kill。
+         * 禁用 MemoryFreezeStubImpl。
          * */
         hookMethod(MemoryFreezeStubImpl,
-            checkUnused,
-            doNothing()
+            isEnable,
+            returnResult(false).shouldObserveCall(false)
         );
 
         /*
          * 禁用 MemoryStandardProcessControl。
-         * 它由一个后台 job (MemoryControlServiceImpl) 启动并执行 kill 逻辑，同时会监听广播。
+         * 它由一个后台 job (MemoryControlServiceImpl) 启动。
          *  */
-        hookMethod(MemoryStandardProcessControl,
-            killProcess,
-            boolean.class,
-            returnResult(false)
+        chain(MemoryStandardProcessControl, method(isEnable)
+            .returnResult(false)
+
+            .method(init, Context.class, ActivityManagerService)
+            .returnResult(false)
         );
 
         /*
          * 禁止系统压力控制器清理内存。
          * */
+        setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
         chain(SystemPressureController,
             /*
              * 禁止随屏幕状态启动压力监测器。
@@ -295,7 +292,8 @@ public class HyperV1 extends BaseHC {
                     public void before() {
                         Object config = getArgs(0);
                         int mPolicy = callMethod(config, getPolicy);
-                        if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN))
+                        if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN)
+                            && !ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_ONE_KEY_CLEAN))
                             returnNull();
                     }
                 })

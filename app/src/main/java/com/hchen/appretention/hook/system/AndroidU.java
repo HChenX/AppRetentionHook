@@ -158,20 +158,22 @@ public class AndroidU extends BaseHC {
          * 225 132120576 250 132120576 300 226492416 400 226492416 500 226492416 600 226492416 700 226492416
          * 800 226492416 900 226492416 999 330301440
          * */
-        /*hook(ProcessList,
-            getMemLevel,
-            int.class,
-            new IHook() {
-                @Override
-                public void after() {
-                    int[] mOomAdj = getThisField("mOomAdj");
-                    int[] mOomMinFree = getThisField("mOomMinFree");
-                    logI(TAG, "oom adj: " + Arrays.toString(mOomAdj)
-                        + " oom min free: " + Arrays.toString(mOomMinFree));
-                    logI(TAG, "memlevel: " + getResult());
-                }
-            }
-        );*/
+        /*
+         * hook(ProcessList,
+         * getMemLevel,
+         * int.class,
+         * new IHook() {
+         *    @Override
+         *    public void after() {
+         *      int[] mOomAdj = getThisField("mOomAdj");
+         *      int[] mOomMinFree = getThisField("mOomMinFree");
+         *      logI(TAG, "oom adj: " + Arrays.toString(mOomAdj)
+         *           + " oom min free: " + Arrays.toString(mOomMinFree));
+         *      logI(TAG, "memlevel: " + getResult());
+         *     }
+         *   }
+         * );
+         * */
 
 
         /*
@@ -368,18 +370,22 @@ public class AndroidU extends BaseHC {
          *
          * 被调用 AppProfiler 方法 updateLowMemStateLSP
          * */
-        /*hook(LowMemDetector,
-            getMemFactor,
-            returnResult(0).shouldObserveCall(false)
-        );*/
+        /*
+         *hook(LowMemDetector,
+         *   getMemFactor,
+         *   returnResult(0).shouldObserveCall(false)
+         *);
+         * */
 
         /*
          * 为不支持 LowMemDetector 功能的设备伪装支持。
          * */
-        /*hook(LowMemDetector,
-            isAvailable,
-            returnResult(true).shouldObserveCall(false)
-        );*/
+        /*
+         *hook(LowMemDetector,
+         *   isAvailable,
+         *   returnResult(true).shouldObserveCall(false)
+         *);
+         * */
 
         // ------------- OomAdjuster -------------
         /*
