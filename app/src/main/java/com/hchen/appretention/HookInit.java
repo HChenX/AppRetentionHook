@@ -23,6 +23,7 @@
 package com.hchen.appretention;
 
 import com.hchen.appretention.hook.LogPuppet;
+import com.hchen.appretention.hook.TestHook;
 import com.hchen.appretention.hook.hyper.HyperV1;
 import com.hchen.appretention.hook.powerkeeper.PowerKeeper;
 import com.hchen.appretention.hook.system.AndroidU;
@@ -81,10 +82,10 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                 Arrays.stream(baseHCs).forEach(BaseHC::onLoadPackage);
             }
         });
-        /*if (loadPackageParam.packageName.equals("com.android.settings")) {
+        if (loadPackageParam.packageName.equals("")) {
             HCInit.initLoadPackageParam(loadPackageParam);
             new TestHook().onLoadPackage();
-        }*/
+        }
     }
 
     @Override
@@ -93,12 +94,10 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
             .setTag("AppRetention")
             .setModulePackageName(BuildConfig.APPLICATION_ID)
             .setLogLevel(HCInit.LOG_D)
+            .useLogExpand(new String[]{
+                "com.hchen.appretention"
+            })
         );
-        HCInit.useLogExpand(new String[]{
-            "com.hchen.appretention"
-        });
-        HCInit.setLogFileRootName("AppRetention");
-        HCInit.setModuleVersion(BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")");
         HCInit.initStartupParam(startupParam);
     }
 

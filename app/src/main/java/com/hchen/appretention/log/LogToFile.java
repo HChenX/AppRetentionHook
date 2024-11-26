@@ -35,7 +35,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
-import com.hchen.hooktool.data.ToolData;
+import com.hchen.appretention.BuildConfig;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.ContextTool;
 import com.hchen.hooktool.tool.additional.DeviceTool;
@@ -69,8 +69,8 @@ public class LogToFile {
     public static final String USER_UNLOCKED_COMPLETED_PROP = "persist.sys.user.unlocked.completed";
     public static final String SETTINGS_LOG_SERVICE_COMPLETED = "log_service_boot_complete";
     private static final String TAG = "LogToFile";
-    public static final String LOG_FILE_PATH = "/storage/emulated/0/Android/" + ToolData.mLogFileRootName + "/";
-    private static final String LOG_OLD_FILE_PATH = "/storage/emulated/0/Android/" + ToolData.mLogFileRootName + "/old/";
+    public static final String LOG_FILE_PATH = "/storage/emulated/0/Android/AppRetention/";
+    private static final String LOG_OLD_FILE_PATH = "/storage/emulated/0/Android/AppRetention/old/";
     private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
     private static String LOG_FILE_FULL_PATH = "";
     private static boolean isWaitingSystemBootCompleted = false;
@@ -290,7 +290,7 @@ public class LogToFile {
             data.mWriter.newLine();
             data.mWriter.write("# Memory Info: " + getRam());
             data.mWriter.newLine();
-            data.mWriter.write("# Module Version: " + ToolData.mModuleVersion);
+            data.mWriter.write("# Module Version: " + BuildConfig.VERSION_NAME + "(" + BuildConfig.VERSION_CODE + ")");
             data.mWriter.newLine();
             data.mWriter.write("# Date Info: " + new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(System.currentTimeMillis()));
             data.mWriter.newLine();

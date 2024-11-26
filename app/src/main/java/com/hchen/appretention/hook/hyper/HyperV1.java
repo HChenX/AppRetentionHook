@@ -365,7 +365,7 @@ public class HyperV1 extends BaseHC {
         /*
          * 从此开始，下方为针对相机杀后台而 hook 的内容。
          * */
-        Class<?> mCameraOpt = findClass(CameraOpt).getIfExists();
+        Class<?> mCameraOpt = findClass(CameraOpt).getNoReport();
         if (mCameraOpt != null) {
             // 帮助 CameraOpt 初始化
             Class<?> mCameraBoosterClazz = getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
@@ -407,7 +407,7 @@ public class HyperV1 extends BaseHC {
 
         for (String m : mCameraOptShouldHookMethodList) {
             if (existsAnyMethod(cameraBooster, m)) {
-                Method method = findAnyMethod(cameraBooster, m).first();
+                Method method = findAllMethod(cameraBooster, m).first();
                 if (method == null) continue;
                 if (method.getName().equals(interceptAppRestartIfNeeded)) {
                     hook(method, returnResult(false).shouldObserveCall(false));
