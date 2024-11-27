@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 输出日志至指定文件中
@@ -168,6 +169,7 @@ public class LogToFile {
     }
 
     private static LogContentData[] updateLogContent(String fileName, String log) {
+        fileName = redirectFileName(fileName);
         if (log.equals("Any")) {
             mLogContentDataMap.forEach((s, logContentData) ->
                 logContentData.mLogContent.add(getDate() + " " + log));
@@ -179,6 +181,31 @@ public class LogToFile {
             return new LogContentData[]{logContentData};
         }
         return new LogContentData[0];
+    }
+
+    private static final HashMap<String, String> mRedirectFileNameMap = new HashMap<>();
+
+    private static String redirectFileName(String fileName) {
+        if (mRedirectFileNameMap.get(fileName) != null) {
+            return mRedirectFileNameMap.get(fileName);
+        }
+
+        String[] shouldRedirect = new String[]{
+            "CacheCompaction",
+            "UpdateOomLevels"
+        };
+        AtomicReference<String> redirectFileName = new AtomicReference<>();
+        if (Arrays.asList(shouldRedirect).contains(fileName)) {
+            mLogContentDataMap.keySet().forEach(s -> {
+                if (s.contains("Android")) {
+                    redirectFileName.set(s);
+                }
+            });
+            mRedirectFileNameMap.put(fileName, redirectFileName.get());
+            if (redirectFileName.get() == null) return fileName;
+            return redirectFileName.get();
+        }
+        return fileName;
     }
 
     public static void writeFile(String key, ArrayList<String> logs) {
