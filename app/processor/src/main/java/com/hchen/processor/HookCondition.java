@@ -20,34 +20,38 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package com.hchen.appretention.hook.powerkeeper;
+package com.hchen.processor;
 
-import static com.hchen.appretention.data.method.PowerKeeper.kill;
-import static com.hchen.appretention.data.path.PowerKeeper.ProcessManager;
-
-import com.hchen.hooktool.BaseHC;
-import com.hchen.processor.HookCondition;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * 禁止电量和性能杀后台
+ * Hook 执行条件
  *
  * @author 焕晨HChen
  */
-@HookCondition(targetPackage = "com.miui.powerkeeper", targetBrand = "Xiaomi")
-public class PowerKeeper extends BaseHC {
-    @Override
-    public void init() {
-        /*
-         * 禁止电量和性能杀后台
-         * */
-        hookAllMethod(ProcessManager,
-            kill,
-            returnResult(false)
-        );
-    }
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.TYPE)
+public @interface HookCondition {
+    /**
+     * 目标品牌
+     */
+    String targetBrand() default "Any";
 
-    @Override
-    public void copy() {
+    /**
+     * 目标作用域
+     */
+    String targetPackage();
 
-    }
+    /**
+     * 目标安卓版本
+     */
+    int targetSdk() default 0;
+
+    /**
+     * 目标系统 ROM 版本
+     */
+    float targetOS() default -1f;
 }

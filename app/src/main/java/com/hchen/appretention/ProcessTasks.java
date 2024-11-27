@@ -42,6 +42,9 @@ import java.util.stream.Collectors;
  * @author 焕晨HChen
  */
 public class ProcessTasks {
+    // 使用示例：
+    // FURRY!! [HyperV2] STATE: NONE
+    // DONE!!
     private static final String TAG = "[FURRY!!]";
     private static final ArrayList<FutureTask<String>> futureTaskList = new ArrayList<>();
     private static final ArrayList<String> importList = new ArrayList<>();
@@ -109,6 +112,7 @@ public class ProcessTasks {
                         if (startRecordCopyContent) {
                             if (content.contains("// DONE")) {
                                 startRecordCopyContent = false;
+                                copyContent.add("        // COPY DONE!\n");
                                 for (String target : targetFileArray) {
                                     if (readCopyContentHashMap.get(target) == null)
                                         readCopyContentHashMap.put(target, new ArrayList<>(copyContent));
@@ -118,6 +122,9 @@ public class ProcessTasks {
                                 targetFileArray = new String[]{};
                                 copyContent.clear();
                                 continue;
+                            }
+                            if (copyContent.isEmpty()) {
+                                copyContent.add("        // FURRY! FROM: [" + s + "]");
                             }
                             copyContent.add(content);
                         }

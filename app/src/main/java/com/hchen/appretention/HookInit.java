@@ -22,21 +22,19 @@
  */
 package com.hchen.appretention;
 
-import com.hchen.appretention.hook.LogPuppet;
+import static com.hchen.hooktool.log.XposedLog.logENoSave;
+
+import com.hchen.appretention.hook.ConditionMap;
 import com.hchen.appretention.hook.TestHook;
-import com.hchen.appretention.hook.hyper.HyperV1;
-import com.hchen.appretention.hook.powerkeeper.PowerKeeper;
-import com.hchen.appretention.hook.system.AndroidU;
-import com.hchen.appretention.hook.system.CrashListener;
-import com.hchen.appretention.hook.system.UserUnlockListener;
 import com.hchen.appretention.log.LogToFile;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.HCInit;
+import com.hchen.hooktool.tool.additional.DeviceTool;
 
 import org.luckypray.dexkit.DexKitBridge;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.BiConsumer;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -49,13 +47,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  */
 public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     private static final String TAG = "AppRetention";
-    private static final AndroidU androidU = new AndroidU();
-    private static final HyperV1 hyperV1 = new HyperV1();
-    private static final UserUnlockListener userUnlockListener = new UserUnlockListener();
-    private static final CrashListener crashListener = new CrashListener();
-    private static final PowerKeeper powerKeeper = new PowerKeeper();
-    private static final HashMap<String, BaseHC[]> baseHCs = new HashMap<>();
-    private static final HashMap<String, String> hookAsTag = new HashMap<>();
     private static final String[] hookPackages = {
         "android",
         "com.miui.powerkeeper",
@@ -64,22 +55,30 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
         "com.android.systemui"
     };
 
-    static {
-        baseHCs.put("android", new BaseHC[]{androidU, hyperV1, userUnlockListener, crashListener});
-        baseHCs.put("com.miui.powerkeeper", new BaseHC[]{powerKeeper});
-        baseHCs.put("com.android.systemui", new BaseHC[]{new LogPuppet()});
-        hookAsTag.put("android", "Android");
-        hookAsTag.put("com.miui.powerkeeper", "PowerKeeper");
-        hookAsTag.put("com.android.systemui", "LogPuppet");
-    }
-
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        baseHCs.forEach((packageName, baseHCs) -> {
-            if (packageName.equals(loadPackageParam.packageName)) {
-                LogToFile.initLogToFile(hookAsTag.get(packageName));
-                HCInit.initLoadPackageParam(loadPackageParam);
-                Arrays.stream(baseHCs).forEach(BaseHC::onLoadPackage);
+        ConditionMap.get().forEach(new BiConsumer<>() {
+            @Override
+            public void accept(String s, ConditionMap conditionMap) {
+                if (!conditionMap.mTargetPackage.equals(loadPackageParam.packageName))
+                    return;
+                if (!conditionMap.mTargetBrand.equals("Any") && !DeviceTool.isRightRom(conditionMap.mTargetBrand))
+                    return;
+                if (!(conditionMap.mTargetSdk == 0) && !DeviceTool.isAndroidVersion(conditionMap.mTargetSdk))
+                    return;
+                if (!(conditionMap.mTargetOS == -1f) && !DeviceTool.isHyperOSVersion(conditionMap.mTargetOS)) // 暂时只支持 Hyper 版本检查
+                    return;
+                try {
+                    Class<?> hookClass = getClass().getClassLoader().loadClass(s);
+                    BaseHC baseHC = (BaseHC) hookClass.getDeclaredConstructor().newInstance();
+                    String className = baseHC.TAG;
+                    LogToFile.initLogToFile(className);
+                    HCInit.initLoadPackageParam(loadPackageParam);
+                    baseHC.onLoadPackage();
+                } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                         InstantiationException | InvocationTargetException e) {
+                    logENoSave(TAG, e);
+                }
             }
         });
         if (loadPackageParam.packageName.equals("")) {

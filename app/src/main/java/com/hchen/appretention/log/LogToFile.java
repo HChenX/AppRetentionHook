@@ -28,11 +28,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.provider.Settings;
 import android.service.restrictions.RestrictionsReceiver;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hchen.appretention.BuildConfig;
@@ -54,6 +57,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -75,15 +79,16 @@ public class LogToFile {
     private static String LOG_FILE_FULL_PATH = "";
     private static boolean isWaitingSystemBootCompleted = false;
     private static boolean isWaitingLogServiceBootCompleted = false;
-    private static LogContentData mLogContentData;
+    private static final HashMap<String, LogContentData> mLogContentDataMap = new HashMap<>();
     private static boolean hasProcessingBroadcast = false;
 
     public static void initLogToFile(String fileName) {
         if (fileName == null) return;
         if (fileName.isEmpty()) return;
-        mLogContentData = new LogContentData();
+        LogContentData mLogContentData = new LogContentData();
         mLogContentData.mLogFileName = fileName;
         mLogContentData.mLogId = getRandomNumber();
+        mLogContentDataMap.put(fileName, mLogContentData);
         waitSystemBootCompletedIfNeed();
     }
 
@@ -150,17 +155,30 @@ public class LogToFile {
         return null;
     }
 
-    public static synchronized void saveLogContent(String log) {
-        if (mLogContentData == null) return;
-        if (isWaitingSystemBootCompleted || isWaitingLogServiceBootCompleted) {
-            mLogContentData.mLogContent.add(getDate() + " " + log);
-        } else {
-            mLogContentData.mLogContent.add(getDate() + " " + log);
-            pushWithAsyncContext(LogToFile::sendLogContentBroadcast);
+    public static synchronized void saveLogContent(String fileName, String log) {
+        LogContentData[] logContentDatas = updateLogContent(fileName, log);
+        if (!isWaitingSystemBootCompleted && !isWaitingLogServiceBootCompleted) {
+            pushWithAsyncContext(context -> {
+                Arrays.stream(logContentDatas).forEach(logContentData ->
+                    sendLogContentBroadcast(context, logContentData));
+            });
         }
         AndroidLog.logI(TAG, "isWaitingSystemBootCompleted: " + isWaitingSystemBootCompleted +
-            " isWaitingLogServiceBootCompleted: " + isWaitingLogServiceBootCompleted +
-            " log: " + log + " content: " + mLogContentData.mLogContent);
+            " isWaitingLogServiceBootCompleted: " + isWaitingLogServiceBootCompleted + " log: " + log);
+    }
+
+    private static LogContentData[] updateLogContent(String fileName, String log) {
+        if (log.equals("Any")) {
+            mLogContentDataMap.forEach((s, logContentData) ->
+                logContentData.mLogContent.add(getDate() + " " + log));
+            return mLogContentDataMap.values().toArray(new LogContentData[0]);
+        }
+        LogContentData logContentData = mLogContentDataMap.get(fileName);
+        if (logContentData != null) {
+            logContentData.mLogContent.add(getDate() + " " + log);
+            return new LogContentData[]{logContentData};
+        }
+        return new LogContentData[0];
     }
 
     public static void writeFile(String key, ArrayList<String> logs) {
@@ -241,6 +259,11 @@ public class LogToFile {
                 } catch (IOException e) {
                     logENoSave(TAG, "failed to copy log file to old path: " + file.getPath(), e);
                 }
+
+                if (file.delete()) {
+                    AndroidLog.logI(TAG, "success to delete log file: " + file.getPath());
+                } else
+                    AndroidLog.logE(TAG, "failed to delete log file: " + file.getPath());
             }
         }
     }
@@ -353,7 +376,7 @@ public class LogToFile {
                     int maxWhileCount1 = 3;
                     while (maxWhileCount1-- > 0) {
                         if (isLogServiceBootCompleted(context)) {
-                            sendLogContentBroadcast(context);
+                            flushLog(context);
                             isWaitingLogServiceBootCompleted = false;
                             break;
                         }
@@ -365,8 +388,15 @@ public class LogToFile {
                 });
             });
         } else {
-            pushWithAsyncContext(LogToFile::sendLogContentBroadcast);
+            pushWithAsyncContext(LogToFile::flushLog);
         }
+    }
+
+    private static void flushLog(Context context) {
+        mLogContentDataMap.forEach((s, logContentData) -> {
+            if (logContentData.mLogContent.isEmpty()) return;
+            sendLogContentBroadcast(context, logContentData);
+        });
     }
 
     public static String getRandomNumber() {
@@ -375,26 +405,22 @@ public class LogToFile {
     }
 
     @SuppressLint("MissingPermission")
-    private static synchronized void sendLogContentBroadcast(Context context) {
+    private static synchronized void sendLogContentBroadcast(Context context, LogContentData logContentData) {
         if (context == null || hasProcessingBroadcast) return;
         hasProcessingBroadcast = true;
-        ArrayList<String> finalLogContent = new ArrayList<>(mLogContentData.mLogContent);
-        mLogContentData.mLogContent.clear();
         Intent intent = new Intent();
         intent.setAction(ACTION_LOG_SERVICE_CONTENT);
-        intent.putExtra("logId", mLogContentData.mLogId);
-        intent.putExtra("logFileName", mLogContentData.mLogFileName);
-        intent.putExtra("logContent", finalLogContent);
-        AndroidLog.logI(TAG, "send broadcast logId: " + mLogContentData.mLogId + " logKey: " + mLogContentData.mLogFileName
-            + " logContent: " + finalLogContent);
+        intent.putExtra("logData", logContentData);
+        AndroidLog.logI(TAG, "send broadcast logId: " + logContentData.mLogId + " logKey: " + logContentData.mLogFileName
+            + " logContent: " + logContentData.mLogContent);
+        logContentData.createOldLogContent();
+        logContentData.mLogContent.clear();
         context.sendOrderedBroadcast(intent, null, new RestrictionsReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (getResultCode() == Activity.RESULT_OK) {
                     hasProcessingBroadcast = false;
-                    if (!mLogContentData.mLogContent.isEmpty()) {
-                        sendLogContentBroadcast(context);
-                    }
+                    flushLog(context);
                 } else
                     hasProcessingBroadcast = false; // 处理失败, 接收方可能尚未注册, 跳过！可能丢失日志数据！
                 AndroidLog.logI(TAG, "broadcast result code: " + getResultCode());
@@ -421,10 +447,43 @@ public class LogToFile {
         private BufferedReader mReader;
     }
 
-    private static class LogContentData {
+    public static class LogContentData implements Parcelable {
         public String mLogId = "";
         public String mLogFileName = "";
         public ArrayList<String> mLogContent = new ArrayList<>();
+        public ArrayList<String> mOldLogContent;
+
+        void createOldLogContent() {
+            mOldLogContent = new ArrayList<>(mLogContent);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
+            dest.writeString(mLogId);
+            dest.writeString(mLogFileName);
+            dest.writeStringList(mOldLogContent);
+        }
+
+        public static final Creator<?> CREATOR = new Creator<LogContentData>() {
+            @Override
+            public LogContentData createFromParcel(Parcel source) {
+                LogContentData logContentData = new LogContentData();
+                logContentData.mLogId = source.readString();
+                logContentData.mLogFileName = source.readString();
+                logContentData.mOldLogContent = source.createStringArrayList();
+                return logContentData;
+            }
+
+            @Override
+            public LogContentData[] newArray(int size) {
+                return new LogContentData[size];
+            }
+        };
     }
 
     private static String getRam() {

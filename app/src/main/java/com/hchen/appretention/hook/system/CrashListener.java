@@ -32,6 +32,7 @@ import android.content.Context;
 import com.hchen.appretention.data.field.System;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
+import com.hchen.processor.HookCondition;
 
 import java.lang.reflect.Method;
 
@@ -40,6 +41,7 @@ import java.lang.reflect.Method;
  *
  * @author 焕晨HChen
  */
+@HookCondition(targetPackage = "android")
 public class CrashListener extends BaseHC {
     @Override
     public void init() {

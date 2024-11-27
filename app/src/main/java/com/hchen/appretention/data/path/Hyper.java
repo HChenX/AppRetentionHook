@@ -42,6 +42,7 @@ public class Hyper {
     public static final String MemoryFreezeStubImpl = "com.android.server.am.MemoryFreezeStubImpl";
     public static final String MemoryStandardProcessControl = "com.android.server.am.MemoryStandardProcessControl";
     public static final String SystemPressureController = "com.android.server.am.SystemPressureController";
+    public static final String SystemPressureControllerNative = "com.android.server.am.SystemPressureControllerNative";
     public static final String ProcessPowerCleaner = "com.android.server.am.ProcessPowerCleaner";
     public static final String ProcessMemoryCleaner = "com.android.server.am.ProcessMemoryCleaner";
     public static final String ProcessSceneCleaner = "com.android.server.am.ProcessSceneCleaner";
@@ -59,6 +60,7 @@ public class Hyper {
     public static final String PreloadLifecycle = "com.android.server.wm.PreloadLifecycle";
     public static final String CameraBooster = "com.miui.cameraopt.booster.CameraBooster";
     public static final String CameraBoosterNew = "com.android.server.am.CameraBooster";
+    public static final String CameraOptManager = "com.miui.cameraopt.CameraOptManager";
     public static final String CameraOpt = "com.android.server.camera.CameraOpt";
     public static final String ICameraBooster = "com.android.server.camera.ICameraBooster";
     public static final String ProcessManagerInternal = "com.miui.server.process.ProcessManagerInternal";

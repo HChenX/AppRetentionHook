@@ -103,6 +103,7 @@ import android.content.Context;
 import com.hchen.appretention.data.field.Hyper;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
+import com.hchen.processor.HookCondition;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -112,6 +113,7 @@ import java.util.List;
  *
  * @author 焕晨HChen
  */
+@HookCondition(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 1.0f)
 public class HyperV1 extends BaseHC {
     private static ClassLoader mCameraOptClassLoader = null;
 
@@ -130,6 +132,7 @@ public class HyperV1 extends BaseHC {
          * setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
          * */
 
+        // FURRY!! [HyperV2], STATE: OK
         /*
          * 关闭 spc。
          * */
@@ -203,6 +206,7 @@ public class HyperV1 extends BaseHC {
             .method(init, Context.class, ActivityManagerService)
             .returnResult(false)
         );
+        // DONE!!
 
         /*
          * 禁止系统压力控制器清理内存。
@@ -228,6 +232,7 @@ public class HyperV1 extends BaseHC {
                 .doNothing().shouldObserveCall(false)
         );
 
+        // FURRY!! [HyperV2], STATE: OK
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -361,6 +366,7 @@ public class HyperV1 extends BaseHC {
                 }
             }).shouldObserveCall(false)
         );
+        // DONE!!
 
         /*
          * 从此开始，下方为针对相机杀后台而 hook 的内容。
@@ -421,54 +427,5 @@ public class HyperV1 extends BaseHC {
 
     @Override
     public void copy() {
-    }
-
-    private static class ProcessPolicy {
-        public static final String REASON_ANR = "anr";
-        public static final String REASON_AUTO_IDLE_KILL = "AutoIdleKill";
-        public static final String REASON_AUTO_LOCK_OFF_CLEAN = "AutoLockOffClean";
-        public static final String REASON_AUTO_LOCK_OFF_CLEAN_BY_PRIORITY = "AutoLockOffCleanByPriority";
-        public static final String REASON_AUTO_POWER_KILL = "AutoPowerKill";
-        public static final String REASON_AUTO_SLEEP_CLEAN = "AutoSleepClean";
-        public static final String REASON_AUTO_SYSTEM_ABNORMAL_CLEAN = "AutoSystemAbnormalClean";
-        public static final String REASON_AUTO_THERMAL_KILL = "AutoThermalKill";
-        public static final String REASON_AUTO_THERMAL_KILL_ALL_LEVEL_1 = "AutoThermalKillAll1";
-        public static final String REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2 = "AutoThermalKillAll2";
-        public static final String REASON_CRASH = "crash";
-        public static final String REASON_DISPLAY_SIZE_CHANGED = "DisplaySizeChanged";
-        public static final String REASON_FORCE_CLEAN = "ForceClean";
-        public static final String REASON_GAME_CLEAN = "GameClean";
-        public static final String REASON_GARBAGE_CLEAN = "GarbageClean";
-        public static final String REASON_LOCK_SCREEN_CLEAN = "LockScreenClean";
-        public static final String REASON_LOW_MEMO = "lowMemory";
-        public static final String REASON_MIUI_MEMO_SERVICE = "MiuiMemoryService";
-        public static final String REASON_ONE_KEY_CLEAN = "OneKeyClean";
-        public static final String REASON_OPTIMIZATION_CLEAN = "OptimizationClean";
-        public static final String REASON_SCREEN_OFF_CPU_CHECK_KILL = "ScreenOffCPUCheckKill";
-        public static final String REASON_SWIPE_UP_CLEAN = "SwipeUpClean";
-        public static final String REASON_UNKNOWN = "Unknown";
-        public static final String REASON_USER_DEFINED = "UserDefined";
-
-        public static String getKillReason(int policy) {
-            return switch (policy) {
-                case 1 -> ProcessPolicy.REASON_ONE_KEY_CLEAN;
-                case 2 -> ProcessPolicy.REASON_FORCE_CLEAN;
-                case 3 -> ProcessPolicy.REASON_LOCK_SCREEN_CLEAN;
-                case 4 -> ProcessPolicy.REASON_GAME_CLEAN;
-                case 5 -> ProcessPolicy.REASON_OPTIMIZATION_CLEAN;
-                case 6 -> ProcessPolicy.REASON_GARBAGE_CLEAN;
-                case 7 -> ProcessPolicy.REASON_SWIPE_UP_CLEAN;
-                case 10 -> ProcessPolicy.REASON_USER_DEFINED;
-                case 11 -> ProcessPolicy.REASON_AUTO_POWER_KILL;
-                case 12 -> ProcessPolicy.REASON_AUTO_THERMAL_KILL;
-                case 13 -> ProcessPolicy.REASON_AUTO_IDLE_KILL;
-                case 14 -> ProcessPolicy.REASON_AUTO_SLEEP_CLEAN;
-                case 16 -> ProcessPolicy.REASON_AUTO_SYSTEM_ABNORMAL_CLEAN;
-                case 19 -> ProcessPolicy.REASON_AUTO_THERMAL_KILL_ALL_LEVEL_1;
-                case 20 -> ProcessPolicy.REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2;
-                case 22 -> ProcessPolicy.REASON_SCREEN_OFF_CPU_CHECK_KILL;
-                default -> ProcessPolicy.REASON_UNKNOWN;
-            };
-        }
     }
 }

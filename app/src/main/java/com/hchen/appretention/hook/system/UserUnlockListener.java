@@ -33,12 +33,14 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
+import com.hchen.processor.HookCondition;
 
 /**
  * 监听用户重启后解锁的事件
  *
  * @author 焕晨HChen
  */
+@HookCondition(targetPackage = "android")
 public class UserUnlockListener extends BaseHC {
     @Override
     public void init() {

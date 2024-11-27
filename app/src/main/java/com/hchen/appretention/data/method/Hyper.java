@@ -89,4 +89,5 @@ public class Hyper {
     public static final String changeProcessMemCgroup = "changeProcessMemCgroup";
     public static final String killApplication = "killApplication";
     public static final String doAdjBoost = "doAdjBoost";
+    public static final String ensureService = "ensureService";
 }

@@ -37,30 +37,35 @@ public class XposedLog {
     public static void logE(String tag, String log) {
         if (ToolData.mInitLogLevel < 1) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log);
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log);
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log);
     }
 
     public static void logE(String tag, String log, String msg) {
         if (ToolData.mInitLogLevel < 1) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log + " \n[Error Msg]: " + msg);
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log + " \n[Error Msg]: " + msg);
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log + " \n[Error Msg]: " + msg);
     }
 
     public static void logE(String tag, Throwable e) {
         if (ToolData.mInitLogLevel < 1) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[E]: \n" + LogExpand.printStackTrace(e));
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[E]: \n" + LogExpand.printStackTrace(e));
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[E]: \n" + LogExpand.printStackTrace(e));
     }
 
     public static void logE(String tag, String log, Throwable e) {
         if (ToolData.mInitLogLevel < 1) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log + " \n[Error Msg]: " + LogExpand.printStackTrace(e));
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log + " \n[Error Msg]: " + LogExpand.printStackTrace(e));
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log + " \n[Error Msg]: " + LogExpand.printStackTrace(e));
     }
 
     public static void logENoSave(String tag, String log) {
         if (ToolData.mInitLogLevel < 1) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[E]: " + log);
+    }
+
+    public static void logENoSave(String tag, Throwable e) {
+        if (ToolData.mInitLogLevel < 1) return;
+        XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[E]: \n" + LogExpand.printStackTrace(e));
     }
 
     public static void logENoSave(String tag, String log, Throwable e) {
@@ -72,62 +77,62 @@ public class XposedLog {
     public static void logW(String tag, String log) {
         if (ToolData.mInitLogLevel < 2) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[W]: " + log);
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[W]: " + log);
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[W]: " + log);
     }
 
     public static void logW(String tag, Throwable e) {
         if (ToolData.mInitLogLevel < 2) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[W]: \n" + LogExpand.printStackTrace(e));
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[W]: \n" + LogExpand.printStackTrace(e));
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[W]: \n" + LogExpand.printStackTrace(e));
     }
 
     public static void logW(String tag, String log, Throwable e) {
         if (ToolData.mInitLogLevel < 2) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[W]: " + log + " \n[Warning Msg]: " + LogExpand.printStackTrace(e));
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[W]: " + log + " \n[Warning Msg]: " + LogExpand.printStackTrace(e));
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[W]: " + log + " \n[Warning Msg]: " + LogExpand.printStackTrace(e));
     }
 
     // ----------- logI --------------
     public static void logI(String log) {
         if (ToolData.mInitLogLevel < 3) return;
         XposedBridge.log(ToolData.mInitTag + "[I]: " + log);
-        LogToFile.saveLogContent(ToolData.mInitTag + "[I]: " + log);
+        LogToFile.saveLogContent("Any", ToolData.mInitTag + "[I]: " + log);
     }
 
     public static void logI(String tag, String log) {
         if (ToolData.mInitLogLevel < 3) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[I]: " + log);
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[I]: " + log);
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[I]: " + log);
     }
 
     public static void logI(String tag, String pkg, String log) {
         if (ToolData.mInitLogLevel < 3) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[" + pkg + "][I]: " + log);
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[" + pkg + "][I]: " + log);
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[" + pkg + "][I]: " + log);
     }
 
     public static void logI(String tag, String log, Throwable e) {
         if (ToolData.mInitLogLevel < 3) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[I]: " + log + " \n[Info Msg]: " + LogExpand.printStackTrace(e));
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[I]: " + log + " \n[Info Msg]: " + LogExpand.printStackTrace(e));
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[I]: " + log + " \n[Info Msg]: " + LogExpand.printStackTrace(e));
     }
 
     // ------------ logD --------------
     public static void logD(String tag, Throwable e) {
         if (ToolData.mInitLogLevel < 4) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[D]: \n" + LogExpand.printStackTrace(e));
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[D]: \n" + LogExpand.printStackTrace(e));
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[D]: \n" + LogExpand.printStackTrace(e));
     }
 
     public static void logD(String tag, String log) {
         if (ToolData.mInitLogLevel < 4) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[D]: " + log);
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[D]: " + log);
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[D]: " + log);
     }
 
     public static void logD(String tag, String log, Throwable e) {
         if (ToolData.mInitLogLevel < 4) return;
         XposedBridge.log(ToolData.mInitTag + "[" + tag + "]" + "[D]: " + log + " \n[Debug Msg]: " + LogExpand.printStackTrace(e));
-        LogToFile.saveLogContent(ToolData.mInitTag + "[" + tag + "]" + "[D]: " + log + " \n[Debug Msg]: " + LogExpand.printStackTrace(e));
+        LogToFile.saveLogContent(tag, ToolData.mInitTag + "[" + tag + "]" + "[D]: " + log + " \n[Debug Msg]: " + LogExpand.printStackTrace(e));
     }
 }
