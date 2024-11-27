@@ -24,6 +24,8 @@ package com.hchen.appretention.hook.system;
 
 /**
  * 安卓的 Adj 参数列表
+ *
+ * @author 焕晨HChen
  */
 public final class PrecessAdjInfo {
     // OOM adjustments for processes in various states:

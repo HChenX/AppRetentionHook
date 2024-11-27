@@ -447,6 +447,11 @@ public class LogToFile {
         private BufferedReader mReader;
     }
 
+    /**
+     * 日志数据存储类
+     *
+     * @author 焕晨HChen
+     */
     public static class LogContentData implements Parcelable {
         public String mLogId = "";
         public String mLogFileName = "";

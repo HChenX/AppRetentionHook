@@ -160,6 +160,11 @@ public class LogPuppet extends BaseHC {
         }
     }
 
+    /**
+     * 记录系统 kill 日志
+     *
+     * @author 焕晨HChen
+     */
     private static class KillEventLogRecord {
         private static final String TAG = "KillEventLogRecord";
         private static final String mKillEventRecordFile = "KillEvent";
@@ -240,6 +245,11 @@ public class LogPuppet extends BaseHC {
         }
     }
 
+    /**
+     * 读取并储存系统 prop 键值
+     *
+     * @author 焕晨HChen
+     */
     private static class RecordSystemProp {
         private static final String mRecordFile = "SystemProp";
         private static final String TAG = "RecordSystemProp";

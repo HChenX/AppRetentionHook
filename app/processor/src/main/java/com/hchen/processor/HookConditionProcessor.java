@@ -82,7 +82,7 @@ public class HookConditionProcessor extends AbstractProcessor {
                 import java.util.HashMap;
 
                 /**
-                 * 注解处理器生成的 map 图
+                 * 注解处理器自动生成的 Map 图
                  *
                  * @author 焕晨HChen
                  */

@@ -24,6 +24,8 @@ package com.hchen.appretention.hook.hyper;
 
 /**
  * Hyper 的一些清理动作
+ *
+ * @author 焕晨HChen
  */
 public final class ProcessPolicy {
     public static final String REASON_ANR = "anr";

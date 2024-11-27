@@ -48,6 +48,5 @@ public class PowerKeeper extends BaseHC {
 
     @Override
     public void copy() {
-
     }
 }
