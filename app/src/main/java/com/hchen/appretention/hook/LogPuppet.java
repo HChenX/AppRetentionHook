@@ -22,6 +22,8 @@
  */
 package com.hchen.appretention.hook;
 
+import static com.hchen.appretention.data.method.SystemUi.onCreate;
+import static com.hchen.appretention.data.path.SystemUi.SystemUIApplication;
 import static com.hchen.appretention.log.LogToFile.ACTION_LOG_SERVICE_CONTENT;
 import static com.hchen.appretention.log.LogToFile.SETTINGS_LOG_SERVICE_COMPLETED;
 import static com.hchen.appretention.log.LogToFile.isUserUnlockedCompeted;
@@ -61,13 +63,13 @@ import java.util.concurrent.Executors;
 @HookCondition(targetPackage = "com.android.systemui")
 public class LogPuppet extends BaseHC {
     private boolean isRegisterReceiver = false;
-    private static final String SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE = "kill_event_log_record_enable";
     private static boolean isKillEventRecording = false;
+    private static final String SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE = "kill_event_log_record_enable";
 
     @Override
     public void init() {
-        hookMethod("com.android.systemui.SystemUIApplication",
-            "onCreate",
+        hookMethod(SystemUIApplication,
+            onCreate,
             new IHook() {
                 @Override
                 public void after() {

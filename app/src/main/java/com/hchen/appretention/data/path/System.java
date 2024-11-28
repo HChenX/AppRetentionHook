@@ -23,7 +23,7 @@
 package com.hchen.appretention.data.path;
 
 /**
- * 系统框架字段名
+ * 系统框架类名
  *
  * @author 焕晨HChen
  */

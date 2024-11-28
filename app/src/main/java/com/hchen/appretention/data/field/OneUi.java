@@ -20,13 +20,15 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package com.hchen.appretention.data.path;
+package com.hchen.appretention.data.field;
 
 /**
- * 电量和性能类名
+ * OneUi 字段名
  *
  * @author 焕晨HChen
  */
-public class PowerKeeper {
-    public static final String ProcessManager = "miui.process.ProcessManager";
+public class OneUi {
+    public static final String WRITEBACK_ENABLED = "WRITEBACK_ENABLED";
+    public static final String MAX_NEVERKILLEDAPP_NUM = "MAX_NEVERKILLEDAPP_NUM";
+    public static final String MAX_LONG_LIVE_APP = "MAX_LONG_LIVE_APP";
 }

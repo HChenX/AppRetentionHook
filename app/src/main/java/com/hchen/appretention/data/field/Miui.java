@@ -23,7 +23,7 @@
 package com.hchen.appretention.data.field;
 
 /**
- * Miui 类名
+ * Miui 字段名
  *
  * @author 焕晨HChen
  */

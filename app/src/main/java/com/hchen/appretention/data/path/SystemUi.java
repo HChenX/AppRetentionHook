@@ -23,10 +23,10 @@
 package com.hchen.appretention.data.path;
 
 /**
- * 电量和性能类名
+ * 系统界面类名
  *
  * @author 焕晨HChen
  */
-public class PowerKeeper {
-    public static final String ProcessManager = "miui.process.ProcessManager";
+public class SystemUi {
+    public static final String SystemUIApplication = "com.android.systemui.SystemUIApplication";
 }

@@ -23,7 +23,7 @@
 package com.hchen.appretention.data.path;
 
 /**
- * Hyper 字段名
+ * Hyper 类名
  *
  * @author 焕晨HChen
  */

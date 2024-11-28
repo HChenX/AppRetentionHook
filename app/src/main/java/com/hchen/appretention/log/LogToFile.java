@@ -70,10 +70,10 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author 焕晨HChen
  */
 public class LogToFile {
+    private static final String TAG = "LogToFile";
     public static final String ACTION_LOG_SERVICE_CONTENT = "com.hchen.appretention.LOG_SERVICE_CONTENT";
     public static final String USER_UNLOCKED_COMPLETED_PROP = "persist.sys.user.unlocked.completed";
     public static final String SETTINGS_LOG_SERVICE_COMPLETED = "log_service_boot_complete";
-    private static final String TAG = "LogToFile";
     public static final String LOG_FILE_PATH = "/storage/emulated/0/Android/AppRetention/";
     private static final String LOG_OLD_FILE_PATH = "/storage/emulated/0/Android/AppRetention/old/";
     private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
@@ -192,7 +192,8 @@ public class LogToFile {
 
         String[] shouldRedirect = new String[]{
             "CacheCompaction",
-            "UpdateOomLevels"
+            "UpdateOomLevels",
+            "LmkdParameter"
         };
         AtomicReference<String> redirectFileName = new AtomicReference<>();
         if (Arrays.asList(shouldRedirect).contains(fileName)) {

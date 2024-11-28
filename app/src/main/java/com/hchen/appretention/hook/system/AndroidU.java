@@ -98,7 +98,7 @@ public class AndroidU extends BaseHC {
          * */
         hookMethod(ProcessList,
             killProcessesWhenImperceptible,
-            int[].class, java.lang.String.class, int.class,
+            int[].class, String.class, int.class,
             doNothing());
 
         /*

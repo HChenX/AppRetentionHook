@@ -20,13 +20,13 @@
 
  * Copyright (C) 2023-2024 AppRetentionHook Contributions
  */
-package com.hchen.appretention.data.path;
+package com.hchen.appretention.data.method;
 
 /**
- * 电量和性能类名
+ * 系统界面方法名
  *
  * @author 焕晨HChen
  */
-public class PowerKeeper {
-    public static final String ProcessManager = "miui.process.ProcessManager";
+public class SystemUi {
+    public static final String onCreate = "onCreate";
 }
