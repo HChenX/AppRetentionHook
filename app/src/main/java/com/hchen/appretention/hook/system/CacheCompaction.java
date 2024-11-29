@@ -22,6 +22,7 @@
  */
 package com.hchen.appretention.hook.system;
 
+import static com.hchen.appretention.data.field.System.mCachedAppOptimizerThread;
 import static com.hchen.appretention.data.field.System.mCompactionHandler;
 import static com.hchen.appretention.data.field.System.mOptRecord;
 import static com.hchen.appretention.data.field.System.mPendingCompactionProcesses;
@@ -38,8 +39,10 @@ import static com.hchen.appretention.data.method.System.onOomAdjustChanged;
 import static com.hchen.appretention.data.method.System.resolveCompactionProfile;
 import static com.hchen.appretention.data.method.System.setAppStartingMode;
 import static com.hchen.appretention.data.method.System.setHasPendingCompact;
+import static com.hchen.appretention.data.method.System.setProperty;
 import static com.hchen.appretention.data.method.System.setReqCompactProfile;
 import static com.hchen.appretention.data.method.System.setReqCompactSource;
+import static com.hchen.appretention.data.method.System.setThreadGroupAndCpuset;
 import static com.hchen.appretention.data.method.System.shouldRssThrottleCompaction;
 import static com.hchen.appretention.data.method.System.shouldThrottleMiscCompaction;
 import static com.hchen.appretention.data.method.System.shouldTimeThrottleCompaction;
@@ -52,9 +55,14 @@ import static com.hchen.appretention.data.path.System.CachedAppOptimizer$Default
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$MemCompactionHandler;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$ProcessDependencies;
 import static com.hchen.appretention.data.path.System.CachedAppOptimizer$PropertyChangedCallbackForTest;
+import static com.hchen.appretention.data.path.System.DeviceConfig;
 import static com.hchen.appretention.data.path.System.ProcessRecord;
+import static com.hchen.hooktool.log.XposedLog.logD;
+import static com.hchen.hooktool.log.XposedLog.logW;
 
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 
 import com.hchen.appretention.data.field.System;
 import com.hchen.hooktool.BaseHC;
@@ -81,10 +89,10 @@ public final class CacheCompaction extends BaseHC {
         chain(CachedAppOptimizer, method(onOomAdjustChanged,
             int.class, int.class, ProcessRecord).hook(
                 new IHook() {
-                    private static final Object SOME = getStaticField(CachedAppOptimizer$CompactProfile, com.hchen.appretention.data.field.System.SOME);
-                    private static final Object FULL = getStaticField(CachedAppOptimizer$CompactProfile, com.hchen.appretention.data.field.System.FULL);
-                    private static final Object ANON = getStaticField(CachedAppOptimizer$CompactProfile, com.hchen.appretention.data.field.System.ANON);
-                    private static final Object SHEll = getStaticField(CachedAppOptimizer$CompactSource, com.hchen.appretention.data.field.System.SHELL);
+                    private static final Object SOME = getStaticField(CachedAppOptimizer$CompactProfile, System.SOME);
+                    private static final Object FULL = getStaticField(CachedAppOptimizer$CompactProfile, System.FULL);
+                    private static final Object ANON = getStaticField(CachedAppOptimizer$CompactProfile, System.ANON);
+                    private static final Object SHEll = getStaticField(CachedAppOptimizer$CompactSource, System.SHELL);
                     private static final Object APP = getStaticField(CachedAppOptimizer$CompactSource, System.APP);
                     private Object state;
                     private Object optRecord;
@@ -159,8 +167,31 @@ public final class CacheCompaction extends BaseHC {
             .method(updateUseCompaction)
             .hook(new IHook() {
                 @Override
+                public void before() {
+                    Boolean result = callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", "true", true);
+                    if (result != null && result) {
+                        logD(TAG, "Success to put use_compaction new value 'true'");
+                    } else
+                        logW(TAG, "Failed to put use_compaction value to 'true'");
+                }
+
+                @Override
                 public void after() {
+                    if (existsField(thisObject().getClass(), mUseBootCompact))
+                        setThisField(mUseBootCompact, true);
                     setThisField(mUseCompaction, true);
+
+                    Object compactionHandler = getThisField(mCompactionHandler);
+                    if (compactionHandler == null) {
+                        HandlerThread cachedAppOptimizerThread = getThisField(mCachedAppOptimizerThread);
+
+                        if (!cachedAppOptimizerThread.isAlive()) {
+                            cachedAppOptimizerThread.start();
+                        }
+                        compactionHandler = newInstance(CachedAppOptimizer$MemCompactionHandler, (Object) thisObject(), null);
+                        setThisField(mCompactionHandler, compactionHandler);
+                        callStaticMethod(Process.class, setThreadGroupAndCpuset, cachedAppOptimizerThread.getThreadId(), 2);
+                    }
                 }
             }).shouldObserveCall(false)
 
@@ -170,7 +201,9 @@ public final class CacheCompaction extends BaseHC {
             .hook(new IHook() {
                 @Override
                 public void after() {
-                    setThisField(mUseBootCompact, true);
+                    if (existsField(thisObject().getClass(), mUseBootCompact))
+                        setThisField(mUseBootCompact, true);
+                    setThisField(mUseCompaction, true);
                 }
             }).shouldObserveCall(false)
         );
@@ -218,10 +251,10 @@ public final class CacheCompaction extends BaseHC {
                 }).shouldObserveCall(false)
         );
 
-        chain(CachedAppOptimizer$DefaultProcessDependencies, method(interruptProcCompaction)
+        chain(CachedAppOptimizer$DefaultProcessDependencies, methodIfExist(interruptProcCompaction)
             .doNothing().shouldObserveCall(false)
 
-            .method(setAppStartingMode, boolean.class)
+            .methodIfExist(setAppStartingMode, boolean.class)
             .hook(new IHook() {
                 @Override
                 public void before() {

@@ -51,6 +51,7 @@ public class System {
     public static final String mState = "mState";
     public static final String mOptRecord = "mOptRecord";
     public static final String mCompactionHandler = "mCompactionHandler";
+    public static final String mCachedAppOptimizerThread = "mCachedAppOptimizerThread";
     public static final String mPendingCompactionProcesses = "mPendingCompactionProcesses";
     public static final String mCustomOomMinFree = "mCustomOomMinFree";
     public static final String mMemFactorOverride = "mMemFactorOverride";

@@ -42,6 +42,8 @@ public class OneUi {
     public static final String getInstance = "getInstance";
     public static final String addLongLivePackageLocked = "addLongLivePackageLocked";
     public static final String getMaxLongLiveApps = "getMaxLongLiveApps";
+    public static final String getMARsEnabled = "getMARsEnabled";
+    public static final String isPmmEnabled = "isPmmEnabled";
     public static final String setLmkdCameraKillBoost = "setLmkdCameraKillBoost";
     public static final String setLmkdParameter = "setLmkdParameter";
 }

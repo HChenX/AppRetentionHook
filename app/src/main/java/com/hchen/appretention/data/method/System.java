@@ -63,6 +63,11 @@ public class System {
     public static final String getLastCompactTime = "getLastCompactTime";
     public static final String shouldRssThrottleCompaction = "shouldRssThrottleCompaction";
     public static final String updateUseCompaction = "updateUseCompaction";
+    public static final String isAlive = "isAlive";
+    public static final String start = "start";
+    public static final String setProperty = "setProperty";
+    public static final String setThreadGroupAndCpuset = "setThreadGroupAndCpuset";
+    public static final String getThreadId = "getThreadId";
     public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";
     public static final String updateUseModernTrim = "updateUseModernTrim";
     public static final String updateProactiveKillsEnabled = "updateProactiveKillsEnabled";

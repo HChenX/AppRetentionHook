@@ -271,30 +271,41 @@ public class HyperV2 extends BaseHC {
 
         chain(ProcessSceneCleaner,
             /*
-             * REASON_ONE_KEY_CLEAN
-             * REASON_FORCE_CLEAN
-             * REASON_GAME_CLEAN
-             * REASON_OPTIMIZATION_CLEAN
+             * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
+             * REASON_FORCE_CLEAN (强力清理 > 负一屏)
+             * REASON_GAME_CLEAN (游戏清理 > 安全中心)
+             * REASON_OPTIMIZATION_CLEAN (优化清理 > 安全中心)
+             *
+             * Doc: https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1607
+             *
+             * method(handleKillAll, ProcessConfig)
+             *   .hook(new IHook() {
+             *       @Override
+             *       public void before() {
+             *          Object config = getArgs(0);
+             *          int mPolicy = callMethod(config, getPolicy);
+             *          if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN)
+             *               && !ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_ONE_KEY_CLEAN))
+             *              returnNull();
+             *     }
+             * })
              * */
-            method(handleKillAll, ProcessConfig)
+
+            /*
+             * REASON_LOCK_SCREEN_CLEAN (锁屏清理 > 安全中心)
+             * REASON_GARBAGE_CLEAN (垃圾清理 > 安全中心)
+             * REASON_USER_DEFINED
+             * */
+            method(handleKillAny, ProcessConfig)
                 .hook(new IHook() {
                     @Override
                     public void before() {
                         Object config = getArgs(0);
                         int mPolicy = callMethod(config, getPolicy);
-                        if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN)
-                            && !ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_ONE_KEY_CLEAN))
+                        if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_GARBAGE_CLEAN))
                             returnNull();
                     }
                 })
-
-                /*
-                 * REASON_LOCK_SCREEN_CLEAN
-                 * REASON_GARBAGE_CLEAN
-                 * REASON_USER_DEFINED
-                 * */
-                .method(handleKillAny, ProcessConfig)
-                .doNothing()
         );
 
         /*

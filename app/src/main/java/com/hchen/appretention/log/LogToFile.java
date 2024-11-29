@@ -62,7 +62,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 输出日志至指定文件中
@@ -156,8 +155,8 @@ public class LogToFile {
         return null;
     }
 
-    public static synchronized void saveLogContent(String fileName, String log) {
-        LogContentData[] logContentDatas = updateLogContent(fileName, log);
+    public static synchronized void saveLogContent(String tag, String log) {
+        LogContentData[] logContentDatas = updateLogContent(tag, log);
         if (!isWaitingSystemBootCompleted && !isWaitingLogServiceBootCompleted) {
             pushWithAsyncContext(context -> {
                 Arrays.stream(logContentDatas).forEach(logContentData ->
@@ -168,14 +167,14 @@ public class LogToFile {
             " isWaitingLogServiceBootCompleted: " + isWaitingLogServiceBootCompleted + " log: " + log);
     }
 
-    private static LogContentData[] updateLogContent(String fileName, String log) {
-        fileName = redirectFileName(fileName);
-        if (log.equals("Any")) {
+    private static LogContentData[] updateLogContent(String tag, String log) {
+        tag = redirectFileName(tag);
+        if (tag.equals("Any")) {
             mLogContentDataMap.forEach((s, logContentData) ->
                 logContentData.mLogContent.add(getDate() + " " + log));
             return mLogContentDataMap.values().toArray(new LogContentData[0]);
         }
-        LogContentData logContentData = mLogContentDataMap.get(fileName);
+        LogContentData logContentData = mLogContentDataMap.get(tag);
         if (logContentData != null) {
             logContentData.mLogContent.add(getDate() + " " + log);
             return new LogContentData[]{logContentData};
@@ -185,28 +184,36 @@ public class LogToFile {
 
     private static final HashMap<String, String> mRedirectFileNameMap = new HashMap<>();
 
-    private static String redirectFileName(String fileName) {
-        if (mRedirectFileNameMap.get(fileName) != null) {
-            return mRedirectFileNameMap.get(fileName);
+    private static String redirectFileName(String tag) {
+        if (mRedirectFileNameMap.get(tag) != null) {
+            return mRedirectFileNameMap.get(tag);
         }
 
-        String[] shouldRedirect = new String[]{
+        String[] shouldRedirectToAndroid = new String[]{
             "CacheCompaction",
             "UpdateOomLevels",
+        };
+        String[] shouldRedirectToOneUi = new String[]{
             "LmkdParameter"
         };
-        AtomicReference<String> redirectFileName = new AtomicReference<>();
-        if (Arrays.asList(shouldRedirect).contains(fileName)) {
-            mLogContentDataMap.keySet().forEach(s -> {
+
+        String redirectName = null;
+        if (Arrays.stream(shouldRedirectToAndroid).anyMatch(tag::contains)) {
+            for (String s : mLogContentDataMap.keySet()) {
                 if (s.contains("Android")) {
-                    redirectFileName.set(s);
+                    redirectName = s;
+                    break;
                 }
-            });
-            mRedirectFileNameMap.put(fileName, redirectFileName.get());
-            if (redirectFileName.get() == null) return fileName;
-            return redirectFileName.get();
+            }
+        } else if (Arrays.stream(shouldRedirectToOneUi).anyMatch(tag::contains)) {
+            redirectName = "OneUi";
         }
-        return fileName;
+
+        if (redirectName != null) {
+            mRedirectFileNameMap.put(tag, redirectName);
+            return redirectName;
+        }
+        return tag;
     }
 
     public static void writeFile(String key, ArrayList<String> logs) {

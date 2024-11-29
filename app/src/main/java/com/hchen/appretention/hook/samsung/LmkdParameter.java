@@ -22,9 +22,18 @@
  */
 package com.hchen.appretention.hook.samsung;
 
+import static com.hchen.appretention.data.method.Hyper.init;
+import static com.hchen.appretention.data.method.OneUi.setLmkdParameter;
 import static com.hchen.appretention.data.path.OneUi.DynamicHiddenApp$LmkdParameter;
+import static com.hchen.appretention.data.path.System.ActiveUids;
+import static com.hchen.appretention.data.path.System.ActivityManagerService;
+import static com.hchen.appretention.data.path.System.PlatformCompat;
+import static com.hchen.appretention.data.path.System.ProcessList;
 import static com.hchen.hooktool.log.XposedLog.logD;
+import static com.hchen.hooktool.log.XposedLog.logI;
+import static com.hchen.hooktool.tool.CoreTool.callStaticMethod;
 import static com.hchen.hooktool.tool.CoreTool.findClass;
+import static com.hchen.hooktool.tool.CoreTool.hookMethod;
 
 import android.util.Pair;
 
@@ -81,7 +90,28 @@ public final class LmkdParameter {
                     break;
             }
         });
+
+        // 只输出日志
+        mOrdinalAndParameterMap.forEach((integer, stringIntegerPair) ->
+            logI(TAG, "Map: lmkd parameter: " + stringIntegerPair.first + ", value: " + stringIntegerPair.second + ", ordinal: " + integer));
+
         isInit = true;
+    }
+
+    public static void forceReplace() {
+        hookMethod(ProcessList,
+            init,
+            ActivityManagerService, ActiveUids, PlatformCompat,
+            new IHook() {
+                @Override
+                public void after() {
+                    mOrdinalAndParameterMap.forEach((integer, stringIntegerPair) -> {
+                        callStaticMethod(ProcessList, setLmkdParameter, integer, stringIntegerPair.second);
+                        logD(TAG, "Force ste lmkd parameter: " + stringIntegerPair.first + ", value: " + stringIntegerPair.second + ", ordinal: " + integer);
+                    });
+                }
+            }
+        );
     }
 
     public static void replace(IHook iHook) {

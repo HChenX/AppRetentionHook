@@ -22,6 +22,11 @@
  */
 package com.hchen.appretention.hook.samsung;
 
+import static com.hchen.appretention.data.field.OneUi.ENABLE_KILL_LONG_RUNNING_PROCESS;
+import static com.hchen.appretention.data.field.OneUi.INSTANCE;
+import static com.hchen.appretention.data.field.OneUi.KPM_BTIME_ENABLE;
+import static com.hchen.appretention.data.field.OneUi.KPM_POLICY_ENABLE;
+import static com.hchen.appretention.data.field.OneUi.MARs_ENABLE;
 import static com.hchen.appretention.data.field.OneUi.MAX_LONG_LIVE_APP;
 import static com.hchen.appretention.data.field.OneUi.WRITEBACK_ENABLED;
 import static com.hchen.appretention.data.method.OneUi.IsForceKillHeavyProcess;
@@ -29,9 +34,11 @@ import static com.hchen.appretention.data.method.OneUi.activeLaunchKillCheck;
 import static com.hchen.appretention.data.method.OneUi.addLongLivePackageLocked;
 import static com.hchen.appretention.data.method.OneUi.checkKeptProcess;
 import static com.hchen.appretention.data.method.OneUi.getInstance;
+import static com.hchen.appretention.data.method.OneUi.getMARsEnabled;
 import static com.hchen.appretention.data.method.OneUi.getMaxLongLiveApps;
 import static com.hchen.appretention.data.method.OneUi.isBEKCondition;
 import static com.hchen.appretention.data.method.OneUi.isExcessiveResourceUsage;
+import static com.hchen.appretention.data.method.OneUi.isPmmEnabled;
 import static com.hchen.appretention.data.method.OneUi.killTimeOverEmptyProcess;
 import static com.hchen.appretention.data.method.OneUi.setLmkdCameraKillBoost;
 import static com.hchen.appretention.data.method.OneUi.setLmkdParameter;
@@ -40,10 +47,13 @@ import static com.hchen.appretention.data.path.OneUi.ActivityManagerServiceExt;
 import static com.hchen.appretention.data.path.OneUi.BGProtectManager;
 import static com.hchen.appretention.data.path.OneUi.ChimeraManagerService;
 import static com.hchen.appretention.data.path.OneUi.DynamicHiddenApp;
+import static com.hchen.appretention.data.path.OneUi.KillPolicyManager;
+import static com.hchen.appretention.data.path.OneUi.MARsPolicyManager;
 import static com.hchen.appretention.data.path.OneUi.PerProcessNandswap;
 import static com.hchen.appretention.data.path.System.ActivityManagerService;
 import static com.hchen.appretention.data.path.System.ProcessList;
 import static com.hchen.appretention.data.path.System.ProcessRecord;
+import static com.hchen.hooktool.log.XposedLog.logD;
 
 import android.content.Context;
 
@@ -61,6 +71,7 @@ public class OneUi extends BaseHC {
     @Override
     public void init() {
         LmkdParameter.init();
+        LmkdParameter.forceReplace();
 
         // ------------- ProcessList -------------------
         /*
@@ -166,8 +177,13 @@ public class OneUi extends BaseHC {
             new IHook() {
                 @Override
                 public void after() {
-                    Object perProcessNandswap = getResult();
-                    setField(perProcessNandswap, WRITEBACK_ENABLED, false);
+                    Object perProcessNandswap = getStaticField(PerProcessNandswap, INSTANCE);
+                    if (perProcessNandswap == null)
+                        perProcessNandswap = getResult();
+                    if (perProcessNandswap != null)
+                        setField(perProcessNandswap, WRITEBACK_ENABLED, false);
+
+                    logD(TAG, "PerProcessNandswap: " + perProcessNandswap);
                 }
             }
         );
@@ -187,5 +203,29 @@ public class OneUi extends BaseHC {
             .method(getMaxLongLiveApps)
             .returnResult(Integer.MAX_VALUE)
         );
+
+        // ------------------ MARsPolicyManager -------------------------
+        /*
+         * 禁用 MARs
+         * */
+        setStaticField(MARsPolicyManager, ENABLE_KILL_LONG_RUNNING_PROCESS, false);
+        setStaticField(MARsPolicyManager, MARs_ENABLE, false);
+
+        hookMethod(MARsPolicyManager,
+            getMARsEnabled,
+            returnResult(false)
+        );
+
+        // ------------------ KillPolicyManager -----------------------
+        /*
+         * 禁用 PPM
+         * */
+        hookMethod(ActivityManagerService,
+            isPmmEnabled,
+            returnResult(false)
+        );
+
+        setStaticField(KillPolicyManager, KPM_POLICY_ENABLE, false);
+        setStaticField(KillPolicyManager, KPM_BTIME_ENABLE, false);
     }
 }

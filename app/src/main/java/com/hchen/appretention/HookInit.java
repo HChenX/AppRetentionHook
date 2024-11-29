@@ -81,7 +81,7 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
             }
         });
-        if (loadPackageParam.packageName.equals("")) {
+        if (loadPackageParam.packageName.equals("com.hchen.himiuixdemo")) {
             HCInit.initLoadPackageParam(loadPackageParam);
             new TestHook().onLoadPackage();
         }
