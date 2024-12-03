@@ -31,7 +31,6 @@ import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
 import static com.hchen.appretention.data.method.Hyper.addMiuiPeriodicCleanerService;
 import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
 import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
-import static com.hchen.appretention.data.method.Hyper.ensureService;
 import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
 import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
@@ -59,8 +58,6 @@ import static com.hchen.appretention.data.method.Hyper.startPreloadApp;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
 import static com.hchen.appretention.data.path.Hyper.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.Hyper.Build;
-import static com.hchen.appretention.data.path.Hyper.CameraOpt;
-import static com.hchen.appretention.data.path.Hyper.CameraOptManager;
 import static com.hchen.appretention.data.path.Hyper.ControllerActivityInfo;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryCleanerDeprecated;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryReclaimer;
@@ -87,7 +84,6 @@ import static com.hchen.appretention.data.path.System.ActivityManagerService;
 import android.app.job.JobParameters;
 import android.content.Context;
 
-import com.hchen.appretention.data.field.Hyper;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.processor.HookCondition;
@@ -128,15 +124,7 @@ public class HyperV2 extends BaseHC {
             nStartPressureMonitor,
             doNothing());
 
-        Class<?> mCameraOpt = findClass(CameraOpt).getNoReport();
-        if (mCameraOpt != null) {
-            Class<?> mCameraOptManager = getStaticField(CameraOpt, Hyper.mCameraOptManager);
-            hookMethod(CameraOptManager,
-                mCameraOptManager.getClassLoader(),
-                ensureService,
-                doNothing()
-            );
-        }
+        CameraOpt.doHook();
     }
 
     @Override

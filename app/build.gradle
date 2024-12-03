@@ -6,6 +6,8 @@ plugins {
 }
 
 android {
+    def apk = "AppRetention"
+
     Properties properties = new Properties()
     InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream()
     properties.load(inputStream)
@@ -36,7 +38,7 @@ android {
         minSdk 30
         targetSdk 34
         //noinspection HighAppVersionCode
-        versionCode 2024112902
+        versionCode 2024120100
         versionName "5.0.4"
         ndk {
             // noinspection ChromeOsAbiSupport
@@ -65,6 +67,14 @@ android {
             excludes += "/*.txt"
             excludes += "/*.bin"
             excludes += "/*.json"
+        }
+    }
+
+    android {
+        applicationVariants.configureEach { variant ->
+            variant.outputs.configureEach { output ->
+                outputFileName = "${apk}-v${variant.versionName}(${variant.versionCode})_${variant.buildType.name}.apk"
+            }
         }
     }
 

@@ -39,6 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hchen.appretention.BuildConfig;
+import com.hchen.hooktool.data.ToolData;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.ContextTool;
 import com.hchen.hooktool.tool.additional.DeviceTool;
@@ -81,6 +82,7 @@ public class LogToFile {
     private static boolean isWaitingLogServiceBootCompleted = false;
     private static final HashMap<String, LogContentData> mLogContentDataMap = new HashMap<>();
     private static boolean hasProcessingBroadcast = false;
+    private static boolean isAndroidInitLogPutDown = false;
 
     public static void initLogToFile(String fileName) {
         if (fileName == null) return;
@@ -159,8 +161,10 @@ public class LogToFile {
         LogContentData[] logContentDatas = updateLogContent(tag, log);
         if (!isWaitingSystemBootCompleted && !isWaitingLogServiceBootCompleted) {
             pushWithAsyncContext(context -> {
-                Arrays.stream(logContentDatas).forEach(logContentData ->
-                    sendLogContentBroadcast(context, logContentData));
+                Arrays.stream(logContentDatas).forEach(logContentData -> {
+                    if (logContentData.mLogContent.isEmpty()) return;
+                    sendLogContentBroadcast(context, logContentData);
+                });
             });
         }
         AndroidLog.logI(TAG, "isWaitingSystemBootCompleted: " + isWaitingSystemBootCompleted +
@@ -169,17 +173,29 @@ public class LogToFile {
 
     private static LogContentData[] updateLogContent(String tag, String log) {
         tag = redirectFileName(tag);
+        String formatLog = formatLog(log);
         if (tag.equals("Any")) {
-            mLogContentDataMap.forEach((s, logContentData) ->
-                logContentData.mLogContent.add(getDate() + " " + log));
-            return mLogContentDataMap.values().toArray(new LogContentData[0]);
+            if (ToolData.mLpparam != null && ToolData.mLpparam.packageName.equals("android") && !isAndroidInitLogPutDown) {
+                mLogContentDataMap.forEach((s, logContentData) ->
+                    logContentData.mLogContent.add(formatLog));
+                isAndroidInitLogPutDown = true;
+                return mLogContentDataMap.values().toArray(new LogContentData[0]);
+            } else if (ToolData.mLpparam != null && !ToolData.mLpparam.packageName.equals("android")) {
+                mLogContentDataMap.forEach((s, logContentData) ->
+                    logContentData.mLogContent.add(formatLog));
+                return mLogContentDataMap.values().toArray(new LogContentData[0]);
+            }
         }
         LogContentData logContentData = mLogContentDataMap.get(tag);
         if (logContentData != null) {
-            logContentData.mLogContent.add(getDate() + " " + log);
+            logContentData.mLogContent.add(formatLog);
             return new LogContentData[]{logContentData};
         }
         return new LogContentData[0];
+    }
+
+    private static String formatLog(String log) {
+        return getDate() + " " + log;
     }
 
     private static final HashMap<String, String> mRedirectFileNameMap = new HashMap<>();
@@ -192,6 +208,9 @@ public class LogToFile {
         String[] shouldRedirectToAndroid = new String[]{
             "CacheCompaction",
             "UpdateOomLevels",
+        };
+        String[] shouldRedirectToHyper = new String[]{
+            "CameraOpt"
         };
         String[] shouldRedirectToOneUi = new String[]{
             "LmkdParameter"
@@ -207,6 +226,13 @@ public class LogToFile {
             }
         } else if (Arrays.stream(shouldRedirectToOneUi).anyMatch(tag::contains)) {
             redirectName = "OneUi";
+        } else if (Arrays.stream(shouldRedirectToHyper).anyMatch(tag::contains)) {
+            for (String s : mLogContentDataMap.keySet()) {
+                if (s.contains("Hyper")) {
+                    redirectName = s;
+                    break;
+                }
+            }
         }
 
         if (redirectName != null) {
@@ -326,7 +352,6 @@ public class LogToFile {
         if (data == null) return;
         if (!data.isCreatedFile) return;
         if (data.mWriter == null) return;
-        Long totalMemory = InvokeTool.callStaticMethod(InvokeTool.findClass("android.os.Process"), "getTotalMemory", new Class[]{});
         try {
             data.mWriter.write("###############################################");
             data.mWriter.newLine();

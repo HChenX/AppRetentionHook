@@ -29,10 +29,8 @@ import static com.hchen.appretention.data.field.Hyper.PROC_CPU_EXCEPTION_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.RECLAIM_IF_NEEDED;
 import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
 import static com.hchen.appretention.data.method.Hyper.addMiuiPeriodicCleanerService;
-import static com.hchen.appretention.data.method.Hyper.boostCameraByThreshold;
 import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
 import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
-import static com.hchen.appretention.data.method.Hyper.doAdjBoost;
 import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
 import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
@@ -44,8 +42,6 @@ import static com.hchen.appretention.data.method.Hyper.handleKillApp;
 import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
 import static com.hchen.appretention.data.method.Hyper.handleThermalKillProc;
 import static com.hchen.appretention.data.method.Hyper.init;
-import static com.hchen.appretention.data.method.Hyper.interceptAppRestartIfNeeded;
-import static com.hchen.appretention.data.method.Hyper.isAllowAdjBoost;
 import static com.hchen.appretention.data.method.Hyper.isEnable;
 import static com.hchen.appretention.data.method.Hyper.isMiuiLiteVersion;
 import static com.hchen.appretention.data.method.Hyper.isNeedCompact;
@@ -54,29 +50,18 @@ import static com.hchen.appretention.data.method.Hyper.killPackage;
 import static com.hchen.appretention.data.method.Hyper.killProcess;
 import static com.hchen.appretention.data.method.Hyper.killProcessByMinAdj;
 import static com.hchen.appretention.data.method.Hyper.nStartPressureMonitor;
-import static com.hchen.appretention.data.method.Hyper.newInstance;
-import static com.hchen.appretention.data.method.Hyper.notifyActivityChanged;
-import static com.hchen.appretention.data.method.Hyper.notifyCameraForegroundChange;
-import static com.hchen.appretention.data.method.Hyper.notifyCameraForegroundState;
-import static com.hchen.appretention.data.method.Hyper.notifyCameraPostProcessState;
 import static com.hchen.appretention.data.method.Hyper.onStartJob;
 import static com.hchen.appretention.data.method.Hyper.performCompaction;
 import static com.hchen.appretention.data.method.Hyper.preloadAppEnqueue;
 import static com.hchen.appretention.data.method.Hyper.reclaimBackground;
-import static com.hchen.appretention.data.method.Hyper.reclaimMemoryForCamera;
 import static com.hchen.appretention.data.method.Hyper.startPreloadApp;
-import static com.hchen.appretention.data.method.Hyper.updateCameraBoosterCloudData;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
 import static com.hchen.appretention.data.path.Hyper.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.Hyper.Build;
-import static com.hchen.appretention.data.path.Hyper.CameraBooster;
-import static com.hchen.appretention.data.path.Hyper.CameraBoosterNew;
-import static com.hchen.appretention.data.path.Hyper.CameraOpt;
 import static com.hchen.appretention.data.path.Hyper.ControllerActivityInfo;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryCleanerDeprecated;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.Hyper.IAppState$IRunningProcess;
-import static com.hchen.appretention.data.path.Hyper.ICameraBooster;
 import static com.hchen.appretention.data.path.Hyper.LifecycleConfig;
 import static com.hchen.appretention.data.path.Hyper.MemoryFreezeStubImpl;
 import static com.hchen.appretention.data.path.Hyper.MemoryStandardProcessControl;
@@ -87,11 +72,9 @@ import static com.hchen.appretention.data.path.Hyper.PreloadLifecycle;
 import static com.hchen.appretention.data.path.Hyper.PressureStateSettings;
 import static com.hchen.appretention.data.path.Hyper.ProcessConfig;
 import static com.hchen.appretention.data.path.Hyper.ProcessKillerIdler;
-import static com.hchen.appretention.data.path.Hyper.ProcessManagerInternal;
 import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessSceneCleaner;
-import static com.hchen.appretention.data.path.Hyper.ServiceThread;
 import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
 import static com.hchen.appretention.data.path.Hyper.SystemServerImpl;
@@ -100,12 +83,10 @@ import static com.hchen.appretention.data.path.System.ActivityManagerService;
 import android.app.job.JobParameters;
 import android.content.Context;
 
-import com.hchen.appretention.data.field.Hyper;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.processor.HookCondition;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -115,7 +96,6 @@ import java.util.List;
  */
 @HookCondition(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 1.0f)
 public class HyperV1 extends BaseHC {
-    private static ClassLoader mCameraOptClassLoader = null;
 
     @Override
     public void init() {
@@ -379,62 +359,8 @@ public class HyperV1 extends BaseHC {
         );
         // DONE!!
 
-        /*
-         * 从此开始，下方为针对相机杀后台而 hook 的内容。
-         * */
-        Class<?> mCameraOpt = findClass(CameraOpt).getNoReport();
-        if (mCameraOpt != null) {
-            // 帮助 CameraOpt 初始化
-            Class<?> mCameraBoosterClazz = getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
-            Class<?> mQuickCameraClazz = getStaticField(mCameraOpt, Hyper.mQuickCameraClazz);
-            if (mCameraBoosterClazz != null || mQuickCameraClazz != null) {
-                mCameraOptClassLoader = mCameraBoosterClazz != null ? mCameraBoosterClazz.getClassLoader() : mQuickCameraClazz.getClassLoader();
-                doHookCameraOpt(findClass(CameraBooster, mCameraOptClassLoader).get());
-            }
-        } else {
-            hookMethod(ICameraBooster,
-                newInstance,
-                ProcessManagerInternal, ActivityManagerService, ServiceThread, Context.class,
-                new IHook() {
-                    @Override
-                    public void after() {
-                        Object mICameraBooster = getResult();
-                        mCameraOptClassLoader = mICameraBooster.getClass().getClassLoader();
-                        doHookCameraOpt(findClass(CameraBoosterNew, mCameraOptClassLoader).get());
-                    }
-                }
-            );
-        }
+        CameraOpt.doHook();
     } // END
-
-    // 执行对 cameraOpt 的 hook 动作
-    private void doHookCameraOpt(Class<?> cameraBooster) {
-        String[] mCameraOptShouldHookMethodList = new String[]{
-            boostCameraByThreshold,
-            doAdjBoost, // 禁用 adj 加速
-            interceptAppRestartIfNeeded, // 不允许限制应用重启
-            isAllowAdjBoost, // 返回 true, 防止崩溃
-            notifyCameraForegroundChange,
-            notifyCameraForegroundState,
-            notifyCameraPostProcessState,
-            notifyActivityChanged,
-            reclaimMemoryForCamera, // 禁止压缩进程
-            updateCameraBoosterCloudData // 禁止云更新
-        };
-
-        for (String m : mCameraOptShouldHookMethodList) {
-            if (existsAnyMethod(cameraBooster, m)) {
-                Method method = findAllMethod(cameraBooster, m).first();
-                if (method == null) continue;
-                if (method.getName().equals(interceptAppRestartIfNeeded)) {
-                    hook(method, returnResult(false).shouldObserveCall(false));
-                } else if (isAllowAdjBoost.equals(method.getName())) {
-                    hook(method, returnResult(true).shouldObserveCall(false));
-                } else
-                    hook(method, doNothing().shouldObserveCall(false));
-            }
-        }
-    }
 
     @Override
     public void copy() {
