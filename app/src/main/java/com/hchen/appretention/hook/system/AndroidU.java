@@ -87,7 +87,7 @@ public class AndroidU extends BaseHC {
         new UpdateOomLevels().onLoadPackage();
         new CacheCompaction().onLoadPackage();
 
-        // FURRY!! [AndroidV], STATE: OK
+        // COPY TO: [AndroidV]
         // ----------- ProcessList ----------------------
         /*
          * 将不可感知的进程添加进列表 mWorkItems (ProcessList$ImperceptibleKillRunner)
@@ -259,7 +259,7 @@ public class AndroidU extends BaseHC {
             long.class,
             returnResult(false).shouldObserveCall(false)
         );
-        // DONE!!
+        // DONE
 
         /*
          * 更新和修剪进程。
@@ -279,7 +279,7 @@ public class AndroidU extends BaseHC {
             }.shouldObserveCall(false)
         );
 
-        // FURRY! [AndroidV], STATE: OK
+        // COPY TO: [AndroidV]
         // ------------ RecentTasks ---------------
         /*
          * 修剪最近不活跃的任务卡片。
@@ -310,7 +310,7 @@ public class AndroidU extends BaseHC {
                 }
             }.shouldObserveCall(false)
         );
-        // DONE!!
+        // DONE
 
         // ----------- ActivityManagerConstants -------------
         /*

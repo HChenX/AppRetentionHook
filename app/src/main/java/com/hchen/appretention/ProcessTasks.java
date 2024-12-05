@@ -75,14 +75,6 @@ public class ProcessTasks {
                 if (shouldSkip(mContent)) return "DONE";
 
                 readCopyContentNew(hookFileName, mContent);
-
-                copyContentHashMap.forEach(new BiConsumer<CopyMutual, ArrayList<String>>() {
-                    @Override
-                    public void accept(CopyMutual copyMutual, ArrayList<String> strings) {
-                        log(strings);
-                    }
-                });
-
                 hookImportHashMap.put(hookFileName,
                     mContent.stream()
                         .filter(s -> s.contains("import"))
@@ -128,6 +120,7 @@ public class ProcessTasks {
                     }
                     copyToSet.add(target);
                 }
+                targetFileList.clear();
                 copyContent.clear();
                 continue;
             }
@@ -141,7 +134,6 @@ public class ProcessTasks {
                     c.substring(c.indexOf("[") + 1, c.indexOf("]"))
                         .replace(" ", "")
                         .split(",")));
-                log(targetFileList.toString());
                 start = true;
             }
         }

@@ -152,7 +152,6 @@ public class AndroidV extends BaseHC {
 
     @Override
     public void copy() {
-        // FURRY! FROM: [AndroidU]
         // ----------- ProcessList ----------------------
         /*
          * 将不可感知的进程添加进列表 mWorkItems (ProcessList$ImperceptibleKillRunner)
@@ -163,7 +162,7 @@ public class AndroidV extends BaseHC {
          * */
         hookMethod(ProcessList,
             killProcessesWhenImperceptible,
-            int[].class, java.lang.String.class, int.class,
+            int[].class, String.class, int.class,
             doNothing());
 
         /*
@@ -324,9 +323,8 @@ public class AndroidV extends BaseHC {
             long.class,
             returnResult(false).shouldObserveCall(false)
         );
-        // COPY DONE!
 
-        // FURRY! FROM: [AndroidU]
+
         // ------------ RecentTasks ---------------
         /*
          * 修剪最近不活跃的任务卡片。
@@ -357,6 +355,5 @@ public class AndroidV extends BaseHC {
                 }
             }.shouldObserveCall(false)
         );
-        // COPY DONE!
     }
 }

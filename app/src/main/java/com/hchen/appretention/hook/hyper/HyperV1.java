@@ -112,7 +112,7 @@ public class HyperV1 extends BaseHC {
          * setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
          * */
 
-        // FURRY!! [HyperV2], STATE: OK
+        // COPY TO: [HyperV2]
         /*
          * 关闭 spc。
          * */
@@ -186,7 +186,7 @@ public class HyperV1 extends BaseHC {
             .method(init, Context.class, ActivityManagerService)
             .returnResult(false)
         );
-        // DONE!!
+        // DONE
 
         /*
          * 禁止系统压力控制器清理内存。
@@ -212,7 +212,7 @@ public class HyperV1 extends BaseHC {
                 .doNothing().shouldObserveCall(false)
         );
 
-        // FURRY!! [HyperV2], STATE: OK
+        // COPY TO: [HyperV2]
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -357,10 +357,10 @@ public class HyperV1 extends BaseHC {
                 }
             }).shouldObserveCall(false)
         );
-        // DONE!!
+        // DONE
 
         CameraOpt.doHook();
-    } // END
+    }
 
     @Override
     public void copy() {

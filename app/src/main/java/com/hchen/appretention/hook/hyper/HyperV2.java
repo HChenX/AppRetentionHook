@@ -129,7 +129,6 @@ public class HyperV2 extends BaseHC {
 
     @Override
     public void copy() {
-        // FURRY! FROM: [HyperV1]
         /*
          * 关闭 spc。
          * */
@@ -203,9 +202,8 @@ public class HyperV2 extends BaseHC {
             .method(init, Context.class, ActivityManagerService)
             .returnResult(false)
         );
-        // COPY DONE!
 
-        // FURRY! FROM: [HyperV1]
+
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -350,6 +348,5 @@ public class HyperV2 extends BaseHC {
                 }
             }).shouldObserveCall(false)
         );
-        // COPY DONE!
     }
 }
