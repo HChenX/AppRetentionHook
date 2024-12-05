@@ -72,7 +72,6 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.processor.HookCondition;
 
-
 /**
  * 安卓 15
  *

@@ -66,7 +66,8 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                     return;
                 if (!(conditionMap.mTargetSdk == 0) && !DeviceTool.isAndroidVersion(conditionMap.mTargetSdk))
                     return;
-                if (!(conditionMap.mTargetOS == -1f) && !DeviceTool.isHyperOSVersion(conditionMap.mTargetOS)) // 暂时只支持 Hyper 版本检查
+                if (!(conditionMap.mTargetOS == -1f) &&
+                    !(DeviceTool.isHyperOSVersion(conditionMap.mTargetOS) || DeviceTool.isMiuiVersion(conditionMap.mTargetOS)))
                     return;
                 try {
                     Class<?> hookClass = getClass().getClassLoader().loadClass(s);
