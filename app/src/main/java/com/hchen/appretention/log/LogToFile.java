@@ -39,7 +39,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hchen.appretention.BuildConfig;
-import com.hchen.hooktool.data.ToolData;
+import com.hchen.hooktool.HCData;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.ContextTool;
 import com.hchen.hooktool.tool.additional.DeviceTool;
@@ -175,12 +175,12 @@ public class LogToFile {
         tag = redirectFileName(tag);
         String formatLog = formatLog(log);
         if (tag.equals("Any")) {
-            if (ToolData.mLpparam != null && ToolData.mLpparam.packageName.equals("android") && !isAndroidInitLogPutDown) {
+            if ("android".equals(HCData.getPackageName()) && !isAndroidInitLogPutDown) {
                 mLogContentDataMap.forEach((s, logContentData) ->
                     logContentData.mLogContent.add(formatLog));
                 isAndroidInitLogPutDown = true;
                 return mLogContentDataMap.values().toArray(new LogContentData[0]);
-            } else if (ToolData.mLpparam != null && !ToolData.mLpparam.packageName.equals("android")) {
+            } else if (!"android".equals(HCData.getPackageName())) {
                 mLogContentDataMap.forEach((s, logContentData) ->
                     logContentData.mLogContent.add(formatLog));
                 return mLogContentDataMap.values().toArray(new LogContentData[0]);

@@ -74,7 +74,7 @@ public class LogPuppet extends BaseHC {
                 @Override
                 public void after() {
                     isRegisterReceiver = false;
-                    Application application = thisObject();
+                    Application application = (Application) thisObject();
                     Settings.System.putString(application.getContentResolver(), SETTINGS_LOG_SERVICE_COMPLETED, "0");
 
                     if (!isUserUnlockedCompeted()) {

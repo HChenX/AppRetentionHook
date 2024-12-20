@@ -66,15 +66,15 @@ public class CrashEvent extends BaseHC {
         hook(hookError, new IHook() {
                 @Override
                 public void after() {
-                    Context mContext = getThisField(System.mContext);
+                    Context mContext = (Context) getThisField(System.mContext);
                     Object proc = getArgs(0);
-                    ApplicationErrorReport.CrashInfo crashInfo = getArgs(1);
-                    String shortMsg = getArgs(2);
-                    String longMsg = getArgs(3);
-                    String stackTrace = getArgs(4);
-                    long timeMillis = getArgs(5);
-                    int callingPid = getArgs(6);
-                    int callingUid = getArgs(7);
+                    ApplicationErrorReport.CrashInfo crashInfo = (ApplicationErrorReport.CrashInfo) getArgs(1);
+                    String shortMsg = (String) getArgs(2);
+                    String longMsg = (String) getArgs(3);
+                    String stackTrace = (String) getArgs(4);
+                    long timeMillis = (long) getArgs(5);
+                    int callingPid = (int) getArgs(6);
+                    int callingUid = (int) getArgs(7);
                     if (crashInfo == null) return;
                     if ("Native crash".equals(crashInfo.exceptionClassName))
                         return; // 跳过 Native crash 事件

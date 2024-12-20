@@ -105,8 +105,8 @@ public final class CacheCompaction extends BaseHC {
                         if (app == null) return;
                         state = getField(app, mState);
                         optRecord = getField(app, mOptRecord);
-                        compactionHandler = getThisField(mCompactionHandler);
-                        pendingCompactionProcesses = getThisField(mPendingCompactionProcesses);
+                        compactionHandler = (Handler) getThisField(mCompactionHandler);
+                        pendingCompactionProcesses = (ArrayList) getThisField(mPendingCompactionProcesses);
                         if (getCurAdj() > PrecessAdjInfo.PERCEPTIBLE_APP_ADJ && getCurAdj() < PrecessAdjInfo.PREVIOUS_APP_ADJ) {
                             setReqCompactSource(SHEll);
                             setReqCompactProfile(ANON);
@@ -128,15 +128,15 @@ public final class CacheCompaction extends BaseHC {
                     }
 
                     private int getSetAdj() {
-                        return callMethod(state, getSetAdj);
+                        return (int) callMethod(state, getSetAdj);
                     }
 
                     private int getCurAdj() {
-                        return callMethod(state, getCurAdj);
+                        return (int) callMethod(state, getCurAdj);
                     }
 
                     private int getSetProcState() {
-                        return callMethod(state, getSetProcState);
+                        return (int) callMethod(state, getSetProcState);
                     }
 
                     private void setReqCompactProfile(Object obj) {
@@ -148,7 +148,7 @@ public final class CacheCompaction extends BaseHC {
                     }
 
                     private boolean hasPendingCompact() {
-                        return callMethod(optRecord, hasPendingCompact);
+                        return (boolean) callMethod(optRecord, hasPendingCompact);
                     }
 
                     private void setHasPendingCompact(boolean pendingCompact) {
@@ -168,7 +168,7 @@ public final class CacheCompaction extends BaseHC {
             .hook(new IHook() {
                 @Override
                 public void before() {
-                    Boolean result = callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", "true", true);
+                    Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", "true", true);
                     if (result != null && result) {
                         logD(TAG, "Success to put use_compaction new value 'true'");
                     } else
@@ -183,7 +183,7 @@ public final class CacheCompaction extends BaseHC {
 
                     Object compactionHandler = getThisField(mCompactionHandler);
                     if (compactionHandler == null) {
-                        HandlerThread cachedAppOptimizerThread = getThisField(mCachedAppOptimizerThread);
+                        HandlerThread cachedAppOptimizerThread = (HandlerThread) getThisField(mCachedAppOptimizerThread);
 
                         if (!cachedAppOptimizerThread.isAlive()) {
                             cachedAppOptimizerThread.start();
@@ -219,8 +219,8 @@ public final class CacheCompaction extends BaseHC {
                     @Override
                     public void before() {
                         Object opt = getField(getArgs(0), mOptRecord);
-                        long lastCompactTime = callMethod(opt, getLastCompactTime);
-                        long start = getArgs(1);
+                        long lastCompactTime = (long) callMethod(opt, getLastCompactTime);
+                        long start = (long) getArgs(1);
                         // 10 秒内不允许再次触发。
                         if (lastCompactTime != 0) {
                             if (start - lastCompactTime < 10000) {
@@ -236,7 +236,7 @@ public final class CacheCompaction extends BaseHC {
                 .hook(new IHook() {
                     @Override
                     public void before() {
-                        long[] rssBefore = getArgs(3);
+                        long[] rssBefore = (long[]) getArgs(3);
                         long anonRssBefore = rssBefore[2];
                         if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
                             setResult(true); // 进程可能被杀。

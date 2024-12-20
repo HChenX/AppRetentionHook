@@ -77,14 +77,14 @@ public class CameraOpt {
         if (mCameraOpt != null) {
             if (existsField(mCameraOpt, Hyper.mCameraBoosterClazz) || existsField(mCameraOpt, Hyper.mQuickCameraClazz)) {
                 // 帮助 CameraOpt 初始化
-                Class<?> mCameraBoosterClazz = getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
-                Class<?> mQuickCameraClazz = getStaticField(mCameraOpt, Hyper.mQuickCameraClazz);
+                Class<?> mCameraBoosterClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
+                Class<?> mQuickCameraClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mQuickCameraClazz);
                 if (mCameraBoosterClazz != null || mQuickCameraClazz != null) {
                     ClassLoader mCameraOptClassLoader = mCameraBoosterClazz != null ? mCameraBoosterClazz.getClassLoader() : mQuickCameraClazz.getClassLoader();
                     doHookCameraOpt(findClass(CameraBooster, mCameraOptClassLoader).get());
                 }
             } else {
-                Class<?> mCameraOptManager = getStaticField(mCameraOpt, Hyper.mCameraOptManager);
+                Class<?> mCameraOptManager = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraOptManager);
                 if (existsMethod(CameraOptManager, mCameraOptManager.getClassLoader(), ensureService)) {
                     hookMethod(CameraOptManager,
                         mCameraOptManager.getClassLoader(),
@@ -100,7 +100,7 @@ public class CameraOpt {
                             if (member.getName().length() > 3) return false;
                             return true;
                         }
-                    }).first();
+                    }).get(0);
                     hook(service, doNothing());
                 }
             }
@@ -137,7 +137,7 @@ public class CameraOpt {
 
         for (String m : mCameraOptShouldHookMethodList) {
             if (existsAnyMethod(cameraBooster, m)) {
-                Method method = findAllMethod(cameraBooster, m).first();
+                Method method = findAllMethod(cameraBooster, m).get(0);
                 if (method == null) continue;
                 if (method.getName().equals(interceptAppRestartIfNeeded)) {
                     hook(method, returnResult(false).shouldObserveCall(false));

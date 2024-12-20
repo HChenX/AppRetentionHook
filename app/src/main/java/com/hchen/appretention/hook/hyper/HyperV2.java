@@ -287,7 +287,7 @@ public class HyperV2 extends BaseHC {
                     @Override
                     public void before() {
                         Object config = getArgs(0);
-                        int mPolicy = callMethod(config, getPolicy);
+                        int mPolicy = (int) callMethod(config, getPolicy);
                         if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_GARBAGE_CLEAN))
                             returnNull();
                     }

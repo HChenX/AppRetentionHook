@@ -28,6 +28,7 @@ import com.hchen.appretention.hook.ConditionMap;
 import com.hchen.appretention.hook.TestHook;
 import com.hchen.appretention.log.LogToFile;
 import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCEntrance;
 import com.hchen.hooktool.HCInit;
 import com.hchen.hooktool.tool.additional.DeviceTool;
 
@@ -36,8 +37,6 @@ import org.luckypray.dexkit.DexKitBridge;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiConsumer;
 
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 /**
@@ -45,7 +44,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  *
  * @author 焕晨HChen
  */
-public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
+public class HookInit extends HCEntrance {
     private static final String TAG = "AppRetention";
     private static final String[] hookPackages = {
         "android",
@@ -56,11 +55,21 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     };
 
     @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) {
+    public HCInit.BasicData initHC(HCInit.BasicData basicData) {
+        return basicData.setTag("AppRetention")
+            .setModulePackageName(BuildConfig.APPLICATION_ID)
+            .setLogLevel(HCInit.LOG_D)
+            .initLogExpand(new String[]{
+                "com.hchen.appretention"
+            });
+    }
+
+    @Override
+    public void onLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
         ConditionMap.get().forEach(new BiConsumer<>() {
             @Override
             public void accept(String s, ConditionMap conditionMap) {
-                if (!conditionMap.mTargetPackage.equals(loadPackageParam.packageName))
+                if (!conditionMap.mTargetPackage.equals(lpparam.packageName))
                     return;
                 if (!conditionMap.mTargetBrand.equals("Any") && !DeviceTool.isRightRom(conditionMap.mTargetBrand))
                     return;
@@ -74,7 +83,7 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                     BaseHC baseHC = (BaseHC) hookClass.getDeclaredConstructor().newInstance();
                     String className = baseHC.TAG;
                     LogToFile.initLogToFile(className);
-                    HCInit.initLoadPackageParam(loadPackageParam);
+                    HCInit.initLoadPackageParam(lpparam);
                     baseHC.onLoadPackage();
                 } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
                          InstantiationException | InvocationTargetException e) {
@@ -82,23 +91,10 @@ public class HookInit implements IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
             }
         });
-        if (loadPackageParam.packageName.equals("com.hchen.himiuixdemo")) {
-            HCInit.initLoadPackageParam(loadPackageParam);
+        if (lpparam.packageName.equals("com.hchen.himiuixdemo")) {
+            HCInit.initLoadPackageParam(lpparam);
             new TestHook().onLoadPackage();
         }
-    }
-
-    @Override
-    public void initZygote(StartupParam startupParam) {
-        HCInit.initBasicData(new HCInit.BasicData()
-            .setTag("AppRetention")
-            .setModulePackageName(BuildConfig.APPLICATION_ID)
-            .setLogLevel(HCInit.LOG_D)
-            .useLogExpand(new String[]{
-                "com.hchen.appretention"
-            })
-        );
-        HCInit.initStartupParam(startupParam);
     }
 
     private void initHook(BaseHC baseHC) {

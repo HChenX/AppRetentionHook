@@ -74,7 +74,7 @@ public final class UpdateOomLevels extends BaseHC {
                 public void before() {
                     if (Boolean.TRUE.equals(getThisAdditionalInstanceField(isChangedOomMinFree)))
                         return;
-                    int[] mOomMinFree = getThisField(com.hchen.appretention.data.field.System.mOomMinFree);
+                    int[] mOomMinFree = (int[]) getThisField(System.mOomMinFree);
                     if (mOomMinFree == null) return;
                     int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
                     setThisField(com.hchen.appretention.data.field.System.mOomMinFree, mOomMinFreeArray);
@@ -98,7 +98,7 @@ public final class UpdateOomLevels extends BaseHC {
                 @Override
                 public void after() {
                     if ((getArgs(2) instanceof Boolean b) && !b) {
-                        int[] mOomMinFree = getThisField(com.hchen.appretention.data.field.System.mOomMinFree);
+                        int[] mOomMinFree = (int[]) getThisField(System.mOomMinFree);
                         if (mOomMinFree == null) return;
                         int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
                         setThisField(com.hchen.appretention.data.field.System.mOomMinFree, mOomMinFreeArray);
@@ -117,7 +117,7 @@ public final class UpdateOomLevels extends BaseHC {
             new IHook() {
                 @Override
                 public void before() {
-                    ByteBuffer buffer = getArgs(0);
+                    ByteBuffer buffer = (ByteBuffer) getArgs(0);
                     ByteBuffer bufCopy = buffer.duplicate();
                     bufCopy.rewind();
                     if (bufCopy.getInt() == 0) {
@@ -138,8 +138,8 @@ public final class UpdateOomLevels extends BaseHC {
                 private void setOomMinFreeBuf(ByteBuffer bufCopy) {
                     bufCopy.rewind();
                     bufCopy.putInt(0);
-                    int[] mOomAdj = getField(processListInstance, com.hchen.appretention.data.field.System.mOomAdj);
-                    int[] mOomMinFree = getField(processListInstance, com.hchen.appretention.data.field.System.mOomMinFree);
+                    int[] mOomAdj = (int[]) getField(processListInstance, System.mOomAdj);
+                    int[] mOomMinFree = (int[]) getField(processListInstance, System.mOomMinFree);
                     if (mOomMinFree == null || mOomAdj == null)
                         return;
 

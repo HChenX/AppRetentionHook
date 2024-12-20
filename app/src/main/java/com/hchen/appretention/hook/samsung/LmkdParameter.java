@@ -71,7 +71,7 @@ public final class LmkdParameter {
             Object param = CoreTool.getStaticField(lmkdParameter, s);
             if (param == null) return;
 
-            Integer ordinal = CoreTool.callMethod(param, "ordinal");
+            Integer ordinal = (Integer) CoreTool.callMethod(param, "ordinal");
             if (ordinal == null) return;
 
             switch (s) {
@@ -118,8 +118,8 @@ public final class LmkdParameter {
         if (!isInit)
             init();
 
-        int ordinal = iHook.getArgs(0);
-        int value = iHook.getArgs(1);
+        int ordinal = (int) iHook.getArgs(0);
+        int value = (int) iHook.getArgs(1);
 
         if (mOrdinalAndParameterMap.get(ordinal) != null) {
             Pair<String, Integer> param = mOrdinalAndParameterMap.get(ordinal);
