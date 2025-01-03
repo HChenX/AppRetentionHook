@@ -14,11 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Author of this project: 焕晨HChen
- * You can reference the code of this project,
- * but as a project developer, I hope you can indicate it when referencing.
-
- * Copyright (C) 2023-2024 AppRetentionHook Contributions
+ * Copyright (C) 2023-2024 HChenX
  */
 package com.hchen.appretention.data.method;
 
