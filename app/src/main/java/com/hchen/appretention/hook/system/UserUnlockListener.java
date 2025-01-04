@@ -20,7 +20,7 @@ package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.method.System.performReceive;
 import static com.hchen.appretention.data.path.System.UserController$3;
-import static com.hchen.appretention.log.LogToFile.USER_UNLOCKED_COMPLETED_PROP;
+import static com.hchen.appretention.log.SaveLog.USER_UNLOCKED_COMPLETED_PROP;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,14 +29,15 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
-import com.hchen.processor.HookCondition;
 
 /**
  * 监听用户重启后解锁的事件
  *
  * @author 焕晨HChen
+ * @deprecated
  */
-@HookCondition(targetPackage = "android")
+@Deprecated
+// @HookCondition(targetPackage = "android")
 public class UserUnlockListener extends BaseHC {
     @Override
     public void init() {

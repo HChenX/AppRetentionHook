@@ -22,7 +22,7 @@ import static com.hchen.hooktool.log.XposedLog.logENoSave;
 
 import com.hchen.appretention.hook.ConditionMap;
 import com.hchen.appretention.hook.TestHook;
-import com.hchen.appretention.log.LogToFile;
+import com.hchen.appretention.log.SaveLog;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.HCEntrance;
 import com.hchen.hooktool.HCInit;
@@ -78,7 +78,8 @@ public class HookInit extends HCEntrance {
                     Class<?> hookClass = getClass().getClassLoader().loadClass(s);
                     BaseHC baseHC = (BaseHC) hookClass.getDeclaredConstructor().newInstance();
                     String className = baseHC.TAG;
-                    LogToFile.initLogToFile(className);
+                    // SaveLog.initLogToFile(className);
+                    SaveLog.initSaveLog(className);
                     HCInit.initLoadPackageParam(lpparam);
                     baseHC.onLoadPackage();
                 } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |

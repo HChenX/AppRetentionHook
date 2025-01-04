@@ -20,9 +20,9 @@ package com.hchen.appretention.hook;
 
 import static com.hchen.appretention.data.method.SystemUi.onCreate;
 import static com.hchen.appretention.data.path.SystemUi.SystemUIApplication;
-import static com.hchen.appretention.log.LogToFile.ACTION_LOG_SERVICE_CONTENT;
-import static com.hchen.appretention.log.LogToFile.SETTINGS_LOG_SERVICE_COMPLETED;
-import static com.hchen.appretention.log.LogToFile.isUserUnlockedCompeted;
+import static com.hchen.appretention.log.SaveLog.ACTION_LOG_SERVICE_CONTENT;
+import static com.hchen.appretention.log.SaveLog.SETTINGS_LOG_SERVICE_COMPLETED;
+import static com.hchen.appretention.log.SaveLog.isUserUnlockedCompeted;
 import static com.hchen.hooktool.log.XposedLog.logE;
 
 import android.annotation.SuppressLint;
@@ -38,11 +38,10 @@ import android.os.Handler;
 import android.provider.Settings;
 
 import com.hchen.appretention.BuildConfig;
-import com.hchen.appretention.log.LogToFile;
+import com.hchen.appretention.log.SaveLog;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
-import com.hchen.processor.HookCondition;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,8 +54,10 @@ import java.util.concurrent.Executors;
  * 劫持系统界面作为傀儡日志写入工具
  *
  * @author 焕晨HChen
+ * @deprecated
  */
-@HookCondition(targetPackage = "com.android.systemui")
+@Deprecated
+// @HookCondition(targetPackage = "com.android.systemui")
 public class LogPuppet extends BaseHC {
     private boolean isRegisterReceiver = false;
     private static boolean isKillEventRecording = false;
@@ -98,7 +99,7 @@ public class LogPuppet extends BaseHC {
                     application.registerReceiver(new BroadcastReceiver() {
                         @Override
                         public void onReceive(Context context, Intent intent) {
-                            LogToFile.removeAllOldLogFileAndCopyLogFileToOldPathIfNeed();
+                            SaveLog.removeAllOldLogFileAndCopyLogFileToOldPathIfNeed();
                             AndroidLog.logI(TAG, "system will shutdown or reboot!!!");
                         }
                     }, intentFilter);
@@ -134,9 +135,9 @@ public class LogPuppet extends BaseHC {
         @Override
         public void onReceive(Context context, Intent intent) {
             if ("com.hchen.appretention.LOG_SERVICE_CONTENT".equals(intent.getAction())) {
-                LogToFile.LogContentData logContentData;
+                SaveLog.LogContentData logContentData;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    logContentData = intent.getParcelableExtra("logData", LogToFile.LogContentData.class);
+                    logContentData = intent.getParcelableExtra("logData", SaveLog.LogContentData.class);
                 } else
                     logContentData = intent.getParcelableExtra("logData");
                 if (logContentData == null) {
@@ -148,9 +149,9 @@ public class LogPuppet extends BaseHC {
                 String key = logContentData.mLogFileName;
                 ArrayList<String> content = logContentData.mOldLogContent;
 
-                LogToFile.createFile(key);
-                LogToFile.openFile(key, id);
-                LogToFile.writeFile(key, content);
+                SaveLog.createFile(key);
+                SaveLog.openFile(key, id);
+                SaveLog.writeFile(key, content);
 
                 setResultCode(Activity.RESULT_OK);
                 AndroidLog.logI(TAG, "broadcast receiver: key: " + key + ", id: " + id + ", content: " + content);
@@ -186,8 +187,8 @@ public class LogPuppet extends BaseHC {
         }
 
         private static void startRecord() {
-            LogToFile.createFile(mKillEventRecordFile);
-            LogToFile.openFile(mKillEventRecordFile, LogToFile.getRandomNumber());
+            SaveLog.createFile(mKillEventRecordFile);
+            SaveLog.openFile(mKillEventRecordFile, SaveLog.getRandomNumber());
             mExecutorService = Executors.newSingleThreadExecutor();
             mExecutorService.submit(() -> {
                 try {
@@ -201,12 +202,12 @@ public class LogPuppet extends BaseHC {
                             continue;
                         String lowerCaseLine = line.toLowerCase();
                         if (lowerCaseLine.contains("kill") && !lowerCaseLine.contains("killinfo"))
-                            LogToFile.writeFile(mKillEventRecordFile, line);
+                            SaveLog.writeFile(mKillEventRecordFile, line);
                     }
                 } catch (IOException e) {
                     logE(TAG, "start record kill event failed!", e);
                     isKillEventRecording = false;
-                    LogToFile.closeFile(mKillEventRecordFile);
+                    SaveLog.closeFile(mKillEventRecordFile);
                 } finally {
                     if (mLogcat != null) {
                         mLogcat.destroy();
@@ -225,7 +226,7 @@ public class LogPuppet extends BaseHC {
         }
 
         private static void clear() {
-            LogToFile.closeFile(mKillEventRecordFile);
+            SaveLog.closeFile(mKillEventRecordFile);
             if (mLogcat != null) {
                 mLogcat.destroy();
                 mLogcat = null;
@@ -255,8 +256,8 @@ public class LogPuppet extends BaseHC {
         private static BufferedReader mReader;
 
         public static void startRecord() {
-            LogToFile.createFile(mRecordFile);
-            LogToFile.openFile(mRecordFile, LogToFile.getRandomNumber());
+            SaveLog.createFile(mRecordFile);
+            SaveLog.openFile(mRecordFile, SaveLog.getRandomNumber());
             ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
             mExecutorService.submit(() -> {
                 try {
@@ -268,12 +269,12 @@ public class LogPuppet extends BaseHC {
                     while ((line = mReader.readLine()) != null) {
                         if (line.isEmpty())
                             continue;
-                        LogToFile.writeFile(mRecordFile, line);
+                        SaveLog.writeFile(mRecordFile, line);
                     }
                 } catch (IOException e) {
                     logE(TAG, "start record system prop failed!", e);
                     isKillEventRecording = false;
-                    LogToFile.closeFile(mRecordFile);
+                    SaveLog.closeFile(mRecordFile);
                 } finally {
                     if (mPropData != null) {
                         mPropData.destroy();

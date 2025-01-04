@@ -96,7 +96,7 @@ public class CameraOpt {
                             if (member.getName().length() > 3) return false;
                             return true;
                         }
-                    }).get(0);
+                    })[0];
                     hook(service, doNothing());
                 }
             }
@@ -133,7 +133,7 @@ public class CameraOpt {
 
         for (String m : mCameraOptShouldHookMethodList) {
             if (existsAnyMethod(cameraBooster, m)) {
-                Method method = findAllMethod(cameraBooster, m).get(0);
+                Method method = findAllMethod(cameraBooster, m)[0];
                 if (method == null) continue;
                 if (method.getName().equals(interceptAppRestartIfNeeded)) {
                     hook(method, returnResult(false).shouldObserveCall(false));
