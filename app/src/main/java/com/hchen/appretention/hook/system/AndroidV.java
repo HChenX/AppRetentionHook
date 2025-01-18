@@ -66,14 +66,14 @@ import android.os.Looper;
 
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.processor.HookCondition;
+import com.hchen.processor.HookEntrance;
 
 /**
  * 安卓 15
  *
  * @author 焕晨HChen
  */
-@HookCondition(targetPackage = "android", targetSdk = 35)
+@HookEntrance(targetPackage = "android", targetSdk = 35)
 public class AndroidV extends BaseHC {
     @Override
     public void init() {

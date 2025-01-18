@@ -22,14 +22,14 @@ import static com.hchen.appretention.data.method.PowerKeeper.kill;
 import static com.hchen.appretention.data.path.PowerKeeper.ProcessManager;
 
 import com.hchen.hooktool.BaseHC;
-import com.hchen.processor.HookCondition;
+import com.hchen.processor.HookEntrance;
 
 /**
  * 禁止电量和性能杀后台
  *
  * @author 焕晨HChen
  */
-@HookCondition(targetPackage = "com.miui.powerkeeper", targetBrand = "Xiaomi")
+@HookEntrance(targetPackage = "com.miui.powerkeeper", targetBrand = "Xiaomi")
 public class PowerKeeper extends BaseHC {
     @Override
     public void init() {

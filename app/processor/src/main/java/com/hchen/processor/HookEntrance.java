@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(ElementType.TYPE)
-public @interface HookCondition {
+public @interface HookEntrance {
     /**
      * 目标品牌
      */

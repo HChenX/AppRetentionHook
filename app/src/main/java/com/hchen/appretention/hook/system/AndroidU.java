@@ -68,14 +68,14 @@ import android.os.Looper;
 
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.processor.HookCondition;
+import com.hchen.processor.HookEntrance;
 
 /**
  * 安卓 14
  *
  * @author 焕晨HChen
  */
-@HookCondition(targetPackage = "android", targetSdk = 34)
+@HookEntrance(targetPackage = "android", targetSdk = 34)
 public class AndroidU extends BaseHC {
 
     @Override

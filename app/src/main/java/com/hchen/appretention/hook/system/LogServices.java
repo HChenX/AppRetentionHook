@@ -35,7 +35,7 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
-import com.hchen.processor.HookCondition;
+import com.hchen.processor.HookEntrance;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -49,7 +49,7 @@ import java.util.concurrent.Executors;
  *
  * @author 焕晨HChen
  */
-@HookCondition(targetPackage = "android")
+@HookEntrance(targetPackage = "android")
 public class LogServices extends BaseHC {
     private static final String SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE = "kill_event_log_record_enable";
     private static boolean isKillEventRecording = false;
@@ -60,24 +60,24 @@ public class LogServices extends BaseHC {
         SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, "false");
 
         hookMethod("com.android.server.am.ActivityManagerService",
-            "systemReady",
-            Runnable.class, "com.android.server.utils.TimingsTraceAndSlog",
-            new IHook() {
-                @Override
-                @SuppressLint("UnspecifiedRegisterReceiverFlag")
-                public void after() {
-                    mContext = (Context) getThisField("mContext");
-                    IntentFilter filter = new IntentFilter();
-                    filter.addAction(Intent.ACTION_BOOT_COMPLETED);
-                    filter.addAction(Intent.ACTION_SHUTDOWN);
-                    filter.addAction(Intent.ACTION_REBOOT);
-                    filter.addAction(SaveLog.ACTION_LOG_SERVICE_CONTENT);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter, Context.RECEIVER_EXPORTED);
-                    } else
-                        mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter);
+                "systemReady",
+                Runnable.class, "com.android.server.utils.TimingsTraceAndSlog",
+                new IHook() {
+                    @Override
+                    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+                    public void after() {
+                        mContext = (Context) getThisField("mContext");
+                        IntentFilter filter = new IntentFilter();
+                        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+                        filter.addAction(Intent.ACTION_SHUTDOWN);
+                        filter.addAction(Intent.ACTION_REBOOT);
+                        filter.addAction(SaveLog.ACTION_LOG_SERVICE_CONTENT);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter, Context.RECEIVER_EXPORTED);
+                        } else
+                            mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter);
+                    }
                 }
-            }
         );
     }
 
@@ -86,40 +86,43 @@ public class LogServices extends BaseHC {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case Intent.ACTION_BOOT_COMPLETED -> {
-                    SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, "true");
-                    KillEventLogRecord.init(context);
-                    RecordSystemProp.startRecord();
-                }
-                case SaveLog.ACTION_LOG_SERVICE_CONTENT -> {
-                    SaveLog.LogContentData logContentData;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        logContentData = intent.getParcelableExtra("logData", SaveLog.LogContentData.class);
-                    } else
-                        logContentData = intent.getParcelableExtra("logData");
-                    if (logContentData == null) {
-                        AndroidLog.logW(TAG, "broadcast receiver: log content data is null!");
-                        return;
+            String action = intent.getAction();
+            if (action != null) {
+                switch (action) {
+                    case Intent.ACTION_BOOT_COMPLETED -> {
+                        SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, "true");
+                        KillEventLogRecord.init(context);
+                        RecordSystemProp.startRecord();
                     }
+                    case SaveLog.ACTION_LOG_SERVICE_CONTENT -> {
+                        SaveLog.LogContentData logContentData;
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            logContentData = intent.getParcelableExtra("logData", SaveLog.LogContentData.class);
+                        } else
+                            logContentData = intent.getParcelableExtra("logData");
+                        if (logContentData == null) {
+                            AndroidLog.logW(TAG, "broadcast receiver: log content data is null!");
+                            return;
+                        }
 
-                    String id = logContentData.mLogId;
-                    String key = logContentData.mLogFileName;
-                    ArrayList<String> content = logContentData.mOldLogContent;
+                        String id = logContentData.mLogId;
+                        String key = logContentData.mLogFileName;
+                        ArrayList<String> content = logContentData.mOldLogContent;
 
-                    SaveLog.createFile(key);
-                    SaveLog.openFile(key, id);
-                    SaveLog.writeFile(key, content);
+                        SaveLog.createFile(key);
+                        SaveLog.openFile(key, id);
+                        SaveLog.writeFile(key, content);
 
-                    setResultCode(Activity.RESULT_OK);
-                    AndroidLog.logI(TAG, "broadcast receiver: key: " + key + ", id: " + id + ", content: " + content);
-                }
-                case Intent.ACTION_SHUTDOWN, Intent.ACTION_REBOOT -> {
-                    SaveLog.removeAllOldLogFileAndCopyLogFileToOldPathIfNeed();
-                    AndroidLog.logI(TAG, "system will shutdown or reboot!!!");
-                }
-                case null, default -> {
-                    AndroidLog.logW(TAG, "unknown action: " + intent.getAction());
+                        setResultCode(Activity.RESULT_OK);
+                        AndroidLog.logI(TAG, "broadcast receiver: key: " + key + ", id: " + id + ", content: " + content);
+                    }
+                    case Intent.ACTION_SHUTDOWN, Intent.ACTION_REBOOT -> {
+                        SaveLog.removeAllOldLogFileAndCopyLogFileToOldPathIfNeed();
+                        AndroidLog.logI(TAG, "system will shutdown or reboot!!!");
+                    }
+                    default -> {
+                        AndroidLog.logW(TAG, "unknown action: " + intent.getAction());
+                    }
                 }
             }
         }

@@ -20,7 +20,7 @@ package com.hchen.appretention;
 
 import static com.hchen.hooktool.log.XposedLog.logENoSave;
 
-import com.hchen.appretention.hook.ConditionMap;
+import com.hchen.appretention.hook.EntranceMap;
 import com.hchen.appretention.hook.TestHook;
 import com.hchen.appretention.log.SaveLog;
 import com.hchen.hooktool.BaseHC;
@@ -62,17 +62,17 @@ public class HookInit extends HCEntrance {
 
     @Override
     public void onLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
-        ConditionMap.get().forEach(new BiConsumer<>() {
+        EntranceMap.get().forEach(new BiConsumer<>() {
             @Override
-            public void accept(String s, ConditionMap conditionMap) {
-                if (!conditionMap.mTargetPackage.equals(lpparam.packageName))
+            public void accept(String s, EntranceMap entranceMap) {
+                if (!entranceMap.mTargetPackage.equals(lpparam.packageName))
                     return;
-                if (!conditionMap.mTargetBrand.equals("Any") && !DeviceTool.isRightRom(conditionMap.mTargetBrand))
+                if (!entranceMap.mTargetBrand.equals("Any") && !DeviceTool.isRightRom(entranceMap.mTargetBrand))
                     return;
-                if (!(conditionMap.mTargetSdk == 0) && !DeviceTool.isAndroidVersion(conditionMap.mTargetSdk))
+                if (!(entranceMap.mTargetSdk == 0) && !DeviceTool.isAndroidVersion(entranceMap.mTargetSdk))
                     return;
-                if (!(conditionMap.mTargetOS == -1f) &&
-                    !(DeviceTool.isHyperOSVersion(conditionMap.mTargetOS) || DeviceTool.isMiuiVersion(conditionMap.mTargetOS)))
+                if (!(entranceMap.mTargetOS == -1f) &&
+                    !(DeviceTool.isHyperOSVersion(entranceMap.mTargetOS) || DeviceTool.isMiuiVersion(entranceMap.mTargetOS)))
                     return;
                 try {
                     Class<?> hookClass = getClass().getClassLoader().loadClass(s);

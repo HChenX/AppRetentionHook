@@ -19,14 +19,14 @@
 package com.hchen.appretention.hook.system;
 
 import com.hchen.hooktool.BaseHC;
-import com.hchen.processor.HookCondition;
+import com.hchen.processor.HookEntrance;
 
 /**
  * 安卓 13
  *
  * @author 焕晨HChen
  */
-@HookCondition(targetPackage = "android", targetSdk = 33)
+@HookEntrance(targetPackage = "android", targetSdk = 33)
 public class AndroidT extends BaseHC {
     @Override
     public void init() {

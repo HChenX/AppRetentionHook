@@ -81,7 +81,7 @@ import android.content.Context;
 
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.processor.HookCondition;
+import com.hchen.processor.HookEntrance;
 
 import java.util.List;
 
@@ -90,7 +90,7 @@ import java.util.List;
  *
  * @author 焕晨HChen
  */
-@HookCondition(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 1.0f)
+@HookEntrance(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 1.0f)
 public class HyperV1 extends BaseHC {
 
     @Override
