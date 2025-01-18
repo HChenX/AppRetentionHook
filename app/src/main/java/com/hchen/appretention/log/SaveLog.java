@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
-import android.provider.Settings;
 import android.service.restrictions.RestrictionsReceiver;
 import android.text.TextUtils;
 
@@ -67,9 +66,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public class SaveLog {
     private static final String TAG = "SaveLog";
-    @Deprecated
     public static final String ACTION_LOG_SERVICE_CONTENT = "com.hchen.appretention.LOG_SERVICE_CONTENT";
-    @Deprecated
     public static final String USER_UNLOCKED_COMPLETED_PROP = "persist.sys.user.unlocked.completed";
     @Deprecated
     public static final String SETTINGS_LOG_SERVICE_COMPLETED = "log_service_boot_complete";
@@ -77,23 +74,18 @@ public class SaveLog {
     private static final String LOG_OLD_FILE_PATH = "/data/system/AppRetention/old/";
     private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
     private static String LOG_FILE_FULL_PATH = "";
-    @Deprecated
     private static boolean isWaitingSystemBootCompleted = false;
-    @Deprecated
     private static boolean isWaitingLogServiceBootCompleted = false;
-    @Deprecated
     private static final HashMap<String, LogContentData> mLogContentDataMap = new HashMap<>();
-    @Deprecated
     private static boolean hasProcessingBroadcast = false;
-    @Deprecated
     private static boolean isAndroidInitLogPutDown = false;
 
+    @Deprecated
     public static void initSaveLog(String key) {
         createFile(key);
         openFile(key, getRandomNumber());
     }
 
-    @Deprecated
     public static void initLogToFile(String fileName) {
         if (fileName == null) return;
         if (fileName.isEmpty()) return;
@@ -168,6 +160,7 @@ public class SaveLog {
         return null;
     }
 
+    @Deprecated
     public static synchronized void saveLog(String tag, String log) {
         tag = redirectFileName(tag);
         String formatLog = formatLog(tag, log);
@@ -176,6 +169,7 @@ public class SaveLog {
         writeFile(tag, formatLog);
     }
 
+    @Deprecated
     private static String formatLog(String tag, String log) {
         String formatLog = formatLog(log);
         if (tag.equals("Any")) {
@@ -191,7 +185,6 @@ public class SaveLog {
         return formatLog;
     }
 
-    @Deprecated
     public static synchronized void saveLogContent(String tag, String log) {
         LogContentData[] logContentDatas = updateLogContent(tag, log);
         if (!isWaitingSystemBootCompleted && !isWaitingLogServiceBootCompleted) {
@@ -206,7 +199,6 @@ public class SaveLog {
             " isWaitingLogServiceBootCompleted: " + isWaitingLogServiceBootCompleted + " log: " + log);
     }
 
-    @Deprecated
     private static LogContentData[] updateLogContent(String tag, String log) {
         tag = redirectFileName(tag);
         String formatLog = formatLog(log);
@@ -244,6 +236,7 @@ public class SaveLog {
         String[] shouldRedirectToAndroid = new String[]{
             "CacheCompaction",
             "UpdateOomLevels",
+            "LogServices"
         };
         String[] shouldRedirectToHyper = new String[]{
             "CameraOpt"
@@ -434,10 +427,14 @@ public class SaveLog {
 
     @Deprecated
     private static boolean isLogServiceBootCompleted(Context context) {
-        if (context == null) return false;
-        String result = Settings.System.getString(context.getContentResolver(), SETTINGS_LOG_SERVICE_COMPLETED);
-        if (result == null || "0".equals(result)) return false;
-        return "1".equals(result);
+        /*
+         * @Deprecated
+         * if (context == null) return false;
+         * String result = Settings.System.getString(context.getContentResolver(), SETTINGS_LOG_SERVICE_COMPLETED);
+         * if (result == null || "0".equals(result)) return false;
+         * return "1".equals(result);
+         */
+        return true;
     }
 
     @Deprecated
@@ -445,7 +442,6 @@ public class SaveLog {
         return SystemPropTool.getProp(USER_UNLOCKED_COMPLETED_PROP, "false").equals("true");
     }
 
-    @Deprecated
     private static void waitSystemBootCompletedIfNeed() {
         if (!DeviceTool.isBootCompleted() || !isUserUnlockedCompeted()) {
             isWaitingSystemBootCompleted = true;
@@ -491,7 +487,6 @@ public class SaveLog {
         }
     }
 
-    @Deprecated
     private static void flushLog(Context context) {
         mLogContentDataMap.forEach((s, logContentData) -> {
             if (logContentData.mLogContent.isEmpty()) return;
@@ -504,7 +499,6 @@ public class SaveLog {
         return String.valueOf(randomNumber);
     }
 
-    @Deprecated
     @SuppressLint("MissingPermission")
     private static synchronized void sendLogContentBroadcast(Context context, LogContentData logContentData) {
         if (context == null || hasProcessingBroadcast) return;
@@ -533,12 +527,10 @@ public class SaveLog {
         }, null, Activity.RESULT_CANCELED, null, null);
     }
 
-    @Deprecated
     private static void pushWithAsyncContext(OnContextGetter onContextGetter) {
         ContextTool.getAsyncContext(onContextGetter::push, ContextTool.FLAG_ALL);
     }
 
-    @Deprecated
     private interface OnContextGetter {
         void push(Context context);
     }
@@ -554,9 +546,7 @@ public class SaveLog {
      * 日志数据存储类
      *
      * @author 焕晨HChen
-     * @deprecated
      */
-    @Deprecated
     public static class LogContentData implements Parcelable {
         public String mLogId = "";
         public String mLogFileName = "";

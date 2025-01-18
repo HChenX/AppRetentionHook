@@ -78,8 +78,8 @@ public class HookInit extends HCEntrance {
                     Class<?> hookClass = getClass().getClassLoader().loadClass(s);
                     BaseHC baseHC = (BaseHC) hookClass.getDeclaredConstructor().newInstance();
                     String className = baseHC.TAG;
-                    // SaveLog.initLogToFile(className);
-                    SaveLog.initSaveLog(className);
+                    SaveLog.initLogToFile(className);
+                    // SaveLog.initSaveLog(className);
                     HCInit.initLoadPackageParam(lpparam);
                     baseHC.onLoadPackage();
                 } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
