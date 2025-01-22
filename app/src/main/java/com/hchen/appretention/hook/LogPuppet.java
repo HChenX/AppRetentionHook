@@ -147,7 +147,7 @@ public class LogPuppet extends BaseHC {
 
                 String id = logContentData.mLogId;
                 String key = logContentData.mLogFileName;
-                ArrayList<String> content = logContentData.mOldLogContent;
+                ArrayList<String> content = logContentData.mLogContentCache;
 
                 SaveLog.createFile(key);
                 SaveLog.openFile(key, id);

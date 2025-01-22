@@ -72,11 +72,11 @@ public class SaveLog {
     public static final String SETTINGS_LOG_SERVICE_COMPLETED = "log_service_boot_complete";
     public static final String LOG_FILE_PATH = "/data/system/AppRetention/";
     private static final String LOG_OLD_FILE_PATH = "/data/system/AppRetention/old/";
-    private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
     private static String LOG_FILE_FULL_PATH = "";
+    private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
+    private static final HashMap<String, LogContentData> mLogContentDataMap = new HashMap<>();
     private static boolean isWaitingSystemBootCompleted = false;
     private static boolean isWaitingLogServiceBootCompleted = false;
-    private static final HashMap<String, LogContentData> mLogContentDataMap = new HashMap<>();
     private static boolean hasProcessingBroadcast = false;
     private static boolean isAndroidInitLogPutDown = false;
 
@@ -437,7 +437,6 @@ public class SaveLog {
         return true;
     }
 
-    @Deprecated
     public static boolean isUserUnlockedCompeted() {
         return SystemPropTool.getProp(USER_UNLOCKED_COMPLETED_PROP, "false").equals("true");
     }
@@ -459,7 +458,7 @@ public class SaveLog {
                 while (maxWhileCount-- > 0) {
                     try {
                         Thread.sleep(10000);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException ignore) {
                     }
                     if (isUserUnlockedCompeted())
                         break;
@@ -477,7 +476,7 @@ public class SaveLog {
                         }
                         try {
                             Thread.sleep(10000);
-                        } catch (InterruptedException e) {
+                        } catch (InterruptedException ignore) {
                         }
                     }
                 });
@@ -508,7 +507,7 @@ public class SaveLog {
         intent.putExtra("logData", logContentData);
         AndroidLog.logI(TAG, "send broadcast logId: " + logContentData.mLogId + " logKey: " + logContentData.mLogFileName
             + " logContent: " + logContentData.mLogContent);
-        logContentData.createOldLogContent();
+        logContentData.createLogContentCache();
         logContentData.mLogContent.clear();
         context.sendOrderedBroadcast(intent, null, new RestrictionsReceiver() {
             @Override
@@ -551,10 +550,10 @@ public class SaveLog {
         public String mLogId = "";
         public String mLogFileName = "";
         public ArrayList<String> mLogContent = new ArrayList<>();
-        public ArrayList<String> mOldLogContent;
+        public ArrayList<String> mLogContentCache;
 
-        void createOldLogContent() {
-            mOldLogContent = new ArrayList<>(mLogContent);
+        void createLogContentCache() {
+            mLogContentCache = new ArrayList<>(mLogContent);
         }
 
         @Override
@@ -566,7 +565,7 @@ public class SaveLog {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString(mLogId);
             dest.writeString(mLogFileName);
-            dest.writeStringList(mOldLogContent);
+            dest.writeStringList(mLogContentCache);
         }
 
         public static final Creator<?> CREATOR = new Creator<LogContentData>() {
@@ -575,7 +574,7 @@ public class SaveLog {
                 LogContentData logContentData = new LogContentData();
                 logContentData.mLogId = source.readString();
                 logContentData.mLogFileName = source.readString();
-                logContentData.mOldLogContent = source.createStringArrayList();
+                logContentData.mLogContentCache = source.createStringArrayList();
                 return logContentData;
             }
 

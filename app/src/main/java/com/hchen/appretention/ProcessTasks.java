@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.concurrent.FutureTask;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -44,62 +45,70 @@ public class ProcessTasks {
     // COPY TO: [AndroidU]
     // DONE
     private static final String TAG = "[COPY!!]";
-    private static final ArrayList<FutureTask<String>> futureTaskList = new ArrayList<>();
-    private static final HashMap<String, String> hookFilesHashMap = new HashMap<>();
-    private static final HashMap<String, ArrayList<String>> hookCropContentHashMap = new HashMap<>(); // 裁剪处理后的内容
-    private static final HashMap<String, ArrayList<String>> hookImportHashMap = new HashMap<>(); // import 列表
-    private static final HashMap<CopyMutual, ArrayList<String>> copyContentHashMap = new HashMap<>(); // 需要复制的内容
-    private static final HashSet<String> copyToSet = new HashSet<>(); // 需要复制到的 copy 列表
+    private static ArrayList<String> mHookFilePathList = new ArrayList<>();
+    private static final ArrayList<String> mHookFileNameList = new ArrayList<>();
+    private static final ArrayList<FutureTask<String>> mFutureTaskList = new ArrayList<>();
+    private static final HashMap<String, String> mHookFilesHashMap = new HashMap<>(); // 文件名和文件完整路径
+    private static final HashMap<String, ArrayList<String>> mHookFileContentHashMap = new HashMap<>(); // 文件名和文件内容
+    @Deprecated
+    private static final HashMap<String, ArrayList<String>> mHookCropContentHashMap = new HashMap<>(); // 裁剪处理后的内容
+    private static final HashMap<String, ArrayList<String>> mHookImportHashMap = new HashMap<>(); // import 列表
+    private static final HashMap<CopyMutual, ArrayList<String>> mCopyContentHashMap = new HashMap<>(); // 需要复制的内容
+    private static final HashMap<String, ArrayList<String>> mProcessedContentHashMap = new HashMap<>();
+    private static final HashSet<String> mCopyToSet = new HashSet<>(); // 需要复制到的 copy 列表
 
     public static void main(String[] args) {
-        ArrayList<String> hookFilePathList = Arrays.stream(strToArray(args[0])).filter(s -> FileHelper.exists(s) && s.contains("\\hook\\"))
+        mHookFilePathList = Arrays.stream(strToArray(args[0])).filter(s -> FileHelper.exists(s) && s.contains("\\hook\\"))
             .collect(Collectors.toCollection(ArrayList::new));
 
         printLogo();
-        processContent(hookFilePathList);
+        processContent();
         System.exit(0);
     }
 
-    private static void processContent(ArrayList<String> hookFilePathList) {
-        for (String hookFilePath : hookFilePathList) {
+    private static void processContent() {
+        for (String hookFilePath : mHookFilePathList) {
             FutureTask<String> futureTask = new FutureTask<>(() -> {
                 // D:\Android\AppRetentionHook\app\src\main\java\com\hchen\appretention\ProcessTasks.java
                 String hookFileName = hookFilePath.substring(hookFilePath.lastIndexOf("\\") + 1, hookFilePath.lastIndexOf("."));
-                hookFilesHashMap.put(hookFileName, hookFilePath);
-
                 ArrayList<String> mContent = FileHelper.read(hookFilePath);
                 if (shouldSkip(mContent)) return "DONE";
 
-                readCopyContentNew(hookFileName, mContent);
-                hookImportHashMap.put(hookFileName,
+                mHookFilesHashMap.put(hookFileName, hookFilePath);
+                mHookFileContentHashMap.put(hookFileName, mContent);
+                mHookFileNameList.add(hookFileName);
+
+                readNeedCopyContent(hookFileName, mContent);
+                mHookImportHashMap.put(hookFileName,
                     mContent.stream()
                         .filter(s -> s.contains("import"))
                         .collect(Collectors.toCollection(ArrayList::new)));
-                cropContent(hookFileName, mContent);
+                // cropContent(hookFileName, mContent);
 
                 return "DONE";
             });
-            futureTaskList.add(futureTask);
+            mFutureTaskList.add(futureTask);
             new Thread(futureTask).start();
         }
         waitDone();
 
-        regroupImport();
-        writeHookContentChange();
+        createProcessedContent();
+        writProcessedContentToFile();
+        // regroupImport();
+        // writeHookContentChange();
     }
 
+    // 是否要跳过当前文件，因为不包含 copy() 方法
     private static boolean shouldSkip(ArrayList<String> content) {
-        boolean shouldSkip = true;
         for (String c : content) {
             if (c.contains("copy()")) {
-                shouldSkip = false;
-                break;
+                return false;
             }
         }
-        return shouldSkip;
+        return true;
     }
 
-    private static void readCopyContentNew(String hookFileName, ArrayList<String> content) {
+    private static void readNeedCopyContent(String hookFileName, ArrayList<String> content) {
         ArrayList<String> copyContent = new ArrayList<>();
         ArrayList<String> targetFileList = new ArrayList<>();
         boolean start = false;
@@ -107,22 +116,28 @@ public class ProcessTasks {
             if (c.contains("// DONE") && start) {
                 start = false;
                 for (String target : targetFileList) {
+                    if (target.isEmpty()) continue;
+
                     CopyMutual copyMutual = new CopyMutual(hookFileName, target);
-                    if (copyContentHashMap.get(copyMutual) == null) {
-                        copyContentHashMap.put(copyMutual, new ArrayList<>(copyContent));
+                    if (mCopyContentHashMap.get(copyMutual) == null) {
+                        mCopyContentHashMap.put(copyMutual, new ArrayList<>(copyContent));
+                        mCopyContentHashMap.get(copyMutual).add("        // DONE\n");
                     } else {
-                        copyContentHashMap.get(copyMutual).add("\n");
-                        copyContentHashMap.get(copyMutual).addAll(new ArrayList<>(copyContent));
+                        mCopyContentHashMap.get(copyMutual).addAll(new ArrayList<>(copyContent));
+                        mCopyContentHashMap.get(copyMutual).add("        // DONE");
                     }
-                    copyToSet.add(target);
+                    mCopyToSet.add(target);
                 }
                 targetFileList.clear();
                 copyContent.clear();
                 continue;
             }
 
-            if (start)
+            if (start) {
+                if (copyContent.isEmpty())
+                    copyContent.add("        // COPY FROM: " + hookFileName);
                 copyContent.add(c);
+            }
 
             if (c.contains("// COPY TO")) {
                 // COPY TO: [AndroidU, AndroidV]
@@ -135,9 +150,110 @@ public class ProcessTasks {
         }
     }
 
+    private static void createProcessedContent() {
+        for (String hookFileName : mHookFileNameList) {
+            FutureTask<String> futureTask = new FutureTask<>(() -> {
+                if (mCopyToSet.contains(hookFileName)) {
+                    ArrayList<String> processedContent = new ArrayList<>();
+                    ArrayList<String> originalContent = mHookFileContentHashMap.get(hookFileName);
+                    ArrayList<CopyMutual> mutuals = mCopyContentHashMap.keySet().stream().filter(new Predicate<CopyMutual>() {
+                        @Override
+                        public boolean test(CopyMutual copyMutual) {
+                            return copyMutual.copyTo.equals(hookFileName);
+                        }
+                    }).collect(Collectors.toCollection(ArrayList::new));
+
+                    ArrayList<String> allImportList = new ArrayList<>();
+                    ArrayList<String> allCopyContentList = new ArrayList<>();
+                    for (CopyMutual mutual : mutuals) {
+                        String copyFrom = mutual.copyFrom;
+                        allImportList.addAll(mHookImportHashMap.get(copyFrom));
+                        allCopyContentList.addAll(mCopyContentHashMap.get(mutual));
+                    }
+
+                    ArrayList<String> processedImportList = new ArrayList<>(mHookImportHashMap.get(hookFileName));
+                    for (String all : allImportList) {
+                        if (!processedImportList.contains(all)) {
+                            processedImportList.add(all);
+                        }
+                    }
+
+                    int startIndex = -1;
+                    int endIndex = -1;
+
+                    for (int i = 0; i < originalContent.size(); i++) {
+                        if (startIndex == -1 && originalContent.get(i).contains("import")) {
+                            startIndex = i;
+                        }
+
+                        if (originalContent.get(i).contains("/**") || originalContent.get(i).contains("@HookEntrance")) {
+                            endIndex = i - 2;
+                            break;
+                        }
+                    }
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        for (int i = originalContent.size() - 1; i >= 0; i--) {
+                            if (i >= startIndex && i <= endIndex)
+                                originalContent.remove(i);
+                        }
+                    }
+
+                    originalContent.addAll(startIndex, processedImportList);
+                    processedContent = originalContent;
+
+                    startIndex = -1;
+                    endIndex = -1;
+                    for (int i = 0; i < processedContent.size(); i++) {
+                        if (processedContent.get(i).contains("copy()"))
+                            startIndex = i + 1;
+
+                        if (processedContent.get(i).equals("    }") && startIndex != -1) {
+                            endIndex = i - 1;
+                            break;
+                        }
+                    }
+
+                    if (startIndex != -1 && endIndex != -1) {
+                        for (int i = processedContent.size() - 1; i >= 0; i--) {
+                            if (i >= startIndex && i <= endIndex)
+                                processedContent.remove(i);
+                        }
+                    }
+
+                    processedContent.addAll(startIndex, allCopyContentList);
+                    mProcessedContentHashMap.put(hookFileName, processedContent);
+                }
+                return "DONE";
+            });
+            mFutureTaskList.add(futureTask);
+            new Thread(futureTask).start();
+        }
+        waitDone();
+    }
+
+    private static void writProcessedContentToFile() {
+        mProcessedContentHashMap.forEach(new BiConsumer<String, ArrayList<String>>() {
+            @Override
+            public void accept(String fileName, ArrayList<String> processedContent) {
+                FutureTask<String> futureTask = new FutureTask<>(() -> {
+                    String path = mHookFilesHashMap.get(fileName);
+                    FileHelper.write(path, processedContent);
+                    log("成功生成并写入！写入目标文件: " + path);
+                    return "DONE";
+                });
+                mFutureTaskList.add(futureTask);
+                new Thread(futureTask).start();
+            }
+        });
+        waitDone();
+    }
+
     /**
      * @noinspection ExtractMethodRecommender
+     * @deprecated
      */
+    @Deprecated
     private static void cropContent(String hookFileName, ArrayList<String> content) {
         final ArrayList<String> removedImportList = new ArrayList<>();
         boolean inImportBlock = false;
@@ -180,16 +296,17 @@ public class ProcessTasks {
             }
         }
 
-        hookCropContentHashMap.put(hookFileName, processedList);
+        mHookCropContentHashMap.put(hookFileName, processedList);
     }
 
+    @Deprecated
     private static void regroupImport() {
-        copyContentHashMap.keySet().forEach(new Consumer<CopyMutual>() {
+        mCopyContentHashMap.keySet().forEach(new Consumer<CopyMutual>() {
             @Override
             public void accept(CopyMutual copyMutual) {
                 FutureTask<String> futureTask = new FutureTask<>(() -> {
-                    ArrayList<String> fromImport = hookImportHashMap.get(copyMutual.copyFrom);
-                    ArrayList<String> toImport = hookImportHashMap.get(copyMutual.copyTo);
+                    ArrayList<String> fromImport = mHookImportHashMap.get(copyMutual.copyFrom);
+                    ArrayList<String> toImport = mHookImportHashMap.get(copyMutual.copyTo);
                     if (fromImport == null || toImport == null) {
                         throwAndExit("List is null! form: " + fromImport + ", to: " + toImport);
                         return "DONE";
@@ -202,7 +319,7 @@ public class ProcessTasks {
                     return "DONE";
                 });
 
-                futureTaskList.add(futureTask);
+                mFutureTaskList.add(futureTask);
                 new Thread(futureTask).start();
             }
         });
@@ -210,17 +327,18 @@ public class ProcessTasks {
         waitDone();
     }
 
+    @Deprecated
     private static void writeHookContentChange() {
-        hookCropContentHashMap.forEach(new BiConsumer<String, ArrayList<String>>() {
+        mHookCropContentHashMap.forEach(new BiConsumer<String, ArrayList<String>>() {
             @Override
             public void accept(String file, ArrayList<String> content) {
                 FutureTask<String> futureTask = new FutureTask<>(() -> {
-                    if (copyToSet.contains(file)) {
-                        copyContentHashMap.keySet().stream().filter(copyMutual -> copyMutual.copyTo.equals(file))
+                    if (mCopyToSet.contains(file)) {
+                        mCopyContentHashMap.keySet().stream().filter(copyMutual -> copyMutual.copyTo.equals(file))
                             .collect(Collectors.toCollection(ArrayList::new))
                             .forEach(copyMutual -> {
-                                ArrayList<String> cropContent = hookCropContentHashMap.get(copyMutual.copyTo);
-                                ArrayList<String> importList = hookImportHashMap.get(copyMutual.copyTo);
+                                ArrayList<String> cropContent = mHookCropContentHashMap.get(copyMutual.copyTo);
+                                ArrayList<String> importList = mHookImportHashMap.get(copyMutual.copyTo);
 
                                 for (int i = 0; i < cropContent.size(); i++) {
                                     if (cropContent.get(i).contains("// THIS IMPORT")) {
@@ -231,20 +349,20 @@ public class ProcessTasks {
 
                                 for (int i = 0; i < cropContent.size(); i++) {
                                     if (cropContent.get(i).contains("// THIS COPY")) {
-                                        cropContent.addAll(i, copyContentHashMap.get(copyMutual));
+                                        cropContent.addAll(i, mCopyContentHashMap.get(copyMutual));
                                         break;
                                     }
                                 }
 
                                 cropContent.removeIf(s -> s.contains("// THIS IMPORT") || s.contains("// THIS COPY"));
 
-                                String path = hookFilesHashMap.get(copyMutual.copyTo);
+                                String path = mHookFilesHashMap.get(copyMutual.copyTo);
                                 FileHelper.write(path, cropContent);
                                 log("成功生成并写入！写入目标文件: " + path);
                             });
                     } else {
-                        ArrayList<String> cropContent = hookCropContentHashMap.get(file);
-                        ArrayList<String> importList = hookImportHashMap.get(file);
+                        ArrayList<String> cropContent = mHookCropContentHashMap.get(file);
+                        ArrayList<String> importList = mHookImportHashMap.get(file);
 
                         for (int i = 0; i < cropContent.size(); i++) {
                             if (cropContent.get(i).contains("// THIS IMPORT")) {
@@ -255,14 +373,14 @@ public class ProcessTasks {
 
                         cropContent.removeIf(s -> s.contains("// THIS IMPORT") || s.contains("// THIS COPY"));
 
-                        String path = hookFilesHashMap.get(file);
+                        String path = mHookFilesHashMap.get(file);
                         FileHelper.write(path, cropContent);
                         log("成功生成并写入！写入目标文件: " + path);
                     }
                     return "DONE";
                 });
 
-                futureTaskList.add(futureTask);
+                mFutureTaskList.add(futureTask);
                 new Thread(futureTask).start();
             }
         });
@@ -271,9 +389,9 @@ public class ProcessTasks {
     }
 
     private static void waitDone() {
-        while (!futureTaskList.isEmpty()) {
-            futureTaskList.removeIf(FutureTask::isDone);
-            sleep(50);
+        while (!mFutureTaskList.isEmpty()) {
+            mFutureTaskList.removeIf(FutureTask::isDone);
+            sleep(150);
         }
     }
 

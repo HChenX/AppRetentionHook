@@ -125,6 +125,7 @@ public class HyperV2 extends BaseHC {
 
     @Override
     public void copy() {
+        // COPY FROM: HyperV1
         /*
          * 关闭 spc。
          * */
@@ -198,8 +199,9 @@ public class HyperV2 extends BaseHC {
             .method(init, Context.class, ActivityManagerService)
             .returnResult(false)
         );
+        // DONE
 
-
+        // COPY FROM: HyperV1
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -344,5 +346,6 @@ public class HyperV2 extends BaseHC {
                 }
             }).shouldObserveCall(false)
         );
+        // DONE
     }
 }
