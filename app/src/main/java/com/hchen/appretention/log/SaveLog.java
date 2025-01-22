@@ -236,7 +236,9 @@ public class SaveLog {
         String[] shouldRedirectToAndroid = new String[]{
             "CacheCompaction",
             "UpdateOomLevels",
-            "LogServices"
+            "LogServices",
+            "KillEventLogRecord",
+            "RecordSystemProp"
         };
         String[] shouldRedirectToHyper = new String[]{
             "CameraOpt"
@@ -606,7 +608,14 @@ public class SaveLog {
                 }
             }
         } catch (IOException e) {
-            logENoSave(TAG, "Reader /proc/mv failed!", e);
+            // try again
+            Long totalMemory = InvokeTool.callStaticMethod(InvokeTool.findClass("android.os.Process"), "getTotalMemory", new Class[]{});
+            if (totalMemory == null) {
+                logENoSave(TAG, "Reader /proc/mv failed!", e);
+                return "Unknown";
+            }
+
+            return ((totalMemory / 1024 / 1024 / 1024) + 1) + "GB";
         }
         return "Unknown";
     }

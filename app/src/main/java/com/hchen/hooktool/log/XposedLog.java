@@ -124,6 +124,11 @@ public class XposedLog {
         // SaveLog.saveLog(tag, HCData.getInitTag() + "[" + tag + "]" + "[I]: " + log + " \n[Info Msg]: " + LogExpand.printStackTrace(e));
     }
 
+    public static void logINoSave(String tag, String log) {
+        if (HCData.getInitLogLevel() < 3) return;
+        XposedBridge.log(HCData.getInitTag() + "[" + tag + "]" + "[I]: " + log);
+    }
+
     // ------------ logD --------------
     public static void logD(String tag, Throwable e) {
         if (HCData.getInitLogLevel() < 4) return;

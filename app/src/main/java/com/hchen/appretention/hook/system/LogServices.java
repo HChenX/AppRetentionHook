@@ -18,7 +18,7 @@
  */
 package com.hchen.appretention.hook.system;
 
-import static com.hchen.hooktool.log.XposedLog.logE;
+import static com.hchen.appretention.hook.system.LogServices.KillEventLogRecord.SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -26,7 +26,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.Settings;
 
 import com.hchen.appretention.BuildConfig;
@@ -34,6 +36,7 @@ import com.hchen.appretention.log.SaveLog;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
+import com.hchen.hooktool.log.XposedLog;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
 import com.hchen.processor.HookEntrance;
 
@@ -51,8 +54,6 @@ import java.util.concurrent.Executors;
  */
 @HookEntrance(targetPackage = "android")
 public class LogServices extends BaseHC {
-    private static final String SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE = "kill_event_log_record_enable";
-    private static boolean isKillEventRecording = false;
     private Context mContext;
 
     @Override
@@ -60,24 +61,27 @@ public class LogServices extends BaseHC {
         SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, "false");
 
         hookMethod("com.android.server.am.ActivityManagerService",
-                "systemReady",
-                Runnable.class, "com.android.server.utils.TimingsTraceAndSlog",
-                new IHook() {
-                    @Override
-                    @SuppressLint("UnspecifiedRegisterReceiverFlag")
-                    public void after() {
-                        mContext = (Context) getThisField("mContext");
-                        IntentFilter filter = new IntentFilter();
-                        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
-                        filter.addAction(Intent.ACTION_SHUTDOWN);
-                        filter.addAction(Intent.ACTION_REBOOT);
-                        filter.addAction(SaveLog.ACTION_LOG_SERVICE_CONTENT);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter, Context.RECEIVER_EXPORTED);
-                        } else
-                            mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter);
-                    }
+            "systemReady",
+            Runnable.class, "com.android.server.utils.TimingsTraceAndSlog",
+            new IHook() {
+                @Override
+                @SuppressLint("UnspecifiedRegisterReceiverFlag")
+                public void after() {
+                    mContext = (Context) getThisField("mContext");
+
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+                    filter.addAction(Intent.ACTION_SHUTDOWN);
+                    filter.addAction(Intent.ACTION_REBOOT);
+                    filter.addAction(SaveLog.ACTION_LOG_SERVICE_CONTENT);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter, Context.RECEIVER_EXPORTED);
+                    } else
+                        mContext.registerReceiver(new SystemBaseBroadcastReceiver(), filter);
+
+                    XposedLog.logI(TAG, "register log broadcast receiver!!");
                 }
+            }
         );
     }
 
@@ -93,6 +97,16 @@ public class LogServices extends BaseHC {
                         SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, "true");
                         KillEventLogRecord.init(context);
                         RecordSystemProp.startRecord();
+                        context.getContentResolver().registerContentObserver(Settings.System.getUriFor(SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE),
+                            false, new ContentObserver(new Handler(context.getMainLooper())) {
+                                @Override
+                                public void onChange(boolean selfChange) {
+                                    if (selfChange) return;
+                                    KillEventLogRecord.init(context);
+                                }
+                            }
+                        );
+                        XposedLog.logI(TAG, "system boot completed!!");
                     }
                     case SaveLog.ACTION_LOG_SERVICE_CONTENT -> {
                         SaveLog.LogContentData logContentData;
@@ -101,7 +115,7 @@ public class LogServices extends BaseHC {
                         } else
                             logContentData = intent.getParcelableExtra("logData");
                         if (logContentData == null) {
-                            AndroidLog.logW(TAG, "broadcast receiver: log content data is null!");
+                            XposedLog.logW(TAG, "broadcast receiver: log content data is null!");
                             return;
                         }
 
@@ -118,10 +132,10 @@ public class LogServices extends BaseHC {
                     }
                     case Intent.ACTION_SHUTDOWN, Intent.ACTION_REBOOT -> {
                         SaveLog.removeAllOldLogFileAndCopyLogFileToOldPathIfNeed();
-                        AndroidLog.logI(TAG, "system will shutdown or reboot!!!");
+                        XposedLog.logINoSave(TAG, "system will shutdown or reboot!!!");
                     }
                     default -> {
-                        AndroidLog.logW(TAG, "unknown action: " + intent.getAction());
+                        XposedLog.logW(TAG, "unknown action: " + intent.getAction());
                     }
                 }
             }
@@ -133,9 +147,11 @@ public class LogServices extends BaseHC {
      *
      * @author 焕晨HChen
      */
-    private static class KillEventLogRecord {
+    static class KillEventLogRecord {
+        public static final String SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE = "kill_event_log_record_enable";
         private static final String TAG = "KillEventLogRecord";
         private static final String mKillEventRecordFile = "KillEvent";
+        private static boolean isKillEventRecording = false;
         private static ExecutorService mExecutorService;
         private static BufferedReader mReader;
         private static Process mLogcat;
@@ -145,12 +161,12 @@ public class LogServices extends BaseHC {
                 if (!isKillEventRecording)
                     startRecord();
                 else
-                    AndroidLog.logW(TAG, "kill event log record is already started!!");
+                    XposedLog.logW(TAG, "kill event log record is already started!!");
             } else if (!BuildConfig.DEBUG) {
                 if (isKillEventRecording && mExecutorService != null) {
                     mExecutorService.shutdownNow();
                     clear();
-                    AndroidLog.logI(TAG, "stop record kill event!!");
+                    XposedLog.logI(TAG, "stop record kill event!!");
                 }
             }
         }
@@ -161,7 +177,7 @@ public class LogServices extends BaseHC {
             mExecutorService = Executors.newSingleThreadExecutor();
             mExecutorService.submit(() -> {
                 try {
-                    AndroidLog.logI(TAG, "start record kill event!!");
+                    XposedLog.logI(TAG, "start record kill event!!");
                     isKillEventRecording = true;
                     mLogcat = Runtime.getRuntime().exec("logcat -b events");
                     mReader = new BufferedReader(new InputStreamReader(mLogcat.getInputStream()));
@@ -174,7 +190,7 @@ public class LogServices extends BaseHC {
                             SaveLog.writeFile(mKillEventRecordFile, line);
                     }
                 } catch (IOException e) {
-                    logE(TAG, "start record kill event failed!", e);
+                    XposedLog.logE(TAG, "start record kill event failed!", e);
                     isKillEventRecording = false;
                     SaveLog.closeFile(mKillEventRecordFile);
                 } finally {
@@ -187,7 +203,7 @@ public class LogServices extends BaseHC {
                             mReader.close();
                             mReader = null;
                         } catch (IOException e) {
-                            AndroidLog.logE(TAG, "close reader failed!", e);
+                            XposedLog.logE(TAG, "close reader failed!", e);
                         }
                     }
                 }
@@ -205,11 +221,11 @@ public class LogServices extends BaseHC {
                     mReader.close();
                     mReader = null;
                 } catch (IOException e) {
-                    AndroidLog.logE(TAG, "close reader failed!", e);
+                    XposedLog.logE(TAG, "close reader failed!", e);
                 }
             }
             isKillEventRecording = false;
-            AndroidLog.logI(TAG, "clear kll log event record process!!");
+            XposedLog.logI(TAG, "clear kll log event record process!!");
         }
     }
 
@@ -218,7 +234,7 @@ public class LogServices extends BaseHC {
      *
      * @author 焕晨HChen
      */
-    private static class RecordSystemProp {
+    static class RecordSystemProp {
         private static final String mRecordFile = "SystemProp";
         private static final String TAG = "RecordSystemProp";
         private static Process mPropData;
@@ -230,8 +246,7 @@ public class LogServices extends BaseHC {
             ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
             mExecutorService.submit(() -> {
                 try {
-                    AndroidLog.logI(TAG, "start record system prop!!");
-                    isKillEventRecording = true;
+                    XposedLog.logI(TAG, "start record system prop!!");
                     mPropData = Runtime.getRuntime().exec("getprop");
                     mReader = new BufferedReader(new InputStreamReader(mPropData.getInputStream()));
                     String line;
@@ -241,8 +256,7 @@ public class LogServices extends BaseHC {
                         SaveLog.writeFile(mRecordFile, line);
                     }
                 } catch (IOException e) {
-                    logE(TAG, "start record system prop failed!", e);
-                    isKillEventRecording = false;
+                    XposedLog.logE(TAG, "start record system prop failed!", e);
                     SaveLog.closeFile(mRecordFile);
                 } finally {
                     if (mPropData != null) {
@@ -254,10 +268,10 @@ public class LogServices extends BaseHC {
                             mReader.close();
                             mReader = null;
                         } catch (IOException e) {
-                            AndroidLog.logE(TAG, "close reader failed!", e);
+                            XposedLog.logE(TAG, "close reader failed!", e);
                         }
                     }
-                    AndroidLog.logI(TAG, "record system prop done, close process success!!");
+                    XposedLog.logI(TAG, "record system prop done, close process success!!");
                 }
             });
         }
