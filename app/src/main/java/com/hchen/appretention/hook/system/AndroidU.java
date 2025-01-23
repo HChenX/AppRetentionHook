@@ -19,10 +19,6 @@
 package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.field.System.CUR_MAX_CACHED_PROCESSES;
-import static com.hchen.appretention.data.field.System.CUR_MAX_EMPTY_PROCESSES;
-import static com.hchen.appretention.data.field.System.CUR_TRIM_CACHED_PROCESSES;
-import static com.hchen.appretention.data.field.System.CUR_TRIM_EMPTY_PROCESSES;
-import static com.hchen.appretention.data.field.System.MAX_CACHED_PROCESSES;
 import static com.hchen.appretention.data.field.System.MAX_PHANTOM_PROCESSES;
 import static com.hchen.appretention.data.field.System.PROACTIVE_KILLS_ENABLED;
 import static com.hchen.appretention.data.field.System.USE_MODERN_TRIM;
@@ -32,7 +28,6 @@ import static com.hchen.appretention.data.field.System.mMemFactorOverride;
 import static com.hchen.appretention.data.field.System.mNextNoKillDebugMessageTime;
 import static com.hchen.appretention.data.method.System.checkExcessivePowerUsageLPr;
 import static com.hchen.appretention.data.method.System.isInVisibleRange;
-import static com.hchen.appretention.data.method.System.killProcessLocked;
 import static com.hchen.appretention.data.method.System.killProcessesWhenImperceptible;
 import static com.hchen.appretention.data.method.System.performIdleMaintenance;
 import static com.hchen.appretention.data.method.System.shouldKillExcessiveProcesses;
@@ -40,7 +35,6 @@ import static com.hchen.appretention.data.method.System.trimInactiveRecentTasks;
 import static com.hchen.appretention.data.method.System.trimPhantomProcessesIfNecessary;
 import static com.hchen.appretention.data.method.System.updateAndTrimProcessLSP;
 import static com.hchen.appretention.data.method.System.updateKillBgRestrictedCachedIdle;
-import static com.hchen.appretention.data.method.System.updateLowMemStateLSP;
 import static com.hchen.appretention.data.method.System.updateMaxCachedProcesses;
 import static com.hchen.appretention.data.method.System.updateMaxPhantomProcesses;
 import static com.hchen.appretention.data.method.System.updatePerfConfigConstants;
@@ -56,13 +50,11 @@ import static com.hchen.appretention.data.path.System.OomAdjuster;
 import static com.hchen.appretention.data.path.System.PhantomProcessList;
 import static com.hchen.appretention.data.path.System.ProcessCpuTracker;
 import static com.hchen.appretention.data.path.System.ProcessList;
-import static com.hchen.appretention.data.path.System.ProcessList$ImperceptibleKillRunner;
 import static com.hchen.appretention.data.path.System.ProcessRecord;
 import static com.hchen.appretention.data.path.System.RecentTasks;
 import static com.hchen.appretention.data.path.System.Task;
 
 import android.content.Context;
-import android.os.DropBoxManager;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -101,13 +93,17 @@ public class AndroidU extends BaseHC {
          * ProcessList$ImperceptibleKillRunner 类内部的私有进程 kill 方法。
          *
          * 调用了 ProcessList$ImperceptibleKillRunner 方法 handleDeviceIdle、handleUidStateChanged
+         *
+         * Changed: 多余的 Hook
          * */
-        hookMethod(ProcessList$ImperceptibleKillRunner,
-            killProcessLocked,
-            int.class, int.class, long.class, String.class, int.class,
-            DropBoxManager.class, boolean.class,
-            returnResult(true)
-        );
+        /*
+         * hookMethod(ProcessList$ImperceptibleKillRunner,
+         *    killProcessLocked,
+         *    int.class, int.class, long.class, String.class, int.class,
+         *    DropBoxManager.class, boolean.class,
+         *    returnResult(true)
+         * );
+         * */
 
         /*
          * Warning: test hook!!
@@ -190,6 +186,8 @@ public class AndroidU extends BaseHC {
 
         /*
          * 使 mMemFactorOverride 初始化为 0。
+         *
+         * 虽然 setMemFactorOverrideLocked 可能会改变其参数值，但几乎不会被触发。
          * */
         hookConstructor(AppProfiler,
             ActivityManagerService, Looper.class, LowMemDetector,
@@ -204,17 +202,20 @@ public class AndroidU extends BaseHC {
         /*
          * 保持 mMemFactorOverride 为 0；
          * 即可使 memFactor 保持为 0。
+         *
+         * Changed: 多余的 Hook
          * */
-        hookMethod(AppProfiler,
-            updateLowMemStateLSP,
-            int.class, int.class, int.class, long.class,
-            new IHook() {
-                @Override
-                public void before() {
-                    setThisField(mMemFactorOverride, 0);
-                }
-            }.shouldObserveCall(false)
-        );
+        /* hookMethod(AppProfiler,
+         *    updateLowMemStateLSP,
+         *    int.class, int.class, int.class, long.class,
+         *    new IHook() {
+         *       @Override
+         *       public void before() {
+         *           setThisField(mMemFactorOverride, 0);
+         *       }
+         *    }.shouldObserveCall(false)
+         * );
+         * */
 
         // 废弃的
         /*
@@ -270,7 +271,7 @@ public class AndroidU extends BaseHC {
                 @Override
                 public void before() {
                     setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
-                    setArgs(2, 0L);
+                    // setArgs(2, 0L); // 不保护空进程
                 }
             }.shouldObserveCall(false)
         );
@@ -306,7 +307,6 @@ public class AndroidU extends BaseHC {
                 }
             }.shouldObserveCall(false)
         );
-        // DONE
 
         // ----------- ActivityManagerConstants -------------
         /*
@@ -318,13 +318,15 @@ public class AndroidU extends BaseHC {
                 @Override
                 public void after() {
                     setThisField(CUR_MAX_CACHED_PROCESSES, 6144); // 最大缓存进程数
-                    setThisField(CUR_MAX_EMPTY_PROCESSES, (6144 / 6)); // 最大空进程数
-                    setThisField(CUR_TRIM_CACHED_PROCESSES, -1); // 修剪缓存进程数 (别问为啥是 -1
-                    setThisField(CUR_TRIM_EMPTY_PROCESSES, Integer.MAX_VALUE); // 修剪空进程数 (别问为啥是又是 max 了
+                    // setThisField(CUR_MAX_EMPTY_PROCESSES, (6144 / 6)); // 最大空进程数。Changed: 不要更改空进程限制
+                    // setThisField(CUR_TRIM_CACHED_PROCESSES, -1); // 修剪缓存进程数 (别问为啥是 -1。Changed: 不需要修改
+                    // setThisField(CUR_TRIM_EMPTY_PROCESSES, Integer.MAX_VALUE); // 修剪空进程数 (别问为啥是又是 max 了。Changed: 不要更改空进程限制
+                    // setThisField(MAX_CACHED_PROCESSES, Integer.MAX_VALUE); // 最大缓存进程数量。Changed: 没用的修改
                     setThisField(MAX_PHANTOM_PROCESSES, Integer.MAX_VALUE); // 最大虚幻进程数量
-                    setThisField(MAX_CACHED_PROCESSES, Integer.MAX_VALUE); // 最大缓存进程数量
-                    setThisField(USE_MODERN_TRIM, true); // 使用现代 trim
                     setThisField(mKillBgRestrictedAndCachedIdle, false); // 禁止 kill 后台受限和缓存空闲的应用
+
+                    if (existsField(mClass, USE_MODERN_TRIM))
+                        setThisField(USE_MODERN_TRIM, true); // 使用现代 trim。Note: AndroidV 删除
                 }
             })
 
@@ -332,7 +334,7 @@ public class AndroidU extends BaseHC {
             .method(updateKillBgRestrictedCachedIdle)
             .doNothing()
 
-            .method(updateUseModernTrim)
+            .methodIfExist(updateUseModernTrim) // Note: AndroidV 删除
             .doNothing()
 
             .method(updateProactiveKillsEnabled)
@@ -352,6 +354,7 @@ public class AndroidU extends BaseHC {
          * 禁止主动杀戮。
          * */
         setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
+        // DONE
     }
 
     @Override

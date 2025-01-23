@@ -30,10 +30,8 @@ import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
 import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
 import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
-import static com.hchen.appretention.data.method.Hyper.getPolicy;
 import static com.hchen.appretention.data.method.Hyper.handleAutoLockOff;
 import static com.hchen.appretention.data.method.Hyper.handleKillAll;
-import static com.hchen.appretention.data.method.Hyper.handleKillAny;
 import static com.hchen.appretention.data.method.Hyper.handleKillApp;
 import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
 import static com.hchen.appretention.data.method.Hyper.handleThermalKillProc;
@@ -70,7 +68,6 @@ import static com.hchen.appretention.data.path.Hyper.ProcessConfig;
 import static com.hchen.appretention.data.path.Hyper.ProcessKillerIdler;
 import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
-import static com.hchen.appretention.data.path.Hyper.ProcessSceneCleaner;
 import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
 import static com.hchen.appretention.data.path.Hyper.SystemServerImpl;
@@ -260,7 +257,7 @@ public class HyperV1 extends BaseHC {
             .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
         );
 
-        chain(ProcessSceneCleaner,
+        // chain(ProcessSceneCleaner,
             /*
              * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
              * REASON_FORCE_CLEAN (强力清理 > 负一屏)
@@ -286,18 +283,22 @@ public class HyperV1 extends BaseHC {
              * REASON_LOCK_SCREEN_CLEAN (锁屏清理 > 安全中心)
              * REASON_GARBAGE_CLEAN (垃圾清理 > 安全中心)
              * REASON_USER_DEFINED
+             *
+             * Changed: 多余的 Hook
              * */
-            method(handleKillAny, ProcessConfig)
-                .hook(new IHook() {
-                    @Override
-                    public void before() {
-                        Object config = getArgs(0);
-                        int mPolicy = (int) callMethod(config, getPolicy);
-                        if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_GARBAGE_CLEAN))
-                            returnNull();
-                    }
-                })
-        );
+            /*
+             * method(handleKillAny, ProcessConfig)
+             *    .hook(new IHook() {
+             *        @Override
+             *        public void before() {
+             *            Object config = getArgs(0);
+             *            int mPolicy = (int) callMethod(config, getPolicy);
+             *            if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_GARBAGE_CLEAN))
+             *                returnNull();
+             *        }
+             *     })
+             */
+        // );
 
         /*
          * 禁止压缩进程。

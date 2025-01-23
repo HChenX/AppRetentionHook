@@ -173,7 +173,7 @@ public final class CacheCompaction extends BaseHC {
 
                 @Override
                 public void after() {
-                    if (existsField(thisObject().getClass(), mUseBootCompact))
+                    if (existsField(mClass, mUseBootCompact))
                         setThisField(mUseBootCompact, true);
                     setThisField(mUseCompaction, true);
 
@@ -184,7 +184,7 @@ public final class CacheCompaction extends BaseHC {
                         if (!cachedAppOptimizerThread.isAlive()) {
                             cachedAppOptimizerThread.start();
                         }
-                        compactionHandler = newInstance(CachedAppOptimizer$MemCompactionHandler, (Object) thisObject(), null);
+                        compactionHandler = newInstance(CachedAppOptimizer$MemCompactionHandler, thisObject(), null);
                         setThisField(mCompactionHandler, compactionHandler);
                         callStaticMethod(Process.class, setThreadGroupAndCpuset, cachedAppOptimizerThread.getThreadId(), 2);
                     }
@@ -197,7 +197,7 @@ public final class CacheCompaction extends BaseHC {
             .hook(new IHook() {
                 @Override
                 public void after() {
-                    if (existsField(thisObject().getClass(), mUseBootCompact))
+                    if (existsField(mClass, mUseBootCompact))
                         setThisField(mUseBootCompact, true);
                     setThisField(mUseCompaction, true);
                 }
@@ -251,12 +251,7 @@ public final class CacheCompaction extends BaseHC {
             .doNothing().shouldObserveCall(false)
 
             .methodIfExist(setAppStartingMode, boolean.class)
-            .hook(new IHook() {
-                @Override
-                public void before() {
-                    setArgs(0, false);
-                }
-            }).shouldObserveCall(false)
+            .doNothing().shouldObserveCall(false)
         );
     }
 }

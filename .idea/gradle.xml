@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/HookTool" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/app/processor" />
+            <option value="$PROJECT_DIR$/k80p" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

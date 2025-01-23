@@ -39,7 +39,7 @@ import java.util.Arrays;
  */
 public final class UpdateOomLevels extends BaseHC {
     private static final int OOM_MIN_FREE_DISCOUNT = 4;
-    private Object processListInstance = null;
+    private Object mProcessListInstance = null;
 
     @Override
     public void init() {
@@ -54,7 +54,7 @@ public final class UpdateOomLevels extends BaseHC {
             new IHook() {
                 @Override
                 public void after() {
-                    processListInstance = thisObject();
+                    mProcessListInstance = thisObject();
                 }
             }
         );
@@ -73,7 +73,7 @@ public final class UpdateOomLevels extends BaseHC {
                     int[] mOomMinFree = (int[]) getThisField(System.mOomMinFree);
                     if (mOomMinFree == null) return;
                     int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                    setThisField(com.hchen.appretention.data.field.System.mOomMinFree, mOomMinFreeArray);
+                    setThisField(System.mOomMinFree, mOomMinFreeArray);
                     setThisAdditionalInstanceField(isChangedOomMinFree, true);
                 }
             }
@@ -97,7 +97,7 @@ public final class UpdateOomLevels extends BaseHC {
                         int[] mOomMinFree = (int[]) getThisField(System.mOomMinFree);
                         if (mOomMinFree == null) return;
                         int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                        setThisField(com.hchen.appretention.data.field.System.mOomMinFree, mOomMinFreeArray);
+                        setThisField(System.mOomMinFree, mOomMinFreeArray);
                         setThisAdditionalInstanceField(isChangedOomMinFree, true);
                     }
                 }
@@ -117,11 +117,11 @@ public final class UpdateOomLevels extends BaseHC {
                     ByteBuffer bufCopy = buffer.duplicate();
                     bufCopy.rewind();
                     if (bufCopy.getInt() == 0) {
-                        if (processListInstance == null)
+                        if (mProcessListInstance == null)
                             return;
 
                         // false 说明 oomMinFree 未被更改。
-                        if (Boolean.FALSE.equals(getAdditionalInstanceField(processListInstance, isChangedOomMinFree))) {
+                        if (Boolean.FALSE.equals(getAdditionalInstanceField(mProcessListInstance, isChangedOomMinFree))) {
                             setOomMinFreeBuf(bufCopy);
                             setArgs(0, buffer);
                         }
@@ -134,14 +134,14 @@ public final class UpdateOomLevels extends BaseHC {
                 private void setOomMinFreeBuf(ByteBuffer bufCopy) {
                     bufCopy.rewind();
                     bufCopy.putInt(0);
-                    int[] mOomAdj = (int[]) getField(processListInstance, System.mOomAdj);
-                    int[] mOomMinFree = (int[]) getField(processListInstance, System.mOomMinFree);
+                    int[] mOomAdj = (int[]) getField(mProcessListInstance, System.mOomAdj);
+                    int[] mOomMinFree = (int[]) getField(mProcessListInstance, System.mOomMinFree);
                     if (mOomMinFree == null || mOomAdj == null)
                         return;
 
                     int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                    setField(processListInstance, System.mOomMinFree, mOomMinFreeArray);
-                    setAdditionalInstanceField(processListInstance, isChangedOomMinFree, true);
+                    setField(mProcessListInstance, System.mOomMinFree, mOomMinFreeArray);
+                    setAdditionalInstanceField(mProcessListInstance, isChangedOomMinFree, true);
                     for (int i = 0; i < mOomAdj.length; i++) {
                         bufCopy.putInt(((mOomMinFreeArray[i] * 1024) / 4096));
                         bufCopy.putInt(mOomAdj[i]);

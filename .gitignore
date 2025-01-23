@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+/k80p
+/k80p/.*

@@ -19,3 +19,4 @@ rootProject.name = "AppRetentionHook"
 include ':app'
 include ':HookTool'
 include ':app:processor'
+include ':k80p' // 报错可删

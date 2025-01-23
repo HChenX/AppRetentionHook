@@ -38,7 +38,7 @@ import java.lang.reflect.Method;
  * @author 焕晨HChen
  */
 @HookEntrance(targetPackage = "android")
-public class CrashEvent extends BaseHC {
+public class CrashEventListener extends BaseHC {
     @Override
     public void init() {
         Class<?> appError = findClass(AppErrors).get();
