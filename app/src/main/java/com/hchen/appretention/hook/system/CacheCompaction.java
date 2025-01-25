@@ -92,8 +92,6 @@ public final class CacheCompaction extends BaseHC {
                     private static final Object APP = getStaticField(CachedAppOptimizer$CompactSource, System.APP);
                     private Object state;
                     private Object optRecord;
-                    private Handler compactionHandler;
-                    private ArrayList pendingCompactionProcesses;
 
                     @Override
                     public void before() {
@@ -101,8 +99,8 @@ public final class CacheCompaction extends BaseHC {
                         if (app == null) return;
                         state = getField(app, mState);
                         optRecord = getField(app, mOptRecord);
-                        compactionHandler = (Handler) getThisField(mCompactionHandler);
-                        pendingCompactionProcesses = (ArrayList) getThisField(mPendingCompactionProcesses);
+                        Handler compactionHandler = (Handler) getThisField(mCompactionHandler);
+                        ArrayList<Object> pendingCompactionProcesses = (ArrayList<Object>) getThisField(mPendingCompactionProcesses);
                         if (getCurAdj() > PrecessAdjInfo.PERCEPTIBLE_APP_ADJ && getCurAdj() < PrecessAdjInfo.PREVIOUS_APP_ADJ) {
                             setReqCompactSource(SHEll);
                             setReqCompactProfile(ANON);

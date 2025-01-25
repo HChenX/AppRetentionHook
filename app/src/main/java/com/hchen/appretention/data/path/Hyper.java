@@ -53,6 +53,7 @@ public class Hyper {
     public static final String PressureStateSettings = "android.os.spc.PressureStateSettings";
     public static final String ProcessConfig = "miui.process.ProcessConfig";
     public static final String PreloadAppControllerImpl = "com.android.server.am.PreloadAppControllerImpl";
+    public static final String SlowStartupSceneMemClean = "com.android.server.am.SlowStartupSceneMemClean";
     public static final String LifecycleConfig = "miui.process.LifecycleConfig";
     public static final String PreloadLifecycle = "com.android.server.wm.PreloadLifecycle";
     public static final String CameraBooster = "com.miui.cameraopt.booster.CameraBooster";

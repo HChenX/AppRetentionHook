@@ -66,6 +66,7 @@ public class Hyper {
     public static final String handleLimitCpuException = "handleLimitCpuException";
     public static final String onStartJob = "onStartJob";
     public static final String preloadAppEnqueue = "preloadAppEnqueue";
+    public static final String isSSModelEnable = "isSSModelEnable";
     public static final String startPreloadApp = "startPreloadApp";
     public static final String newInstance = "newInstance";
     public static final String reclaimMemoryForCamera = "reclaimMemoryForCamera";

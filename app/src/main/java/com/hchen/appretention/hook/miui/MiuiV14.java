@@ -20,13 +20,11 @@ package com.hchen.appretention.hook.miui;
 
 import static com.hchen.appretention.data.field.Hyper.IS_ENABLE_RECLAIM;
 import static com.hchen.appretention.data.field.Hyper.PROCESS_CLEANER_ENABLED;
-import static com.hchen.appretention.data.field.Hyper.PROCESS_TRACKER_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.PROC_CPU_EXCEPTION_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.RECLAIM_IF_NEEDED;
 import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
 import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
 import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
-import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
 import static com.hchen.appretention.data.method.Hyper.handleAutoLockOff;
 import static com.hchen.appretention.data.method.Hyper.handleKillAll;
@@ -49,7 +47,6 @@ import static com.hchen.appretention.data.path.Hyper.Build;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.Hyper.LifecycleConfig;
 import static com.hchen.appretention.data.path.Hyper.MiuiMemReclaimer;
-import static com.hchen.appretention.data.path.Hyper.OomAdjusterImpl;
 import static com.hchen.appretention.data.path.Hyper.PreloadAppControllerImpl;
 import static com.hchen.appretention.data.path.Hyper.PreloadLifecycle;
 import static com.hchen.appretention.data.path.Hyper.PressureStateSettings;
@@ -64,6 +61,7 @@ import android.app.job.JobParameters;
 
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
+import com.hchen.hooktool.tool.additional.SystemPropTool;
 import com.hchen.processor.HookEntrance;
 
 import java.util.List;
@@ -80,9 +78,11 @@ public class MiuiV14 extends BaseHC {
         /*
          * 关闭 spc。
          * */
+        SystemPropTool.setProp("persist.sys.spc.enabled", "false");
+        SystemPropTool.setProp("persist.sys.spc.cpuexception.enable", "false");
         setStaticField(PressureStateSettings, PROCESS_CLEANER_ENABLED, false);
         setStaticField(PressureStateSettings, PROC_CPU_EXCEPTION_ENABLE, false);
-        setStaticField(PressureStateSettings, PROCESS_TRACKER_ENABLE, false);
+        // setStaticField(PressureStateSettings, PROCESS_TRACKER_ENABLE, false); // Miui14 不包含
 
         /*
          * 禁止为了游戏回收内存。
@@ -113,10 +113,6 @@ public class MiuiV14 extends BaseHC {
             returnResult(3)
         );
 
-        // 后台限制。
-        if (existsMethod(OomAdjusterImpl, getBackgroundAppCount))
-            hookMethod(OomAdjusterImpl, getBackgroundAppCount, returnResult(100));
-
         /*
          * 禁止系统压力控制器清理内存。
          * */
@@ -137,7 +133,7 @@ public class MiuiV14 extends BaseHC {
             /*
              * 无奖竞猜。
              * */
-            // Changed: Miui14 Don't Have.
+            // Changed: Miui14 不包含
             // .method(foregroundActivityChangedLocked, ControllerActivityInfo)
             // .doNothing().shouldObserveCall(false)
         );
@@ -171,49 +167,6 @@ public class MiuiV14 extends BaseHC {
                  * */
                 .method(handleAutoLockOff).doNothing()
         );
-
-        // chain(ProcessSceneCleaner,
-        /*
-         * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
-         * REASON_FORCE_CLEAN (强力清理 > 负一屏)
-         * REASON_GAME_CLEAN (游戏清理 > 安全中心)
-         * REASON_OPTIMIZATION_CLEAN (优化清理 > 安全中心)
-         *
-         * Doc: https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1607
-         *
-         * method(handleKillAll, ProcessConfig)
-         *   .hook(new IHook() {
-         *       @Override
-         *       public void before() {
-         *          Object config = getArgs(0);
-         *          int mPolicy = callMethod(config, getPolicy);
-         *          if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN)
-         *               && !ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_ONE_KEY_CLEAN))
-         *              returnNull();
-         *     }
-         * })
-         * */
-
-        /*
-         * REASON_LOCK_SCREEN_CLEAN (锁屏清理 > 安全中心)
-         * REASON_GARBAGE_CLEAN (垃圾清理 > 安全中心)
-         * REASON_USER_DEFINED
-         *
-         * Changed: 多余的 Hook
-         * */
-        /*
-         * method(handleKillAny, ProcessConfig)
-         *    .hook(new IHook() {
-         *        @Override
-         *        public void before() {
-         *            Object config = getArgs(0);
-         *            int mPolicy = (int) callMethod(config, getPolicy);
-         *            if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_GARBAGE_CLEAN))
-         *                returnNull();
-         *        }
-         *     })
-         */
-        // );
 
         /*
          * 禁止压缩进程。

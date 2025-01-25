@@ -20,7 +20,6 @@ package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.field.System.CUR_MAX_CACHED_PROCESSES;
 import static com.hchen.appretention.data.field.System.MAX_PHANTOM_PROCESSES;
-import static com.hchen.appretention.data.field.System.PROACTIVE_KILLS_ENABLED;
 import static com.hchen.appretention.data.field.System.USE_MODERN_TRIM;
 import static com.hchen.appretention.data.field.System.mGlobalMaxNumTasks;
 import static com.hchen.appretention.data.field.System.mKillBgRestrictedAndCachedIdle;
@@ -38,7 +37,6 @@ import static com.hchen.appretention.data.method.System.updateKillBgRestrictedCa
 import static com.hchen.appretention.data.method.System.updateMaxCachedProcesses;
 import static com.hchen.appretention.data.method.System.updateMaxPhantomProcesses;
 import static com.hchen.appretention.data.method.System.updatePerfConfigConstants;
-import static com.hchen.appretention.data.method.System.updateProactiveKillsEnabled;
 import static com.hchen.appretention.data.method.System.updateProcessCpuStatesLocked;
 import static com.hchen.appretention.data.method.System.updateUseModernTrim;
 import static com.hchen.appretention.data.path.System.ActiveUids;
@@ -83,49 +81,6 @@ public class AndroidT extends BaseHC {
             killProcessesWhenImperceptible,
             int[].class, String.class, int.class,
             doNothing());
-
-        /*
-         * ProcessList$ImperceptibleKillRunner 类内部的私有进程 kill 方法。
-         *
-         * 调用了 ProcessList$ImperceptibleKillRunner 方法 handleDeviceIdle、handleUidStateChanged
-         *
-         * Changed: 多余的 Hook
-         * */
-        /*
-         * hookMethod(ProcessList$ImperceptibleKillRunner,
-         *    killProcessLocked,
-         *    int.class, int.class, long.class, String.class, int.class,
-         *    DropBoxManager.class, boolean.class,
-         *    returnResult(true)
-         * );
-         * */
-
-        /*
-         * Warning: test hook!!
-         *
-         * 获取 mOomAdj、mOomMinFree 具体值。
-         * K50 12G
-         * oom adj: [0, 100, 200, 250, 900, 950], oom min free: [73728, 92160, 110592, 129024, 221184, 322560]
-         * -900 75497472 -800 75497472 -700 75497472 0 75497472 100 94371840 200 113246208
-         * 225 132120576 250 132120576 300 226492416 400 226492416 500 226492416 600 226492416 700 226492416
-         * 800 226492416 900 226492416 999 330301440
-         * */
-        /*
-         * hook(ProcessList,
-         * getMemLevel,
-         * int.class,
-         * new IHook() {
-         *    @Override
-         *    public void after() {
-         *      int[] mOomAdj = getThisField("mOomAdj");
-         *      int[] mOomMinFree = getThisField("mOomMinFree");
-         *      logI(TAG, "oom adj: " + Arrays.toString(mOomAdj)
-         *           + " oom min free: " + Arrays.toString(mOomMinFree));
-         *      logI(TAG, "memlevel: " + getResult());
-         *     }
-         *   }
-         * );
-         * */
 
         // ----------------- PhantomProcessList ---------------
         /*
@@ -194,52 +149,6 @@ public class AndroidT extends BaseHC {
             }
         );
 
-        /*
-         * 保持 mMemFactorOverride 为 0；
-         * 即可使 memFactor 保持为 0。
-         *
-         * Changed: 多余的 Hook
-         * */
-        /* hookMethod(AppProfiler,
-         *    updateLowMemStateLSP,
-         *    int.class, int.class, int.class, long.class,
-         *    new IHook() {
-         *       @Override
-         *       public void before() {
-         *           setThisField(mMemFactorOverride, 0);
-         *       }
-         *    }.shouldObserveCall(false)
-         * );
-         * */
-
-        // 废弃的
-        /*
-         * 返回指定内存因子 0，代表内存正常。
-         * 0 -> 内存正常。
-         * 1 -> 内存偏低。
-         * 2 -> 内存低。
-         * 3 -> 内存极低。
-         * 内存因子决定系统是否会对应用进行内存修剪。
-         *
-         * 被调用 AppProfiler 方法 updateLowMemStateLSP
-         * */
-        /*
-         *hook(LowMemDetector,
-         *   getMemFactor,
-         *   returnResult(0).shouldObserveCall(false)
-         *);
-         * */
-
-        /*
-         * 为不支持 LowMemDetector 功能的设备伪装支持。
-         * */
-        /*
-         *hook(LowMemDetector,
-         *   isAvailable,
-         *   returnResult(true).shouldObserveCall(false)
-         *);
-         * */
-
         // ------------- OomAdjuster -------------
         /*
          * 是否允许 kill 过量的 cached/empty 进程。
@@ -260,7 +169,7 @@ public class AndroidT extends BaseHC {
         hookMethod(OomAdjuster,
             updateAndTrimProcessLSP,
             long.class, long.class, long.class,
-            ActiveUids, int.class,
+            ActiveUids, // int.class, AndroidT 不包含
             new IHook() {
                 @Override
                 public void before() {
@@ -330,8 +239,8 @@ public class AndroidT extends BaseHC {
             .methodIfExist(updateUseModernTrim) // Note: AndroidV 删除
             .doNothing()
 
-            .method(updateProactiveKillsEnabled)
-            .doNothing()
+            /*.method(updateProactiveKillsEnabled)
+            .doNothing()*/ // AndroidT 不包含
 
             .method(updateMaxCachedProcesses)
             .doNothing()
@@ -346,6 +255,7 @@ public class AndroidT extends BaseHC {
         /*
          * 禁止主动杀戮。
          * */
-        setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
+        // AndroidT 不包含
+        // setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
     }
 }
