@@ -93,37 +93,6 @@ public class HyperV2 extends BaseHC {
     @Override
     public void init() {
         /*
-         * 禁止系统压力控制器清理内存。
-         * */
-        setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
-        chain(SystemPressureController,
-            /*
-             * 禁止随屏幕状态启动压力监测器。
-             * */
-            method(updateScreenState, boolean.class)
-                .doNothing()
-
-                /*
-                 * 无奖竞猜。
-                 * */
-                .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-                .doNothing().shouldObserveCall(false)
-        );
-
-        /*
-         * 禁止启动内存压力监测器。
-         * */
-        hookMethod(SystemPressureControllerNative,
-            nStartPressureMonitor,
-            doNothing());
-
-        CameraOpt.doHook();
-    }
-
-    @Override
-    public void copy() {
-        // COPY FROM: HyperV1
-        /*
          * 关闭 spc。
          * */
         setStaticField(PressureStateSettings, PROCESS_CLEANER_ENABLED, false);
@@ -170,7 +139,6 @@ public class HyperV2 extends BaseHC {
          *
          * 新机型 HyperOS1 已删除 PeriodicCleanerService。
          * */
-        // Miui 14 不包含
         if (existsMethod(SystemServerImpl, addMiuiPeriodicCleanerService, ActivityTaskManagerService)) {
             hookMethod(SystemServerImpl,
                 addMiuiPeriodicCleanerService,
@@ -182,26 +150,22 @@ public class HyperV2 extends BaseHC {
         /*
          * 禁用 MemoryFreezeStubImpl。
          * */
-        if (existsClass(MemoryFreezeStubImpl)) // Miui 14 不包含
-            hookMethod(MemoryFreezeStubImpl,
-                isEnable,
-                returnResult(false).shouldObserveCall(false)
-            );
+        hookMethod(MemoryFreezeStubImpl,
+            isEnable,
+            returnResult(false).shouldObserveCall(false)
+        );
 
         /*
          * 禁用 MemoryStandardProcessControl。
          * 它由一个后台 job (MemoryControlServiceImpl) 启动。
          *  */
-        if (existsClass(MemoryStandardProcessControl)) // Miui 14 不包含
-            chain(MemoryStandardProcessControl, method(isEnable)
-                .returnResult(false)
+        chain(MemoryStandardProcessControl, method(isEnable)
+            .returnResult(false)
 
-                .method(init, Context.class, ActivityManagerService)
-                .returnResult(false)
-            );
-        // DONE
+            .method(init, Context.class, ActivityManagerService)
+            .returnResult(false)
+        );
 
-        // COPY FROM: HyperV1
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -231,8 +195,7 @@ public class HyperV2 extends BaseHC {
                  * */
                 .method(handleAutoLockOff).doNothing()
         );
-        // DONE
-        // COPY FROM: HyperV1
+
         /*
          * 是 MiuiMemoryService 几个核心方法。
          * */
@@ -253,8 +216,7 @@ public class HyperV2 extends BaseHC {
 
             .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
         );
-        // DONE
-        // COPY FROM: HyperV1
+
         // chain(ProcessSceneCleaner,
         /*
          * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
@@ -313,7 +275,7 @@ public class HyperV2 extends BaseHC {
          *
          * 新机型 HyperOS1 已删除 GameMemoryCleanerDeprecated。
          * */
-        if (existsClass(GameMemoryCleanerDeprecated)) { // Miui 14 不包含
+        if (existsClass(GameMemoryCleanerDeprecated)) {
             hookMethod(GameMemoryCleanerDeprecated,
                 killBackgroundApps,
                 doNothing()
@@ -352,6 +314,34 @@ public class HyperV2 extends BaseHC {
                 }
             }).shouldObserveCall(false)
         );
-        // DONE
+
+        // Changed: Support HyperV2
+        /*
+         * 禁止系统压力控制器清理内存。
+         * */
+        setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
+        chain(SystemPressureController,
+            /*
+             * 禁止随屏幕状态启动压力监测器。
+             * */
+            method(updateScreenState, boolean.class)
+                .doNothing()
+
+                /*
+                 * 无奖竞猜。
+                 * */
+                .method(foregroundActivityChangedLocked, ControllerActivityInfo)
+                .doNothing().shouldObserveCall(false)
+        );
+
+        // Changed: Support HyperV2
+        /*
+         * 禁止启动内存压力监测器。
+         * */
+        hookMethod(SystemPressureControllerNative,
+            nStartPressureMonitor,
+            doNothing());
+
+        CameraOpt.doHook();
     }
 }

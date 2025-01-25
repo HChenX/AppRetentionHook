@@ -75,7 +75,6 @@ public class AndroidU extends BaseHC {
         new UpdateOomLevels().onLoadPackage();
         new CacheCompaction().onLoadPackage();
 
-        // COPY TO: [AndroidV, AndroidT]
         // ----------- ProcessList ----------------------
         /*
          * 将不可感知的进程添加进列表 mWorkItems (ProcessList$ImperceptibleKillRunner)
@@ -256,9 +255,7 @@ public class AndroidU extends BaseHC {
             long.class,
             returnResult(false).shouldObserveCall(false)
         );
-        // DONE
 
-        // COPY TO: [AndroidT]
         /*
          * 更新和修剪进程。
          * 设置此方法第三个参数为 0L，是为了使以下代码返回假：
@@ -276,9 +273,7 @@ public class AndroidU extends BaseHC {
                 }
             }.shouldObserveCall(false)
         );
-        // DONE
 
-        // COPY TO: [AndroidV, AndroidT]
         // ------------ RecentTasks ---------------
         /*
          * 修剪最近不活跃的任务卡片。
@@ -355,12 +350,6 @@ public class AndroidU extends BaseHC {
         /*
          * 禁止主动杀戮。
          * */
-        if (existsField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED))
-            setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
-        // DONE
-    }
-
-    @Override
-    public void copy() {
+        setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
     }
 }

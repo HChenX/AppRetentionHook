@@ -74,28 +74,6 @@ public class AndroidV extends BaseHC {
         new UpdateOomLevels().onLoadPackage();
         new CacheCompaction().onLoadPackage();
 
-        /*
-         * 更新和修剪进程。
-         * 设置此方法第三个参数为 0L，是为了使以下代码返回假：
-         * app.getLastActivityTime() < oldTime
-         * */
-        hookMethod(OomAdjuster,
-            updateAndTrimProcessLSP,
-            long.class, long.class, long.class,
-            ActiveUids, int.class, boolean.class /* AndroidV 新增 */,
-            new IHook() {
-                @Override
-                public void before() {
-                    setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
-                    // setArgs(2, 0L); // Changed: 不要保护空进程
-                }
-            }.shouldObserveCall(false)
-        );
-    }
-
-    @Override
-    public void copy() {
-        // COPY FROM: AndroidU
         // ----------- ProcessList ----------------------
         /*
          * 将不可感知的进程添加进列表 mWorkItems (ProcessList$ImperceptibleKillRunner)
@@ -276,9 +254,7 @@ public class AndroidV extends BaseHC {
             long.class,
             returnResult(false).shouldObserveCall(false)
         );
-        // DONE
 
-        // COPY FROM: AndroidU
         // ------------ RecentTasks ---------------
         /*
          * 修剪最近不活跃的任务卡片。
@@ -355,8 +331,25 @@ public class AndroidV extends BaseHC {
         /*
          * 禁止主动杀戮。
          * */
-        if (existsField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED))
-            setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
-        // DONE
+        setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
+
+        // Changed: Support AndroidV
+        /*
+         * 更新和修剪进程。
+         * 设置此方法第三个参数为 0L，是为了使以下代码返回假：
+         * app.getLastActivityTime() < oldTime
+         * */
+        hookMethod(OomAdjuster,
+            updateAndTrimProcessLSP,
+            long.class, long.class, long.class,
+            ActiveUids, int.class, boolean.class /* AndroidV 新增 */,
+            new IHook() {
+                @Override
+                public void before() {
+                    setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
+                    // setArgs(2, 0L); // Changed: 不要保护空进程
+                }
+            }.shouldObserveCall(false)
+        );
     }
 }

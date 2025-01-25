@@ -24,10 +24,8 @@ import static com.hchen.appretention.data.field.Hyper.PROCESS_TRACKER_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.PROC_CPU_EXCEPTION_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.RECLAIM_IF_NEEDED;
 import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
-import static com.hchen.appretention.data.method.Hyper.addMiuiPeriodicCleanerService;
 import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
 import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
-import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
 import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
 import static com.hchen.appretention.data.method.Hyper.handleAutoLockOff;
@@ -35,10 +33,7 @@ import static com.hchen.appretention.data.method.Hyper.handleKillAll;
 import static com.hchen.appretention.data.method.Hyper.handleKillApp;
 import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
 import static com.hchen.appretention.data.method.Hyper.handleThermalKillProc;
-import static com.hchen.appretention.data.method.Hyper.init;
-import static com.hchen.appretention.data.method.Hyper.isEnable;
 import static com.hchen.appretention.data.method.Hyper.isMiuiLiteVersion;
-import static com.hchen.appretention.data.method.Hyper.killBackgroundApps;
 import static com.hchen.appretention.data.method.Hyper.killPackage;
 import static com.hchen.appretention.data.method.Hyper.killProcess;
 import static com.hchen.appretention.data.method.Hyper.killProcessByMinAdj;
@@ -49,15 +44,10 @@ import static com.hchen.appretention.data.method.Hyper.preloadAppEnqueue;
 import static com.hchen.appretention.data.method.Hyper.reclaimBackground;
 import static com.hchen.appretention.data.method.Hyper.startPreloadApp;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
-import static com.hchen.appretention.data.path.Hyper.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.Hyper.AppStateManager$AppState$RunningProcess;
 import static com.hchen.appretention.data.path.Hyper.Build;
-import static com.hchen.appretention.data.path.Hyper.ControllerActivityInfo;
-import static com.hchen.appretention.data.path.Hyper.GameMemoryCleanerDeprecated;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.Hyper.LifecycleConfig;
-import static com.hchen.appretention.data.path.Hyper.MemoryFreezeStubImpl;
-import static com.hchen.appretention.data.path.Hyper.MemoryStandardProcessControl;
 import static com.hchen.appretention.data.path.Hyper.MiuiMemReclaimer;
 import static com.hchen.appretention.data.path.Hyper.OomAdjusterImpl;
 import static com.hchen.appretention.data.path.Hyper.PreloadAppControllerImpl;
@@ -69,11 +59,8 @@ import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
 import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
-import static com.hchen.appretention.data.path.Hyper.SystemServerImpl;
-import static com.hchen.appretention.data.path.System.ActivityManagerService;
 
 import android.app.job.JobParameters;
-import android.content.Context;
 
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
@@ -90,26 +77,6 @@ import java.util.List;
 public class MiuiV14 extends BaseHC {
     @Override
     public void init() {
-        chain(ProcessMemoryCleaner, method(cleanUpMemory, List.class, long.class)
-            .returnResult(true)
-
-            .method(killPackage, AppStateManager$AppState$RunningProcess, int.class, String.class)
-            .returnResult(0L)
-
-            .method(killProcess, AppStateManager$AppState$RunningProcess, int.class, String.class)
-            .returnResult(0L)
-
-            .method(killProcessByMinAdj, int.class, String.class, List.class)
-            .doNothing()
-
-            .method(checkBackgroundAppException, String.class, int.class)
-            .returnResult(0)
-        );
-    }
-
-    @Override
-    public void copy() {
-        // COPY FROM: HyperV1
         /*
          * 关闭 spc。
          * */
@@ -151,45 +118,6 @@ public class MiuiV14 extends BaseHC {
             hookMethod(OomAdjusterImpl, getBackgroundAppCount, returnResult(100));
 
         /*
-         * 阻止定期清洁。
-         * 由于 PeriodicCleanerService 继承 SystemService 并由如下方法启动；
-         * 所以使此方法失效即可彻底禁用 PeriodicCleanerService。
-         *
-         * 新机型 HyperOS1 已删除 PeriodicCleanerService。
-         * */
-        // Miui 14 不包含
-        if (existsMethod(SystemServerImpl, addMiuiPeriodicCleanerService, ActivityTaskManagerService)) {
-            hookMethod(SystemServerImpl,
-                addMiuiPeriodicCleanerService,
-                ActivityTaskManagerService,
-                doNothing()
-            );
-        }
-
-        /*
-         * 禁用 MemoryFreezeStubImpl。
-         * */
-        if (existsClass(MemoryFreezeStubImpl)) // Miui 14 不包含
-            hookMethod(MemoryFreezeStubImpl,
-                isEnable,
-                returnResult(false).shouldObserveCall(false)
-            );
-
-        /*
-         * 禁用 MemoryStandardProcessControl。
-         * 它由一个后台 job (MemoryControlServiceImpl) 启动。
-         *  */
-        if (existsClass(MemoryStandardProcessControl)) // Miui 14 不包含
-            chain(MemoryStandardProcessControl, method(isEnable)
-                .returnResult(false)
-
-                .method(init, Context.class, ActivityManagerService)
-                .returnResult(false)
-            );
-        // DONE
-
-        // COPY FROM: HyperV1
-        /*
          * 禁止系统压力控制器清理内存。
          * */
         setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
@@ -206,15 +134,14 @@ public class MiuiV14 extends BaseHC {
                 .method(nStartPressureMonitor)
                 .doNothing()
 
-                /*
-                 * 无奖竞猜。
-                 * */
-                // Miui 14 不包含
-                .methodIfExist(foregroundActivityChangedLocked, ControllerActivityInfo)
-                .doNothing().shouldObserveCall(false)
+            /*
+             * 无奖竞猜。
+             * */
+            // Changed: Miui14 Don't Have.
+            // .method(foregroundActivityChangedLocked, ControllerActivityInfo)
+            // .doNothing().shouldObserveCall(false)
         );
-        // DONE
-        // COPY FROM: HyperV1
+
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -244,8 +171,7 @@ public class MiuiV14 extends BaseHC {
                  * */
                 .method(handleAutoLockOff).doNothing()
         );
-        // DONE
-        // COPY FROM: HyperV1
+
         // chain(ProcessSceneCleaner,
         /*
          * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
@@ -300,18 +226,6 @@ public class MiuiV14 extends BaseHC {
         );
 
         /*
-         * 管理游戏内存，可能已经弃用。
-         *
-         * 新机型 HyperOS1 已删除 GameMemoryCleanerDeprecated。
-         * */
-        if (existsClass(GameMemoryCleanerDeprecated)) { // Miui 14 不包含
-            hookMethod(GameMemoryCleanerDeprecated,
-                killBackgroundApps,
-                doNothing()
-            );
-        }
-
-        /*
          * 禁止 kill 长时间占 cpu 的应用。
          * */
         hookMethod(SmartCpuPolicyManager,
@@ -343,6 +257,43 @@ public class MiuiV14 extends BaseHC {
                 }
             }).shouldObserveCall(false)
         );
-        // DONE
+
+        /*
+         * 禁止系统压力控制器清理内存。
+         * */
+        setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
+        chain(SystemPressureController,
+            /*
+             * 禁止随屏幕状态启动压力监测器。
+             * */
+            method(updateScreenState, boolean.class)
+                .doNothing()
+
+                /*
+                 * 禁止启动内存压力监测器。
+                 * */
+                .method(nStartPressureMonitor)
+                .doNothing()
+        );
+
+        /*
+         * 是 MiuiMemoryService 几个核心方法。
+         * */
+        // Changed: Support Miui14
+        chain(ProcessMemoryCleaner, method(cleanUpMemory, List.class, long.class)
+            .returnResult(true)
+
+            .method(killPackage, AppStateManager$AppState$RunningProcess, int.class, String.class)
+            .returnResult(0L)
+
+            .method(killProcess, AppStateManager$AppState$RunningProcess, int.class, String.class)
+            .returnResult(0L)
+
+            .method(killProcessByMinAdj, int.class, String.class, List.class)
+            .doNothing()
+
+            .method(checkBackgroundAppException, String.class, int.class)
+            .returnResult(0)
+        );
     }
 }

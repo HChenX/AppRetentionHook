@@ -39,11 +39,13 @@ import java.util.stream.Collectors;
  * <br><br>请使用 4 空格缩进！
  *
  * @author 焕晨HChen
+ * @deprecated
  */
+@Deprecated
 public class ProcessTasks {
     // 使用示例：
-    // COPY TO: [AndroidU]
-    // DONE
+    // COPY TO: [AndroidU] ID: xx
+    // DONE ID: xx
     private static final String TAG = "[COPY!!]";
     private static ArrayList<String> mHookFilePathList = new ArrayList<>();
     private static final ArrayList<String> mHookFileNameList = new ArrayList<>();
@@ -58,12 +60,16 @@ public class ProcessTasks {
     private static final HashSet<String> mCopyToSet = new HashSet<>(); // 需要复制到的 copy 列表
 
     public static void main(String[] args) {
-        mHookFilePathList = Arrays.stream(strToArray(args[0])).filter(s -> FileHelper.exists(s) && s.contains("\\hook\\"))
+        printLogo();
+        System.exit(0);
+        return;
+
+        /*mHookFilePathList = Arrays.stream(strToArray(args[0])).filter(s -> FileHelper.exists(s) && s.contains("\\hook\\"))
             .collect(Collectors.toCollection(ArrayList::new));
 
         printLogo();
         processContent();
-        System.exit(0);
+        System.exit(0);*/
     }
 
     private static void processContent() {
@@ -108,46 +114,69 @@ public class ProcessTasks {
         return true;
     }
 
+    /**
+     * @noinspection DuplicateExpressions
+     */
     private static void readNeedCopyContent(String hookFileName, ArrayList<String> content) {
         ArrayList<String> copyContent = new ArrayList<>();
         ArrayList<String> targetFileList = new ArrayList<>();
+        HashSet<String> processedSet = new HashSet<>();
+        String targetId = "";
+        String doneId = "";
         boolean start = false;
-        for (String c : content) {
-            if (c.contains("// DONE") && start) {
-                start = false;
-                for (String target : targetFileList) {
-                    if (target.isEmpty()) continue;
+        boolean allDone = true;
 
-                    CopyMutual copyMutual = new CopyMutual(hookFileName, target);
-                    if (mCopyContentHashMap.get(copyMutual) == null) {
-                        mCopyContentHashMap.put(copyMutual, new ArrayList<>(copyContent));
-                        mCopyContentHashMap.get(copyMutual).add("        // DONE\n");
-                    } else {
-                        mCopyContentHashMap.get(copyMutual).addAll(new ArrayList<>(copyContent));
-                        mCopyContentHashMap.get(copyMutual).add("        // DONE");
+        do {
+            for (String c : content) {
+                if (c.contains("// DONE") && start) {
+                    // DONE TO: [AndroidU, AndroidV]
+                    doneId = c.substring(c.lastIndexOf(":") + 1);
+
+                    if (processedSet.contains(doneId)) {
+                        start = false;
+                        for (String target : targetFileList) {
+                            if (target.isEmpty()) continue;
+
+                            CopyMutual copyMutual = new CopyMutual(hookFileName, target);
+                            if (mCopyContentHashMap.get(copyMutual) == null) {
+                                mCopyContentHashMap.put(copyMutual, new ArrayList<>(copyContent));
+                                mCopyContentHashMap.get(copyMutual).add("        // DONE\n");
+                            } else {
+                                mCopyContentHashMap.get(copyMutual).addAll(new ArrayList<>(copyContent));
+                                mCopyContentHashMap.get(copyMutual).add("        // DONE");
+                            }
+                            mCopyToSet.add(target);
+                        }
+                        targetFileList.clear();
+                        copyContent.clear();
+                        continue;
                     }
-                    mCopyToSet.add(target);
                 }
-                targetFileList.clear();
-                copyContent.clear();
-                continue;
+
+                if (start) {
+                    if (c.contains("// COPY TO") || c.contains("// DONE")) continue;
+
+                    if (copyContent.isEmpty())
+                        copyContent.add("        // COPY FROM: " + hookFileName);
+                    copyContent.add(c);
+                }
+
+                if (c.contains("// COPY TO") && !start) {
+                    // COPY TO: [AndroidU, AndroidV]
+                    targetFileList.addAll(Arrays.asList(
+                        c.substring(c.indexOf("[") + 1, c.indexOf("]"))
+                            .replace(" ", "")
+                            .split(",")));
+                    targetId = c.substring(c.lastIndexOf(":") + 1);
+                    if (processedSet.contains(targetId)) continue;
+
+                    processedSet.add(targetId);
+                    start = true;
+                    allDone = false;
+                }
             }
 
-            if (start) {
-                if (copyContent.isEmpty())
-                    copyContent.add("        // COPY FROM: " + hookFileName);
-                copyContent.add(c);
-            }
-
-            if (c.contains("// COPY TO")) {
-                // COPY TO: [AndroidU, AndroidV]
-                targetFileList.addAll(Arrays.asList(
-                    c.substring(c.indexOf("[") + 1, c.indexOf("]"))
-                        .replace(" ", "")
-                        .split(",")));
-                start = true;
-            }
-        }
+        } while (!allDone);
     }
 
     private static void createProcessedContent() {
@@ -447,7 +476,7 @@ public class ProcessTasks {
         System.out.println(BLUE + "                                              \\|___|/      " + RESET);
         System.out.println(BLUE + "                                                            " + RESET);
         System.out.println(BLUE + "                                               Code By HChenX      " + RESET);
-        sleep(1000);
+        sleep(1500);
     }
 
     private static class FileHelper {

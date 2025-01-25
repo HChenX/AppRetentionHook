@@ -105,7 +105,6 @@ public class HyperV1 extends BaseHC {
          * setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
          * */
 
-        // COPY TO: [HyperV2, MiuiV14]
         /*
          * 关闭 spc。
          * */
@@ -153,7 +152,6 @@ public class HyperV1 extends BaseHC {
          *
          * 新机型 HyperOS1 已删除 PeriodicCleanerService。
          * */
-        // Miui 14 不包含
         if (existsMethod(SystemServerImpl, addMiuiPeriodicCleanerService, ActivityTaskManagerService)) {
             hookMethod(SystemServerImpl,
                 addMiuiPeriodicCleanerService,
@@ -165,26 +163,22 @@ public class HyperV1 extends BaseHC {
         /*
          * 禁用 MemoryFreezeStubImpl。
          * */
-        if (existsClass(MemoryFreezeStubImpl)) // Miui 14 不包含
-            hookMethod(MemoryFreezeStubImpl,
-                isEnable,
-                returnResult(false).shouldObserveCall(false)
-            );
+        hookMethod(MemoryFreezeStubImpl,
+            isEnable,
+            returnResult(false).shouldObserveCall(false)
+        );
 
         /*
          * 禁用 MemoryStandardProcessControl。
          * 它由一个后台 job (MemoryControlServiceImpl) 启动。
          *  */
-        if (existsClass(MemoryStandardProcessControl)) // Miui 14 不包含
-            chain(MemoryStandardProcessControl, method(isEnable)
-                .returnResult(false)
+        chain(MemoryStandardProcessControl, method(isEnable)
+            .returnResult(false)
 
-                .method(init, Context.class, ActivityManagerService)
-                .returnResult(false)
-            );
-        // DONE
+            .method(init, Context.class, ActivityManagerService)
+            .returnResult(false)
+        );
 
-        // COPY TO: [MiuiV14]
         /*
          * 禁止系统压力控制器清理内存。
          * */
@@ -205,13 +199,10 @@ public class HyperV1 extends BaseHC {
                 /*
                  * 无奖竞猜。
                  * */
-                // Miui 14 不包含
-                .methodIfExist(foregroundActivityChangedLocked, ControllerActivityInfo)
+                .method(foregroundActivityChangedLocked, ControllerActivityInfo)
                 .doNothing().shouldObserveCall(false)
         );
-        // DONE
 
-        // COPY TO: [HyperV2, MiuiV14]
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -241,9 +232,7 @@ public class HyperV1 extends BaseHC {
                  * */
                 .method(handleAutoLockOff).doNothing()
         );
-        // DONE
 
-        // COPY TO: [HyperV2]
         /*
          * 是 MiuiMemoryService 几个核心方法。
          * */
@@ -264,9 +253,7 @@ public class HyperV1 extends BaseHC {
 
             .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
         );
-        // DONE
 
-        // COPY TO: [HyperV2, MiuiV14]
         // chain(ProcessSceneCleaner,
         /*
          * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
@@ -311,6 +298,18 @@ public class HyperV1 extends BaseHC {
         // );
 
         /*
+         * 管理游戏内存，可能已经弃用。
+         *
+         * 新机型 HyperOS1 已删除 GameMemoryCleanerDeprecated。
+         * */
+        if (existsClass(GameMemoryCleanerDeprecated)) {
+            hookMethod(GameMemoryCleanerDeprecated,
+                killBackgroundApps,
+                doNothing()
+            );
+        }
+
+        /*
          * 禁止压缩进程。
          * */
         setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
@@ -319,18 +318,6 @@ public class HyperV1 extends BaseHC {
             String.class, int.class,
             doNothing()
         );
-
-        /*
-         * 管理游戏内存，可能已经弃用。
-         *
-         * 新机型 HyperOS1 已删除 GameMemoryCleanerDeprecated。
-         * */
-        if (existsClass(GameMemoryCleanerDeprecated)) { // Miui 14 不包含
-            hookMethod(GameMemoryCleanerDeprecated,
-                killBackgroundApps,
-                doNothing()
-            );
-        }
 
         /*
          * 禁止 kill 长时间占 cpu 的应用。
@@ -364,12 +351,7 @@ public class HyperV1 extends BaseHC {
                 }
             }).shouldObserveCall(false)
         );
-        // DONE
 
         CameraOpt.doHook();
-    }
-
-    @Override
-    public void copy() {
     }
 }
