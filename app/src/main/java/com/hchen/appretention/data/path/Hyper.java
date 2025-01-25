@@ -43,6 +43,7 @@ public class Hyper {
     public static final String ProcessMemoryCleaner = "com.android.server.am.ProcessMemoryCleaner";
     public static final String ProcessSceneCleaner = "com.android.server.am.ProcessSceneCleaner";
     public static final String IAppState$IRunningProcess = "com.miui.server.smartpower.IAppState$IRunningProcess";
+    public static final String AppStateManager$AppState$RunningProcess = "com.android.server.am.AppStateManager$AppState$RunningProcess";
     public static final String ControllerActivityInfo = "com.android.server.am.ControllerActivityInfo";
     public static final String ProcessPowerCleaner$ScreenStatusReceiver = "com.android.server.am.ProcessPowerCleaner$ScreenStatusReceiver";
     public static final String MiuiMemReclaimer = "com.android.server.am.MiuiMemReclaimer";

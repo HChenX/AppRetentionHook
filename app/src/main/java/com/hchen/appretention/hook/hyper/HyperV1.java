@@ -105,7 +105,7 @@ public class HyperV1 extends BaseHC {
          * setStaticField(ScoutDisplayMemoryManager, SCOUT_MEMORY_DISABLE_DMABUF, true); // 关闭内存监视器
          * */
 
-        // COPY TO: [HyperV2]
+        // COPY TO: [HyperV2, MiuiV14]
         /*
          * 关闭 spc。
          * */
@@ -153,6 +153,7 @@ public class HyperV1 extends BaseHC {
          *
          * 新机型 HyperOS1 已删除 PeriodicCleanerService。
          * */
+        // Miui 14 不包含
         if (existsMethod(SystemServerImpl, addMiuiPeriodicCleanerService, ActivityTaskManagerService)) {
             hookMethod(SystemServerImpl,
                 addMiuiPeriodicCleanerService,
@@ -164,23 +165,26 @@ public class HyperV1 extends BaseHC {
         /*
          * 禁用 MemoryFreezeStubImpl。
          * */
-        hookMethod(MemoryFreezeStubImpl,
-            isEnable,
-            returnResult(false).shouldObserveCall(false)
-        );
+        if (existsClass(MemoryFreezeStubImpl)) // Miui 14 不包含
+            hookMethod(MemoryFreezeStubImpl,
+                isEnable,
+                returnResult(false).shouldObserveCall(false)
+            );
 
         /*
          * 禁用 MemoryStandardProcessControl。
          * 它由一个后台 job (MemoryControlServiceImpl) 启动。
          *  */
-        chain(MemoryStandardProcessControl, method(isEnable)
-            .returnResult(false)
+        if (existsClass(MemoryStandardProcessControl)) // Miui 14 不包含
+            chain(MemoryStandardProcessControl, method(isEnable)
+                .returnResult(false)
 
-            .method(init, Context.class, ActivityManagerService)
-            .returnResult(false)
-        );
+                .method(init, Context.class, ActivityManagerService)
+                .returnResult(false)
+            );
         // DONE
 
+        // COPY TO: [MiuiV14]
         /*
          * 禁止系统压力控制器清理内存。
          * */
@@ -201,11 +205,13 @@ public class HyperV1 extends BaseHC {
                 /*
                  * 无奖竞猜。
                  * */
-                .method(foregroundActivityChangedLocked, ControllerActivityInfo)
+                // Miui 14 不包含
+                .methodIfExist(foregroundActivityChangedLocked, ControllerActivityInfo)
                 .doNothing().shouldObserveCall(false)
         );
+        // DONE
 
-        // COPY TO: [HyperV2]
+        // COPY TO: [HyperV2, MiuiV14]
         chain(ProcessPowerCleaner,
             /*
              * 禁止因温度 kill。
@@ -235,7 +241,9 @@ public class HyperV1 extends BaseHC {
                  * */
                 .method(handleAutoLockOff).doNothing()
         );
+        // DONE
 
+        // COPY TO: [HyperV2]
         /*
          * 是 MiuiMemoryService 几个核心方法。
          * */
@@ -256,48 +264,50 @@ public class HyperV1 extends BaseHC {
 
             .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
         );
+        // DONE
 
+        // COPY TO: [HyperV2, MiuiV14]
         // chain(ProcessSceneCleaner,
-            /*
-             * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
-             * REASON_FORCE_CLEAN (强力清理 > 负一屏)
-             * REASON_GAME_CLEAN (游戏清理 > 安全中心)
-             * REASON_OPTIMIZATION_CLEAN (优化清理 > 安全中心)
-             *
-             * Doc: https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1607
-             *
-             * method(handleKillAll, ProcessConfig)
-             *   .hook(new IHook() {
-             *       @Override
-             *       public void before() {
-             *          Object config = getArgs(0);
-             *          int mPolicy = callMethod(config, getPolicy);
-             *          if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN)
-             *               && !ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_ONE_KEY_CLEAN))
-             *              returnNull();
-             *     }
-             * })
-             * */
+        /*
+         * REASON_ONE_KEY_CLEAN (一键清理 > 最近任务/悬浮球)
+         * REASON_FORCE_CLEAN (强力清理 > 负一屏)
+         * REASON_GAME_CLEAN (游戏清理 > 安全中心)
+         * REASON_OPTIMIZATION_CLEAN (优化清理 > 安全中心)
+         *
+         * Doc: https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1607
+         *
+         * method(handleKillAll, ProcessConfig)
+         *   .hook(new IHook() {
+         *       @Override
+         *       public void before() {
+         *          Object config = getArgs(0);
+         *          int mPolicy = callMethod(config, getPolicy);
+         *          if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_OPTIMIZATION_CLEAN)
+         *               && !ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_ONE_KEY_CLEAN))
+         *              returnNull();
+         *     }
+         * })
+         * */
 
-            /*
-             * REASON_LOCK_SCREEN_CLEAN (锁屏清理 > 安全中心)
-             * REASON_GARBAGE_CLEAN (垃圾清理 > 安全中心)
-             * REASON_USER_DEFINED
-             *
-             * Changed: 多余的 Hook
-             * */
-            /*
-             * method(handleKillAny, ProcessConfig)
-             *    .hook(new IHook() {
-             *        @Override
-             *        public void before() {
-             *            Object config = getArgs(0);
-             *            int mPolicy = (int) callMethod(config, getPolicy);
-             *            if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_GARBAGE_CLEAN))
-             *                returnNull();
-             *        }
-             *     })
-             */
+        /*
+         * REASON_LOCK_SCREEN_CLEAN (锁屏清理 > 安全中心)
+         * REASON_GARBAGE_CLEAN (垃圾清理 > 安全中心)
+         * REASON_USER_DEFINED
+         *
+         * Changed: 多余的 Hook
+         * */
+        /*
+         * method(handleKillAny, ProcessConfig)
+         *    .hook(new IHook() {
+         *        @Override
+         *        public void before() {
+         *            Object config = getArgs(0);
+         *            int mPolicy = (int) callMethod(config, getPolicy);
+         *            if (!ProcessPolicy.getKillReason(mPolicy).equals(ProcessPolicy.REASON_GARBAGE_CLEAN))
+         *                returnNull();
+         *        }
+         *     })
+         */
         // );
 
         /*
@@ -315,7 +325,7 @@ public class HyperV1 extends BaseHC {
          *
          * 新机型 HyperOS1 已删除 GameMemoryCleanerDeprecated。
          * */
-        if (existsClass(GameMemoryCleanerDeprecated)) {
+        if (existsClass(GameMemoryCleanerDeprecated)) { // Miui 14 不包含
             hookMethod(GameMemoryCleanerDeprecated,
                 killBackgroundApps,
                 doNothing()

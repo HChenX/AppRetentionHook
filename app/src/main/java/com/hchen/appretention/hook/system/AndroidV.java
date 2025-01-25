@@ -355,7 +355,8 @@ public class AndroidV extends BaseHC {
         /*
          * 禁止主动杀戮。
          * */
-        setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
+        if (existsField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED))
+            setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
         // DONE
     }
 }
