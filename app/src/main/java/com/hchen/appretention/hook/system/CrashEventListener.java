@@ -20,7 +20,6 @@ package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.method.System.handleAppCrashInActivityController;
 import static com.hchen.appretention.data.path.System.AppErrors;
-import static com.hchen.hooktool.log.XposedLog.logE;
 
 import android.app.ApplicationErrorReport;
 import android.content.Context;
@@ -41,7 +40,7 @@ import java.lang.reflect.Method;
 public class CrashEventListener extends BaseHC {
     @Override
     public void init() {
-        Class<?> appError = findClass(AppErrors).get();
+        Class<?> appError = findClass(AppErrors);
         if (appError == null) {
             logE(TAG, "No such 'com.android.server.am.AppErrors'");
             return;

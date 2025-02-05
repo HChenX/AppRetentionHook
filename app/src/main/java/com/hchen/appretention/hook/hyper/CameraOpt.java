@@ -40,6 +40,7 @@ import static com.hchen.appretention.data.path.Hyper.ServiceThread;
 import static com.hchen.appretention.data.path.System.ActivityManagerService;
 import static com.hchen.hooktool.tool.CoreTool.doNothing;
 import static com.hchen.hooktool.tool.CoreTool.existsAnyMethod;
+import static com.hchen.hooktool.tool.CoreTool.existsClass;
 import static com.hchen.hooktool.tool.CoreTool.existsField;
 import static com.hchen.hooktool.tool.CoreTool.existsMethod;
 import static com.hchen.hooktool.tool.CoreTool.filterMethod;
@@ -69,15 +70,15 @@ public class CameraOpt {
         /*
          * 从此开始，下方为针对相机杀后台而 hook 的内容。
          * */
-        Class<?> mCameraOpt = findClass(CameraOpt).getNoReport();
-        if (mCameraOpt != null) {
+        if (existsClass(CameraOpt)) {
+            Class<?> mCameraOpt = findClass(CameraOpt);
             if (existsField(mCameraOpt, Hyper.mCameraBoosterClazz) || existsField(mCameraOpt, Hyper.mQuickCameraClazz)) {
                 // 帮助 CameraOpt 初始化
                 Class<?> mCameraBoosterClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
                 Class<?> mQuickCameraClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mQuickCameraClazz);
                 if (mCameraBoosterClazz != null || mQuickCameraClazz != null) {
                     ClassLoader mCameraOptClassLoader = mCameraBoosterClazz != null ? mCameraBoosterClazz.getClassLoader() : mQuickCameraClazz.getClassLoader();
-                    doHookCameraOpt(findClass(CameraBooster, mCameraOptClassLoader).get());
+                    doHookCameraOpt(findClass(CameraBooster, mCameraOptClassLoader));
                 }
             } else {
                 Class<?> mCameraOptManager = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraOptManager);
@@ -97,7 +98,7 @@ public class CameraOpt {
                             return true;
                         }
                     })[0];
-                    hook(service, doNothing());
+                    hook(service, doNothing().shouldObserveCall(false));
                 }
             }
         } else {
@@ -109,7 +110,7 @@ public class CameraOpt {
                     public void after() {
                         Object mICameraBooster = getResult();
                         ClassLoader mCameraOptClassLoader = mICameraBooster.getClass().getClassLoader();
-                        doHookCameraOpt(findClass(CameraBoosterNew, mCameraOptClassLoader).get());
+                        doHookCameraOpt(findClass(CameraBoosterNew, mCameraOptClassLoader));
                     }
                 }
             );

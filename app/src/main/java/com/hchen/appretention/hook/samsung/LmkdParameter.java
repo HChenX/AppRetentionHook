@@ -59,7 +59,7 @@ public final class LmkdParameter {
 
     public static void init() {
         if (isInit) return;
-        Class<?> lmkdParameter = findClass(DynamicHiddenApp$LmkdParameter).get();
+        Class<?> lmkdParameter = findClass(DynamicHiddenApp$LmkdParameter);
         if (lmkdParameter == null)
             return;
 

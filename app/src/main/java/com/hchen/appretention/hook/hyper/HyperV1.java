@@ -69,6 +69,7 @@ import static com.hchen.appretention.data.path.Hyper.ProcessConfig;
 import static com.hchen.appretention.data.path.Hyper.ProcessKillerIdler;
 import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
+import static com.hchen.appretention.data.path.Hyper.ProcessRecord;
 import static com.hchen.appretention.data.path.Hyper.SlowStartupSceneMemClean;
 import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
@@ -318,7 +319,7 @@ public class HyperV1 extends BaseHC {
          * 禁止压缩进程。
          * */
         setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
-        hookMethod(OomAdjusterImpl, compactBackgroundProcess, doNothing().shouldObserveCall(false));
+        hookMethod(OomAdjusterImpl, compactBackgroundProcess, ProcessRecord, doNothing().shouldObserveCall(false));
         hookMethod(MiuiMemReclaimer,
             performCompaction,
             String.class, int.class,
@@ -362,7 +363,7 @@ public class HyperV1 extends BaseHC {
          * 禁用 SSModel.
          * */
         SystemPropTool.setProp("persist.sys.ssmc.enable", "false");
-        hookMethod(SlowStartupSceneMemClean, isSSModelEnable, returnResult(false));
+        hookMethod(SlowStartupSceneMemClean, isSSModelEnable, returnResult(false).shouldObserveCall(false));
 
         CameraOpt.doHook();
     }
