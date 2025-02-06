@@ -72,6 +72,7 @@ import com.hchen.appretention.data.other.PrecessAdjInfo;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
 /**
@@ -95,8 +96,19 @@ public final class CacheCompaction extends BaseHC {
         // compactionAppCache();
         compactionAppCacheNew();
 
-        hookConstructor(OomAdjuster,
-            ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector,
+        Constructor<?> oomAdjuster = null;
+        if (existsConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector)) {
+            oomAdjuster = findConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector);
+
+        } else if (existsConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread))
+            oomAdjuster = findConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread);
+
+        if (oomAdjuster == null) {
+            logW(TAG, "oomAdjuster is null! can't use CacheCompaction!!");
+            return;
+        }
+
+        hook(oomAdjuster,
             new IHook() {
                 @Override
                 public void after() {
