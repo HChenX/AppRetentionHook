@@ -591,7 +591,7 @@ public class SaveLog {
         if (!new File("proc/mv").exists()) {
             Long totalMemory = InvokeTool.callStaticMethod(InvokeTool.findClass("android.os.Process"), "getTotalMemory", new Class[]{});
             if (totalMemory == null) return "Unknown";
-            return ((totalMemory / 1024 / 1024 / 1024) + 1) + "GB";
+            return ((totalMemory / 1073741824) + 1) + "GB";
         }
 
         String[] split;
@@ -615,7 +615,7 @@ public class SaveLog {
                 return "Unknown";
             }
 
-            return ((totalMemory / 1024 / 1024 / 1024) + 1) + "GB";
+            return ((totalMemory / 1073741824) + 1) + "GB";
         }
         return "Unknown";
     }

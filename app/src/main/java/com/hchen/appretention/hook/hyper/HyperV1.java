@@ -23,12 +23,9 @@ import static com.hchen.appretention.data.field.Hyper.PROCESS_CLEANER_ENABLED;
 import static com.hchen.appretention.data.field.Hyper.PROCESS_TRACKER_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.PROC_CPU_EXCEPTION_ENABLE;
 import static com.hchen.appretention.data.field.Hyper.RECLAIM_IF_NEEDED;
-import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
+import static com.hchen.appretention.data.field.Hyper.sCompactSingleProcEnable;
+import static com.hchen.appretention.data.field.Hyper.sCompactionEnable;
 import static com.hchen.appretention.data.method.Hyper.addMiuiPeriodicCleanerService;
-import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
-import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
-import static com.hchen.appretention.data.method.Hyper.compactBackgroundProcess;
-import static com.hchen.appretention.data.method.Hyper.foregroundActivityChangedLocked;
 import static com.hchen.appretention.data.method.Hyper.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
 import static com.hchen.appretention.data.method.Hyper.handleAutoLockOff;
@@ -38,8 +35,6 @@ import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
 import static com.hchen.appretention.data.method.Hyper.handleThermalKillProc;
 import static com.hchen.appretention.data.method.Hyper.isEnable;
 import static com.hchen.appretention.data.method.Hyper.isMiuiLiteVersion;
-import static com.hchen.appretention.data.method.Hyper.isNeedCompact;
-import static com.hchen.appretention.data.method.Hyper.isSSModelEnable;
 import static com.hchen.appretention.data.method.Hyper.killBackgroundApps;
 import static com.hchen.appretention.data.method.Hyper.killPackage;
 import static com.hchen.appretention.data.method.Hyper.killProcess;
@@ -49,11 +44,10 @@ import static com.hchen.appretention.data.method.Hyper.onStartJob;
 import static com.hchen.appretention.data.method.Hyper.performCompaction;
 import static com.hchen.appretention.data.method.Hyper.preloadAppEnqueue;
 import static com.hchen.appretention.data.method.Hyper.reclaimBackground;
-import static com.hchen.appretention.data.method.Hyper.startPreloadApp;
+import static com.hchen.appretention.data.method.Hyper.scanProcessAndCleanUpMemory;
 import static com.hchen.appretention.data.method.Hyper.updateScreenState;
 import static com.hchen.appretention.data.path.Hyper.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.Hyper.Build;
-import static com.hchen.appretention.data.path.Hyper.ControllerActivityInfo;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryCleanerDeprecated;
 import static com.hchen.appretention.data.path.Hyper.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.Hyper.IAppState$IRunningProcess;
@@ -61,16 +55,14 @@ import static com.hchen.appretention.data.path.Hyper.LifecycleConfig;
 import static com.hchen.appretention.data.path.Hyper.MemoryFreezeStubImpl;
 import static com.hchen.appretention.data.path.Hyper.MemoryStandardProcessControl;
 import static com.hchen.appretention.data.path.Hyper.MiuiMemReclaimer;
+import static com.hchen.appretention.data.path.Hyper.MiuiMemoryService;
 import static com.hchen.appretention.data.path.Hyper.OomAdjusterImpl;
 import static com.hchen.appretention.data.path.Hyper.PreloadAppControllerImpl;
-import static com.hchen.appretention.data.path.Hyper.PreloadLifecycle;
 import static com.hchen.appretention.data.path.Hyper.PressureStateSettings;
 import static com.hchen.appretention.data.path.Hyper.ProcessConfig;
 import static com.hchen.appretention.data.path.Hyper.ProcessKillerIdler;
 import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
 import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
-import static com.hchen.appretention.data.path.Hyper.ProcessRecord;
-import static com.hchen.appretention.data.path.Hyper.SlowStartupSceneMemClean;
 import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
 import static com.hchen.appretention.data.path.Hyper.SystemServerImpl;
@@ -78,7 +70,6 @@ import static com.hchen.appretention.data.path.Hyper.SystemServerImpl;
 import android.app.job.JobParameters;
 
 import com.hchen.hooktool.BaseHC;
-import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
 import com.hchen.processor.HookEntrance;
 
@@ -155,7 +146,7 @@ public class HyperV1 extends BaseHC {
          * 由于 PeriodicCleanerService 继承 SystemService 并由如下方法启动；
          * 所以使此方法失效即可彻底禁用 PeriodicCleanerService。
          *
-         * 新机型 HyperOS1 已删除 PeriodicCleanerService。
+         * 部分新机型 HyperOSV1 删除了 PeriodicCleanerService。
          * */
         if (existsMethod(SystemServerImpl, addMiuiPeriodicCleanerService, ActivityTaskManagerService)) {
             hookMethod(SystemServerImpl,
@@ -178,6 +169,7 @@ public class HyperV1 extends BaseHC {
         /*
          * 禁用 MemoryStandardProcessControl。
          *  */
+        SystemPropTool.setProp("persist.sys.memory_standard.enable", "false");
         chain(MemoryStandardProcessControl, method(isEnable)
                 .returnResult(false)
 
@@ -202,11 +194,13 @@ public class HyperV1 extends BaseHC {
                 .method(nStartPressureMonitor)
                 .doNothing()
 
-                /*
-                 * 无奖竞猜。
-                 * */
-                .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-                .doNothing().shouldObserveCall(false)
+            /*
+             * 无奖竞猜。
+             *
+             * Changed: 多余的 hook，PROCESS_CLEANER_ENABLED 设置 false 后即可。
+             * */
+            // .method(foregroundActivityChangedLocked, ControllerActivityInfo)
+            // .doNothing().shouldObserveCall(false)
         );
 
         chain(ProcessPowerCleaner,
@@ -242,22 +236,23 @@ public class HyperV1 extends BaseHC {
         /*
          * 是 MiuiMemoryService 几个核心方法。
          * */
-        chain(ProcessMemoryCleaner, method(cleanUpMemory, List.class, long.class)
-            .returnResult(true)
+        chain(ProcessMemoryCleaner, method(scanProcessAndCleanUpMemory, long.class) // Changed: 更好的 Hook 点位。
+                .returnResult(true)
 
-            .method(killPackage, IAppState$IRunningProcess, int.class, String.class)
-            .returnResult(0L)
+                .method(killPackage, IAppState$IRunningProcess, int.class, String.class)
+                .returnResult(0L)
 
-            .method(killProcess, IAppState$IRunningProcess, int.class, String.class)
-            .returnResult(0L)
+                .method(killProcess, IAppState$IRunningProcess, int.class, String.class)
+                .returnResult(0L)
 
-            .method(killProcessByMinAdj, int.class, String.class, List.class)
-            .doNothing()
+                .method(killProcessByMinAdj, int.class, String.class, List.class)
+                .doNothing()
 
-            .method(checkBackgroundAppException, String.class, int.class)
-            .returnResult(0)
+            // Changed: 多余的 Hook。
+            // .method(checkBackgroundAppException, String.class, int.class)
+            // .returnResult(0)
 
-            .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
+            // .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
         );
 
         // chain(ProcessSceneCleaner,
@@ -318,8 +313,13 @@ public class HyperV1 extends BaseHC {
         /*
          * 禁止压缩进程。
          * */
+        SystemPropTool.setProp("persist.sys.mms.compact_enable", "false");
+        SystemPropTool.setProp("persist.sys.mms.single_compact_enable", "false");
+        setStaticField(MiuiMemoryService, sCompactionEnable, false);
+        setStaticField(MiuiMemoryService, sCompactSingleProcEnable, false);
         setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
-        hookMethod(OomAdjusterImpl, compactBackgroundProcess, ProcessRecord, doNothing().shouldObserveCall(false));
+        // Changed: 多余的 Hook。
+        // hookMethod(OomAdjusterImpl, compactBackgroundProcess, ProcessRecord, doNothing().shouldObserveCall(false));
         hookMethod(MiuiMemReclaimer,
             performCompaction,
             String.class, int.class,
@@ -348,22 +348,17 @@ public class HyperV1 extends BaseHC {
          * 禁止预启动。
          * */
         chain(PreloadAppControllerImpl, method(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
-            .doNothing().shouldObserveCall(false)
+                .doNothing().shouldObserveCall(false)
 
-            .method(startPreloadApp, PreloadLifecycle)
-            .hook(new IHook() {
-                @Override
-                public void before() {
-                    setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
-                }
-            }).shouldObserveCall(false)
+            // Changed: 多余的 Hook。
+            // .method(startPreloadApp, PreloadLifecycle)
+            // .hook(new IHook() {
+            //     @Override
+            //     public void before() {
+            //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
+            //     }
+            // }).shouldObserveCall(false)
         );
-
-        /*
-         * 禁用 SSModel.
-         * */
-        SystemPropTool.setProp("persist.sys.ssmc.enable", "false");
-        hookMethod(SlowStartupSceneMemClean, isSSModelEnable, returnResult(false).shouldObserveCall(false));
 
         CameraOpt.doHook();
     }

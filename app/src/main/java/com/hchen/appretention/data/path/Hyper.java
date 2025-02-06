@@ -47,6 +47,7 @@ public class Hyper {
     public static final String ControllerActivityInfo = "com.android.server.am.ControllerActivityInfo";
     public static final String ProcessPowerCleaner$ScreenStatusReceiver = "com.android.server.am.ProcessPowerCleaner$ScreenStatusReceiver";
     public static final String MiuiMemReclaimer = "com.android.server.am.MiuiMemReclaimer";
+    public static final String MiuiMemoryService = "com.android.server.am.MiuiMemoryService";
     public static final String GameMemoryCleanerDeprecated = "com.miui.server.migard.memory.GameMemoryCleanerDeprecated";
     public static final String SmartCpuPolicyManager = "com.miui.server.smartpower.SmartCpuPolicyManager";
     public static final String ProcessKillerIdler = "com.android.server.am.ProcessKillerIdler";
@@ -61,6 +62,7 @@ public class Hyper {
     public static final String CameraOptManager = "com.miui.cameraopt.CameraOptManager";
     public static final String CameraOpt = "com.android.server.camera.CameraOpt";
     public static final String ICameraBooster = "com.android.server.camera.ICameraBooster";
+    public static final String ICameraBooster$CameraBoosterProxy = "com.android.server.camera.ICameraBooster$CameraBoosterProxy";
     public static final String ProcessManagerInternal = "com.miui.server.process.ProcessManagerInternal";
     public static final String ServiceThread = "com.android.server.ServiceThread";
     public static final String CameraKillPolicy = "com.miui.cameraopt.booster.CameraKillPolicy";

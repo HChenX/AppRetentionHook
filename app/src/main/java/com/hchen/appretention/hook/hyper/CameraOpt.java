@@ -19,8 +19,9 @@
 package com.hchen.appretention.hook.hyper;
 
 import static com.hchen.appretention.data.method.Hyper.boostCameraByThreshold;
+import static com.hchen.appretention.data.method.Hyper.callMethod;
+import static com.hchen.appretention.data.method.Hyper.callStaticMethod;
 import static com.hchen.appretention.data.method.Hyper.doAdjBoost;
-import static com.hchen.appretention.data.method.Hyper.ensureService;
 import static com.hchen.appretention.data.method.Hyper.interceptAppRestartIfNeeded;
 import static com.hchen.appretention.data.method.Hyper.isAllowAdjBoost;
 import static com.hchen.appretention.data.method.Hyper.newInstance;
@@ -30,11 +31,9 @@ import static com.hchen.appretention.data.method.Hyper.notifyCameraForegroundSta
 import static com.hchen.appretention.data.method.Hyper.notifyCameraPostProcessState;
 import static com.hchen.appretention.data.method.Hyper.reclaimMemoryForCamera;
 import static com.hchen.appretention.data.method.Hyper.updateCameraBoosterCloudData;
-import static com.hchen.appretention.data.path.Hyper.CameraBooster;
-import static com.hchen.appretention.data.path.Hyper.CameraBoosterNew;
 import static com.hchen.appretention.data.path.Hyper.CameraOpt;
-import static com.hchen.appretention.data.path.Hyper.CameraOptManager;
 import static com.hchen.appretention.data.path.Hyper.ICameraBooster;
+import static com.hchen.appretention.data.path.Hyper.ICameraBooster$CameraBoosterProxy;
 import static com.hchen.appretention.data.path.Hyper.ProcessManagerInternal;
 import static com.hchen.appretention.data.path.Hyper.ServiceThread;
 import static com.hchen.appretention.data.path.System.ActivityManagerService;
@@ -42,11 +41,8 @@ import static com.hchen.hooktool.tool.CoreTool.doNothing;
 import static com.hchen.hooktool.tool.CoreTool.existsAnyMethod;
 import static com.hchen.hooktool.tool.CoreTool.existsClass;
 import static com.hchen.hooktool.tool.CoreTool.existsField;
-import static com.hchen.hooktool.tool.CoreTool.existsMethod;
-import static com.hchen.hooktool.tool.CoreTool.filterMethod;
 import static com.hchen.hooktool.tool.CoreTool.findAllMethod;
 import static com.hchen.hooktool.tool.CoreTool.findClass;
-import static com.hchen.hooktool.tool.CoreTool.getStaticField;
 import static com.hchen.hooktool.tool.CoreTool.hook;
 import static com.hchen.hooktool.tool.CoreTool.hookMethod;
 import static com.hchen.hooktool.tool.CoreTool.returnResult;
@@ -55,7 +51,7 @@ import android.content.Context;
 
 import com.hchen.appretention.data.field.Hyper;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.hooktool.tool.itool.IMemberFilter;
+import com.hchen.hooktool.tool.CoreTool;
 
 import java.lang.reflect.Method;
 
@@ -67,39 +63,46 @@ import java.lang.reflect.Method;
 public class CameraOpt {
 
     public static void doHook() {
-        /*
-         * 从此开始，下方为针对相机杀后台而 hook 的内容。
-         * */
         if (existsClass(CameraOpt)) {
             Class<?> mCameraOpt = findClass(CameraOpt);
             if (existsField(mCameraOpt, Hyper.mCameraBoosterClazz) || existsField(mCameraOpt, Hyper.mQuickCameraClazz)) {
+                hookMethod(CameraOpt,
+                    callStaticMethod,
+                    Class.class, String.class, Object[].class,
+                    returnResult(null).shouldObserveCall(false)
+                );
                 // 帮助 CameraOpt 初始化
-                Class<?> mCameraBoosterClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
-                Class<?> mQuickCameraClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mQuickCameraClazz);
-                if (mCameraBoosterClazz != null || mQuickCameraClazz != null) {
-                    ClassLoader mCameraOptClassLoader = mCameraBoosterClazz != null ? mCameraBoosterClazz.getClassLoader() : mQuickCameraClazz.getClassLoader();
-                    doHookCameraOpt(findClass(CameraBooster, mCameraOptClassLoader));
-                }
+                // Class<?> mCameraBoosterClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
+                // Class<?> mQuickCameraClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mQuickCameraClazz);
+                // if (mCameraBoosterClazz != null || mQuickCameraClazz != null) {
+                //     ClassLoader mCameraOptClassLoader = mCameraBoosterClazz != null ? mCameraBoosterClazz.getClassLoader() : mQuickCameraClazz.getClassLoader();
+                //     doHookCameraOpt(findClass(CameraBooster, mCameraOptClassLoader));
+                // }
             } else {
-                Class<?> mCameraOptManager = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraOptManager);
-                if (existsMethod(CameraOptManager, mCameraOptManager.getClassLoader(), ensureService)) {
-                    hookMethod(CameraOptManager,
-                        mCameraOptManager.getClassLoader(),
-                        ensureService,
-                        doNothing()
-                    );
-                } else {
-                    Method service = filterMethod(CameraOptManager, mCameraOptManager.getClassLoader(), new IMemberFilter<Method>() {
-                        @Override
-                        public boolean test(Method member) {
-                            if (member == null) return false;
-                            if (member.getParameterCount() > 0) return false;
-                            if (member.getName().length() > 3) return false;
-                            return true;
-                        }
-                    })[0];
-                    hook(service, doNothing().shouldObserveCall(false));
-                }
+                hookMethod(CameraOpt,
+                    callMethod,
+                    String.class, Object[].class,
+                    returnResult(null).shouldObserveCall(false)
+                );
+                // Class<?> mCameraOptManager = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraOptManager);
+                // if (existsMethod(CameraOptManager, mCameraOptManager.getClassLoader(), ensureService)) {
+                //     hookMethod(CameraOptManager,
+                //         mCameraOptManager.getClassLoader(),
+                //         ensureService,
+                //         doNothing()
+                //     );
+                // } else {
+                //     Method service = filterMethod(CameraOptManager, mCameraOptManager.getClassLoader(), new IMemberFilter<Method>() {
+                //         @Override
+                //         public boolean test(Method member) {
+                //             if (member == null) return false;
+                //             if (member.getParameterCount() > 0) return false;
+                //             if (member.getName().length() > 3) return false;
+                //             return true;
+                //         }
+                //     })[0];
+                //     hook(service, doNothing().shouldObserveCall(false));
+                // }
             }
         } else {
             hookMethod(ICameraBooster,
@@ -107,10 +110,16 @@ public class CameraOpt {
                 ProcessManagerInternal, ActivityManagerService, ServiceThread, Context.class,
                 new IHook() {
                     @Override
+                    public void before() {
+                        Object mCameraBoosterProxy = CoreTool.newInstance(ICameraBooster$CameraBoosterProxy);
+                        setResult(mCameraBoosterProxy);
+                    }
+
+                    @Override
                     public void after() {
-                        Object mICameraBooster = getResult();
-                        ClassLoader mCameraOptClassLoader = mICameraBooster.getClass().getClassLoader();
-                        doHookCameraOpt(findClass(CameraBoosterNew, mCameraOptClassLoader));
+                        // Object mICameraBooster = getResult();
+                        // ClassLoader mCameraOptClassLoader = mICameraBooster.getClass().getClassLoader();
+                        // doHookCameraOpt(findClass(CameraBoosterNew, mCameraOptClassLoader));
                     }
                 }
             );
@@ -118,6 +127,7 @@ public class CameraOpt {
     }
 
     // 执行对 cameraOpt 的 hook 动作
+    @Deprecated // 废弃，过时的复杂实现
     private static void doHookCameraOpt(Class<?> cameraBooster) {
         String[] mCameraOptShouldHookMethodList = new String[]{
             boostCameraByThreshold,

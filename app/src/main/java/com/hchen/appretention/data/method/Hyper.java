@@ -42,10 +42,12 @@ public class Hyper {
     public static final String init = "init";
     public static final String killProcess = "killProcess";
     public static final String killProcessByMinAdj = "killProcessByMinAdj";
+    public static final String killAppExceedingHeapThreshold = "killAppExceedingHeapThreshold";
     public static final String checkBackgroundAppException = "checkBackgroundAppException";
     public static final String isNeedCompact = "isNeedCompact";
     public static final String cleanUpMemory = "cleanUpMemory";
     public static final String killPackage = "killPackage";
+    public static final String scanProcessAndCleanUpMemory = "scanProcessAndCleanUpMemory";
     public static final String checkAndFreeze = "checkAndFreeze";
     public static final String updateScreenState = "updateScreenState";
     public static final String handleThermalKillProc = "handleThermalKillProc";
@@ -72,6 +74,7 @@ public class Hyper {
     public static final String reclaimMemoryForCamera = "reclaimMemoryForCamera";
     public static final String updateCameraBoosterCloudData = "updateCameraBoosterCloudData";
     public static final String callStaticMethod = "callStaticMethod";
+    public static final String callMethod = "callMethod";
     public static final String boostCameraIfNeeded = "boostCameraIfNeeded";
     public static final String boostCameraByThreshold = "boostCameraByThreshold";
     public static final String doReclaimMemory = "doReclaimMemory";
