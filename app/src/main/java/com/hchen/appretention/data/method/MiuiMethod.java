@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.data.path;
+package com.hchen.appretention.data.method;
 
 /**
- * 系统界面类名
+ * Miui 方法名
  *
  * @author 焕晨HChen
  */
-public class SystemUi {
-    public static final String SystemUIApplication = "com.android.systemui.SystemUIApplication";
+public class MiuiMethod {
 }

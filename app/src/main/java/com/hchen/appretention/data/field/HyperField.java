@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.field;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.field;
  *
  * @author 焕晨HChen
  */
-public class Hyper {
+public class HyperField {
     public static final String ENABLED_SCOUT = "ENABLED_SCOUT";
     public static final String BINDER_FULL_KILL_PROC = "BINDER_FULL_KILL_PROC";
     public static final String ENABLE_SCOUT_MEMORY_MONITOR = "ENABLE_SCOUT_MEMORY_MONITOR";

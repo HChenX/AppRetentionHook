@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.field;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.field;
  *
  * @author 焕晨HChen
  */
-public class System {
+public class SystemField {
     public static final String mNextNoKillDebugMessageTime = "mNextNoKillDebugMessageTime";
     public static final String mGlobalMaxNumTasks = "mGlobalMaxNumTasks";
     public static final String mKillBgRestrictedAndCachedIdle = "mKillBgRestrictedAndCachedIdle";
@@ -37,8 +37,10 @@ public class System {
     public static final String MAX_CACHED_PROCESSES = "MAX_CACHED_PROCESSES";
     public static final String mOomMinFree = "mOomMinFree";
     public static final String mOomAdj = "mOomAdj";
+    public static final String NONE = "NONE";
     public static final String SOME = "SOME";
     public static final String FULL = "FULL";
+    public static final String ANON_MORE = "ANON_MORE";
     public static final String ANON = "ANON";
     public static final String SHELL = "SHELL";
     public static final String APP = "APP";
@@ -53,4 +55,5 @@ public class System {
     public static final String mMemFactorOverride = "mMemFactorOverride";
     public static final String isChangedOomMinFree = "isChangedOomMinFree";
     public static final String mContext = "mContext";
+    public static final String mCachedAppOptimizer = "mCachedAppOptimizer";
 }

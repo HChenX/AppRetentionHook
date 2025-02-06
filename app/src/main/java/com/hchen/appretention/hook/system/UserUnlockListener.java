@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.system;
 
-import static com.hchen.appretention.data.method.System.performReceive;
-import static com.hchen.appretention.data.path.System.UserController$3;
+import static com.hchen.appretention.data.method.SystemMethod.performReceive;
+import static com.hchen.appretention.data.path.SystemClass.UserController$3;
 import static com.hchen.appretention.log.SaveLog.USER_UNLOCKED_COMPLETED_PROP;
 
 import android.content.Intent;

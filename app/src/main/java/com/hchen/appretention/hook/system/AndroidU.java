@@ -14,45 +14,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.system;
 
-import static com.hchen.appretention.data.field.System.CUR_MAX_CACHED_PROCESSES;
-import static com.hchen.appretention.data.field.System.MAX_PHANTOM_PROCESSES;
-import static com.hchen.appretention.data.field.System.PROACTIVE_KILLS_ENABLED;
-import static com.hchen.appretention.data.field.System.USE_MODERN_TRIM;
-import static com.hchen.appretention.data.field.System.mGlobalMaxNumTasks;
-import static com.hchen.appretention.data.field.System.mKillBgRestrictedAndCachedIdle;
-import static com.hchen.appretention.data.field.System.mMemFactorOverride;
-import static com.hchen.appretention.data.field.System.mNextNoKillDebugMessageTime;
-import static com.hchen.appretention.data.method.System.checkExcessivePowerUsageLPr;
-import static com.hchen.appretention.data.method.System.isInVisibleRange;
-import static com.hchen.appretention.data.method.System.killProcessesWhenImperceptible;
-import static com.hchen.appretention.data.method.System.performIdleMaintenance;
-import static com.hchen.appretention.data.method.System.shouldKillExcessiveProcesses;
-import static com.hchen.appretention.data.method.System.trimInactiveRecentTasks;
-import static com.hchen.appretention.data.method.System.trimPhantomProcessesIfNecessary;
-import static com.hchen.appretention.data.method.System.updateAndTrimProcessLSP;
-import static com.hchen.appretention.data.method.System.updateKillBgRestrictedCachedIdle;
-import static com.hchen.appretention.data.method.System.updateMaxCachedProcesses;
-import static com.hchen.appretention.data.method.System.updateMaxPhantomProcesses;
-import static com.hchen.appretention.data.method.System.updatePerfConfigConstants;
-import static com.hchen.appretention.data.method.System.updateProactiveKillsEnabled;
-import static com.hchen.appretention.data.method.System.updateProcessCpuStatesLocked;
-import static com.hchen.appretention.data.method.System.updateUseModernTrim;
-import static com.hchen.appretention.data.path.System.ActiveUids;
-import static com.hchen.appretention.data.path.System.ActivityManagerConstants;
-import static com.hchen.appretention.data.path.System.ActivityManagerService;
-import static com.hchen.appretention.data.path.System.AppProfiler;
-import static com.hchen.appretention.data.path.System.LowMemDetector;
-import static com.hchen.appretention.data.path.System.OomAdjuster;
-import static com.hchen.appretention.data.path.System.PhantomProcessList;
-import static com.hchen.appretention.data.path.System.ProcessCpuTracker;
-import static com.hchen.appretention.data.path.System.ProcessList;
-import static com.hchen.appretention.data.path.System.ProcessRecord;
-import static com.hchen.appretention.data.path.System.RecentTasks;
-import static com.hchen.appretention.data.path.System.Task;
+import static com.hchen.appretention.data.field.SystemField.CUR_MAX_CACHED_PROCESSES;
+import static com.hchen.appretention.data.field.SystemField.MAX_PHANTOM_PROCESSES;
+import static com.hchen.appretention.data.field.SystemField.PROACTIVE_KILLS_ENABLED;
+import static com.hchen.appretention.data.field.SystemField.USE_MODERN_TRIM;
+import static com.hchen.appretention.data.field.SystemField.mGlobalMaxNumTasks;
+import static com.hchen.appretention.data.field.SystemField.mKillBgRestrictedAndCachedIdle;
+import static com.hchen.appretention.data.field.SystemField.mMemFactorOverride;
+import static com.hchen.appretention.data.field.SystemField.mNextNoKillDebugMessageTime;
+import static com.hchen.appretention.data.method.SystemMethod.checkExcessivePowerUsageLPr;
+import static com.hchen.appretention.data.method.SystemMethod.isInVisibleRange;
+import static com.hchen.appretention.data.method.SystemMethod.killProcessesWhenImperceptible;
+import static com.hchen.appretention.data.method.SystemMethod.performIdleMaintenance;
+import static com.hchen.appretention.data.method.SystemMethod.shouldKillExcessiveProcesses;
+import static com.hchen.appretention.data.method.SystemMethod.trimInactiveRecentTasks;
+import static com.hchen.appretention.data.method.SystemMethod.trimPhantomProcessesIfNecessary;
+import static com.hchen.appretention.data.method.SystemMethod.updateAndTrimProcessLSP;
+import static com.hchen.appretention.data.method.SystemMethod.updateKillBgRestrictedCachedIdle;
+import static com.hchen.appretention.data.method.SystemMethod.updateMaxCachedProcesses;
+import static com.hchen.appretention.data.method.SystemMethod.updateMaxPhantomProcesses;
+import static com.hchen.appretention.data.method.SystemMethod.updatePerfConfigConstants;
+import static com.hchen.appretention.data.method.SystemMethod.updateProactiveKillsEnabled;
+import static com.hchen.appretention.data.method.SystemMethod.updateProcessCpuStatesLocked;
+import static com.hchen.appretention.data.method.SystemMethod.updateUseModernTrim;
+import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
+import static com.hchen.appretention.data.path.SystemClass.ActivityManagerConstants;
+import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
+import static com.hchen.appretention.data.path.SystemClass.AppProfiler;
+import static com.hchen.appretention.data.path.SystemClass.LowMemDetector;
+import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
+import static com.hchen.appretention.data.path.SystemClass.PhantomProcessList;
+import static com.hchen.appretention.data.path.SystemClass.ProcessCpuTracker;
+import static com.hchen.appretention.data.path.SystemClass.ProcessList;
+import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
+import static com.hchen.appretention.data.path.SystemClass.RecentTasks;
+import static com.hchen.appretention.data.path.SystemClass.Task;
 
 import android.content.Context;
 import android.os.Handler;

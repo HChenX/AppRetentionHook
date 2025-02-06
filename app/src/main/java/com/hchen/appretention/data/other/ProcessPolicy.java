@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.hook.hyper;
+package com.hchen.appretention.data.other;
 
 /**
  * Hyper 的一些清理动作

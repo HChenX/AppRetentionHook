@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.system;
 
-import static com.hchen.appretention.data.field.System.isChangedOomMinFree;
-import static com.hchen.appretention.data.method.System.onLmkdConnect;
-import static com.hchen.appretention.data.method.System.updateOomLevels;
-import static com.hchen.appretention.data.method.System.writeLmkd;
-import static com.hchen.appretention.data.path.System.ProcessList;
+import static com.hchen.appretention.data.field.SystemField.isChangedOomMinFree;
+import static com.hchen.appretention.data.method.SystemMethod.onLmkdConnect;
+import static com.hchen.appretention.data.method.SystemMethod.updateOomLevels;
+import static com.hchen.appretention.data.method.SystemMethod.writeLmkd;
+import static com.hchen.appretention.data.path.SystemClass.ProcessList;
 
-import com.hchen.appretention.data.field.System;
+import com.hchen.appretention.data.field.SystemField;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
@@ -70,10 +70,10 @@ public final class UpdateOomLevels extends BaseHC {
                 public void before() {
                     if (Boolean.TRUE.equals(getThisAdditionalInstanceField(isChangedOomMinFree)))
                         return;
-                    int[] mOomMinFree = (int[]) getThisField(System.mOomMinFree);
+                    int[] mOomMinFree = (int[]) getThisField(SystemField.mOomMinFree);
                     if (mOomMinFree == null) return;
                     int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                    setThisField(System.mOomMinFree, mOomMinFreeArray);
+                    setThisField(SystemField.mOomMinFree, mOomMinFreeArray);
                     setThisAdditionalInstanceField(isChangedOomMinFree, true);
                 }
             }
@@ -94,10 +94,10 @@ public final class UpdateOomLevels extends BaseHC {
                 @Override
                 public void after() {
                     if ((getArgs(2) instanceof Boolean b) && !b) {
-                        int[] mOomMinFree = (int[]) getThisField(System.mOomMinFree);
+                        int[] mOomMinFree = (int[]) getThisField(SystemField.mOomMinFree);
                         if (mOomMinFree == null) return;
                         int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                        setThisField(System.mOomMinFree, mOomMinFreeArray);
+                        setThisField(SystemField.mOomMinFree, mOomMinFreeArray);
                         setThisAdditionalInstanceField(isChangedOomMinFree, true);
                     }
                 }
@@ -134,13 +134,13 @@ public final class UpdateOomLevels extends BaseHC {
                 private void setOomMinFreeBuf(ByteBuffer bufCopy) {
                     bufCopy.rewind();
                     bufCopy.putInt(0);
-                    int[] mOomAdj = (int[]) getField(mProcessListInstance, System.mOomAdj);
-                    int[] mOomMinFree = (int[]) getField(mProcessListInstance, System.mOomMinFree);
+                    int[] mOomAdj = (int[]) getField(mProcessListInstance, SystemField.mOomAdj);
+                    int[] mOomMinFree = (int[]) getField(mProcessListInstance, SystemField.mOomMinFree);
                     if (mOomMinFree == null || mOomAdj == null)
                         return;
 
                     int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                    setField(mProcessListInstance, System.mOomMinFree, mOomMinFreeArray);
+                    setField(mProcessListInstance, SystemField.mOomMinFree, mOomMinFreeArray);
                     setAdditionalInstanceField(mProcessListInstance, isChangedOomMinFree, true);
                     for (int i = 0; i < mOomAdj.length; i++) {
                         bufCopy.putInt(((mOomMinFreeArray[i] * 1024) / 4096));

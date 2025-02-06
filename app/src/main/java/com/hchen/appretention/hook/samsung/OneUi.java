@@ -14,42 +14,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.samsung;
 
-import static com.hchen.appretention.data.field.OneUi.ENABLE_KILL_LONG_RUNNING_PROCESS;
-import static com.hchen.appretention.data.field.OneUi.INSTANCE;
-import static com.hchen.appretention.data.field.OneUi.KPM_BTIME_ENABLE;
-import static com.hchen.appretention.data.field.OneUi.KPM_POLICY_ENABLE;
-import static com.hchen.appretention.data.field.OneUi.MARs_ENABLE;
-import static com.hchen.appretention.data.field.OneUi.MAX_LONG_LIVE_APP;
-import static com.hchen.appretention.data.field.OneUi.WRITEBACK_ENABLED;
-import static com.hchen.appretention.data.method.OneUi.IsForceKillHeavyProcess;
-import static com.hchen.appretention.data.method.OneUi.activeLaunchKillCheck;
-import static com.hchen.appretention.data.method.OneUi.addLongLivePackageLocked;
-import static com.hchen.appretention.data.method.OneUi.checkKeptProcess;
-import static com.hchen.appretention.data.method.OneUi.getInstance;
-import static com.hchen.appretention.data.method.OneUi.getMARsEnabled;
-import static com.hchen.appretention.data.method.OneUi.getMaxLongLiveApps;
-import static com.hchen.appretention.data.method.OneUi.isBEKCondition;
-import static com.hchen.appretention.data.method.OneUi.isExcessiveResourceUsage;
-import static com.hchen.appretention.data.method.OneUi.isPmmEnabled;
-import static com.hchen.appretention.data.method.OneUi.killTimeOverEmptyProcess;
-import static com.hchen.appretention.data.method.OneUi.setLmkdCameraKillBoost;
-import static com.hchen.appretention.data.method.OneUi.setLmkdParameter;
-import static com.hchen.appretention.data.method.OneUi.updateNapProcessProtection;
-import static com.hchen.appretention.data.path.OneUi.ActivityManagerServiceExt;
-import static com.hchen.appretention.data.path.OneUi.BGProtectManager;
-import static com.hchen.appretention.data.path.OneUi.ChimeraManagerService;
-import static com.hchen.appretention.data.path.OneUi.DynamicHiddenApp;
-import static com.hchen.appretention.data.path.OneUi.KillPolicyManager;
-import static com.hchen.appretention.data.path.OneUi.MARsPolicyManager;
-import static com.hchen.appretention.data.path.OneUi.PerProcessNandswap;
-import static com.hchen.appretention.data.path.System.ActivityManagerService;
-import static com.hchen.appretention.data.path.System.ProcessList;
-import static com.hchen.appretention.data.path.System.ProcessRecord;
-import static com.hchen.hooktool.log.XposedLog.logD;
+import static com.hchen.appretention.data.field.OneUiField.ENABLE_KILL_LONG_RUNNING_PROCESS;
+import static com.hchen.appretention.data.field.OneUiField.INSTANCE;
+import static com.hchen.appretention.data.field.OneUiField.KPM_BTIME_ENABLE;
+import static com.hchen.appretention.data.field.OneUiField.KPM_POLICY_ENABLE;
+import static com.hchen.appretention.data.field.OneUiField.MARs_ENABLE;
+import static com.hchen.appretention.data.field.OneUiField.MAX_LONG_LIVE_APP;
+import static com.hchen.appretention.data.field.OneUiField.WRITEBACK_ENABLED;
+import static com.hchen.appretention.data.method.OneUiMethod.IsForceKillHeavyProcess;
+import static com.hchen.appretention.data.method.OneUiMethod.activeLaunchKillCheck;
+import static com.hchen.appretention.data.method.OneUiMethod.addLongLivePackageLocked;
+import static com.hchen.appretention.data.method.OneUiMethod.checkKeptProcess;
+import static com.hchen.appretention.data.method.OneUiMethod.getInstance;
+import static com.hchen.appretention.data.method.OneUiMethod.getMARsEnabled;
+import static com.hchen.appretention.data.method.OneUiMethod.getMaxLongLiveApps;
+import static com.hchen.appretention.data.method.OneUiMethod.isBEKCondition;
+import static com.hchen.appretention.data.method.OneUiMethod.isExcessiveResourceUsage;
+import static com.hchen.appretention.data.method.OneUiMethod.isPmmEnabled;
+import static com.hchen.appretention.data.method.OneUiMethod.killTimeOverEmptyProcess;
+import static com.hchen.appretention.data.method.OneUiMethod.setLmkdCameraKillBoost;
+import static com.hchen.appretention.data.method.OneUiMethod.setLmkdParameter;
+import static com.hchen.appretention.data.method.OneUiMethod.updateNapProcessProtection;
+import static com.hchen.appretention.data.path.OneUiClass.ActivityManagerServiceExt;
+import static com.hchen.appretention.data.path.OneUiClass.BGProtectManager;
+import static com.hchen.appretention.data.path.OneUiClass.ChimeraManagerService;
+import static com.hchen.appretention.data.path.OneUiClass.DynamicHiddenApp;
+import static com.hchen.appretention.data.path.OneUiClass.KillPolicyManager;
+import static com.hchen.appretention.data.path.OneUiClass.MARsPolicyManager;
+import static com.hchen.appretention.data.path.OneUiClass.PerProcessNandswap;
+import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
+import static com.hchen.appretention.data.path.SystemClass.ProcessList;
+import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 
 import android.content.Context;
 

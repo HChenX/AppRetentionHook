@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.system;
 
-import static com.hchen.appretention.data.method.System.handleAppCrashInActivityController;
-import static com.hchen.appretention.data.path.System.AppErrors;
+import static com.hchen.appretention.data.method.SystemMethod.handleAppCrashInActivityController;
+import static com.hchen.appretention.data.path.SystemClass.AppErrors;
 
 import android.app.ApplicationErrorReport;
 import android.content.Context;
 
-import com.hchen.appretention.data.field.System;
+import com.hchen.appretention.data.field.SystemField;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.processor.HookEntrance;
@@ -61,7 +61,7 @@ public class CrashEventListener extends BaseHC {
         hook(hookError, new IHook() {
                 @Override
                 public void after() {
-                    Context mContext = (Context) getThisField(System.mContext);
+                    Context mContext = (Context) getThisField(SystemField.mContext);
                     Object proc = getArgs(0);
                     ApplicationErrorReport.CrashInfo crashInfo = (ApplicationErrorReport.CrashInfo) getArgs(1);
                     String shortMsg = (String) getArgs(2);

@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.samsung;
 
-import static com.hchen.appretention.data.method.Hyper.init;
-import static com.hchen.appretention.data.method.OneUi.setLmkdParameter;
-import static com.hchen.appretention.data.path.OneUi.DynamicHiddenApp$LmkdParameter;
-import static com.hchen.appretention.data.path.System.ActiveUids;
-import static com.hchen.appretention.data.path.System.ActivityManagerService;
-import static com.hchen.appretention.data.path.System.PlatformCompat;
-import static com.hchen.appretention.data.path.System.ProcessList;
+import static com.hchen.appretention.data.method.HyperMethod.init;
+import static com.hchen.appretention.data.method.OneUiMethod.setLmkdParameter;
+import static com.hchen.appretention.data.path.OneUiClass.DynamicHiddenApp$LmkdParameter;
+import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
+import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
+import static com.hchen.appretention.data.path.SystemClass.PlatformCompat;
+import static com.hchen.appretention.data.path.SystemClass.ProcessList;
 import static com.hchen.hooktool.log.XposedLog.logD;
 import static com.hchen.hooktool.log.XposedLog.logI;
 import static com.hchen.hooktool.tool.CoreTool.callStaticMethod;

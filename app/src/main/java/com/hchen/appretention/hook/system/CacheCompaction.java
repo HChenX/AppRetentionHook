@@ -14,53 +14,61 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.system;
 
-import static com.hchen.appretention.data.field.System.mCachedAppOptimizerThread;
-import static com.hchen.appretention.data.field.System.mCompactionHandler;
-import static com.hchen.appretention.data.field.System.mOptRecord;
-import static com.hchen.appretention.data.field.System.mPendingCompactionProcesses;
-import static com.hchen.appretention.data.field.System.mState;
-import static com.hchen.appretention.data.field.System.mUseBootCompact;
-import static com.hchen.appretention.data.field.System.mUseCompaction;
-import static com.hchen.appretention.data.method.System.getCurAdj;
-import static com.hchen.appretention.data.method.System.getLastCompactTime;
-import static com.hchen.appretention.data.method.System.getSetAdj;
-import static com.hchen.appretention.data.method.System.getSetProcState;
-import static com.hchen.appretention.data.method.System.hasPendingCompact;
-import static com.hchen.appretention.data.method.System.interruptProcCompaction;
-import static com.hchen.appretention.data.method.System.onOomAdjustChanged;
-import static com.hchen.appretention.data.method.System.resolveCompactionProfile;
-import static com.hchen.appretention.data.method.System.setAppStartingMode;
-import static com.hchen.appretention.data.method.System.setHasPendingCompact;
-import static com.hchen.appretention.data.method.System.setProperty;
-import static com.hchen.appretention.data.method.System.setReqCompactProfile;
-import static com.hchen.appretention.data.method.System.setReqCompactSource;
-import static com.hchen.appretention.data.method.System.setThreadGroupAndCpuset;
-import static com.hchen.appretention.data.method.System.shouldRssThrottleCompaction;
-import static com.hchen.appretention.data.method.System.shouldThrottleMiscCompaction;
-import static com.hchen.appretention.data.method.System.shouldTimeThrottleCompaction;
-import static com.hchen.appretention.data.method.System.updateUseCompaction;
-import static com.hchen.appretention.data.path.System.ActivityManagerService;
-import static com.hchen.appretention.data.path.System.CachedAppOptimizer;
-import static com.hchen.appretention.data.path.System.CachedAppOptimizer$CompactProfile;
-import static com.hchen.appretention.data.path.System.CachedAppOptimizer$CompactSource;
-import static com.hchen.appretention.data.path.System.CachedAppOptimizer$DefaultProcessDependencies;
-import static com.hchen.appretention.data.path.System.CachedAppOptimizer$MemCompactionHandler;
-import static com.hchen.appretention.data.path.System.CachedAppOptimizer$ProcessDependencies;
-import static com.hchen.appretention.data.path.System.CachedAppOptimizer$PropertyChangedCallbackForTest;
-import static com.hchen.appretention.data.path.System.DeviceConfig;
-import static com.hchen.appretention.data.path.System.ProcessRecord;
-import static com.hchen.hooktool.log.XposedLog.logD;
-import static com.hchen.hooktool.log.XposedLog.logW;
+import static com.hchen.appretention.data.field.SystemField.mCachedAppOptimizerThread;
+import static com.hchen.appretention.data.field.SystemField.mCompactionHandler;
+import static com.hchen.appretention.data.field.SystemField.mOptRecord;
+import static com.hchen.appretention.data.field.SystemField.mPendingCompactionProcesses;
+import static com.hchen.appretention.data.field.SystemField.mState;
+import static com.hchen.appretention.data.field.SystemField.mUseBootCompact;
+import static com.hchen.appretention.data.field.SystemField.mUseCompaction;
+import static com.hchen.appretention.data.method.HyperMethod.compactBackgroundProcess;
+import static com.hchen.appretention.data.method.SystemMethod.getBoolean;
+import static com.hchen.appretention.data.method.SystemMethod.getCurAdj;
+import static com.hchen.appretention.data.method.SystemMethod.getLastCompactTime;
+import static com.hchen.appretention.data.method.SystemMethod.getSetAdj;
+import static com.hchen.appretention.data.method.SystemMethod.getSetProcState;
+import static com.hchen.appretention.data.method.SystemMethod.hasPendingCompact;
+import static com.hchen.appretention.data.method.SystemMethod.interruptProcCompaction;
+import static com.hchen.appretention.data.method.SystemMethod.onOomAdjustChanged;
+import static com.hchen.appretention.data.method.SystemMethod.resolveCompactionProfile;
+import static com.hchen.appretention.data.method.SystemMethod.setAppStartingMode;
+import static com.hchen.appretention.data.method.SystemMethod.setForceCompact;
+import static com.hchen.appretention.data.method.SystemMethod.setHasPendingCompact;
+import static com.hchen.appretention.data.method.SystemMethod.setProperty;
+import static com.hchen.appretention.data.method.SystemMethod.setReqCompactProfile;
+import static com.hchen.appretention.data.method.SystemMethod.setReqCompactSource;
+import static com.hchen.appretention.data.method.SystemMethod.setThreadGroupAndCpuset;
+import static com.hchen.appretention.data.method.SystemMethod.shouldRssThrottleCompaction;
+import static com.hchen.appretention.data.method.SystemMethod.shouldThrottleMiscCompaction;
+import static com.hchen.appretention.data.method.SystemMethod.shouldTimeThrottleCompaction;
+import static com.hchen.appretention.data.method.SystemMethod.updateUseCompaction;
+import static com.hchen.appretention.data.path.HyperClass.OomAdjusterImpl;
+import static com.hchen.appretention.data.path.HyperClass.ServiceThread;
+import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
+import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
+import static com.hchen.appretention.data.path.SystemClass.CachedAppOptimizer;
+import static com.hchen.appretention.data.path.SystemClass.CachedAppOptimizer$CompactProfile;
+import static com.hchen.appretention.data.path.SystemClass.CachedAppOptimizer$CompactSource;
+import static com.hchen.appretention.data.path.SystemClass.CachedAppOptimizer$DefaultProcessDependencies;
+import static com.hchen.appretention.data.path.SystemClass.CachedAppOptimizer$MemCompactionHandler;
+import static com.hchen.appretention.data.path.SystemClass.CachedAppOptimizer$ProcessDependencies;
+import static com.hchen.appretention.data.path.SystemClass.CachedAppOptimizer$PropertyChangedCallbackForTest;
+import static com.hchen.appretention.data.path.SystemClass.DeviceConfig;
+import static com.hchen.appretention.data.path.SystemClass.Injector;
+import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
+import static com.hchen.appretention.data.path.SystemClass.ProcessList;
+import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 
-import com.hchen.appretention.data.field.System;
+import com.hchen.appretention.data.field.SystemField;
+import com.hchen.appretention.data.other.PrecessAdjInfo;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
@@ -72,11 +80,188 @@ import java.util.ArrayList;
  * @author 焕晨HChen
  */
 public final class CacheCompaction extends BaseHC {
+    private Object mCachedAppOptimizer = null;
+    private Object NONE;
+    private Object SOME;
+    private Object ANON;
+    private Object FULL;
+    private Object ANON_MORE;
+    private Object APP;
+    private Object SHELL;
+
+
     @Override
     public void init() {
-        compactionAppCache();
+        // compactionAppCache();
+        compactionAppCacheNew();
+
+        hookConstructor(OomAdjuster,
+            ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector,
+            new IHook() {
+                @Override
+                public void after() {
+                    mCachedAppOptimizer = getThisField(SystemField.mCachedAppOptimizer);
+                    initEnum();
+                }
+            }
+        );
     }
 
+    private void initEnum() {
+        if (mCachedAppOptimizer == null || NONE != null || SOME != null) return;
+        NONE = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.NONE);
+        SOME = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.SOME);
+        ANON = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.ANON);
+        FULL = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.FULL);
+        if (existsField(CachedAppOptimizer$CompactProfile, SystemField.ANON_MORE))
+            ANON_MORE = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.ANON_MORE);
+
+        if (existsClass(CachedAppOptimizer$CompactSource)) {
+            APP = getStaticField(CachedAppOptimizer$CompactSource, SystemField.APP);
+            SHELL = getStaticField(CachedAppOptimizer$CompactSource, SystemField.SHELL);
+        }
+    }
+
+    private void compactionAppCacheNew() {
+        hookMethod(OomAdjusterImpl,
+            compactBackgroundProcess,
+            ProcessRecord,
+            new IHook() {
+                @Override
+                public void before() {
+                    returnNull();
+
+                    if (mCachedAppOptimizer == null) return;
+                    initEnum();
+                    Object app = getArgs(0);
+
+                    if (getCurAdj(app) == getSetAdj(app)) return;
+
+                    if (getSetAdj(app) <= PrecessAdjInfo.PERCEPTIBLE_APP_ADJ && (
+                        getCurAdj(app) == PrecessAdjInfo.PREVIOUS_APP_ADJ ||
+                            getCurAdj(app) == PrecessAdjInfo.HOME_APP_ADJ
+                    )) { // 应用从可感知进入后台
+                        if (ANON != null && ANON_MORE == null)
+                            compactApp(app, ANON, SHELL, false);
+                        else if (ANON_MORE != null) {
+                            compactApp(app, ANON_MORE, SHELL, false);
+                        }
+                    } else if (getCurAdj(app) >= PrecessAdjInfo.CACHED_APP_MIN_ADJ && getCurAdj(app) <= PrecessAdjInfo.CACHED_APP_MAX_ADJ) {
+                        compactApp(app, FULL, SHELL, false);
+                    }
+                }
+            }.shouldObserveCall(false)
+        );
+
+        // 不许替换
+        hookMethod(CachedAppOptimizer,
+            resolveCompactionProfile,
+            CachedAppOptimizer$CompactProfile,
+            new IHook() {
+                @Override
+                public void before() {
+                    setResult(getArgs(0));
+                }
+            }.shouldObserveCall(false)
+        );
+
+        hookMethod(CachedAppOptimizer,
+            updateUseCompaction,
+            new IHook() {
+                @Override
+                public void before() {
+                    Boolean enabled = (Boolean) callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", true);
+
+                    if (!enabled) {
+                        Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", "true", true);
+                        if (result != null && result) {
+                            logD(TAG, "Success to put use_compaction new value 'true'");
+                        } else
+                            logW(TAG, "Failed to put use_compaction value to 'true'");
+                    }
+                }
+            }.shouldObserveCall(false)
+        );
+
+        chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
+            .returnResult(false).shouldObserveCall(false) 进程恢复到可感知状态了 */
+
+            method(shouldThrottleMiscCompaction, ProcessRecord, int.class)
+                .returnResult(false).shouldObserveCall(false)
+
+                .method(shouldTimeThrottleCompaction, ProcessRecord, long.class, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource)
+                .hook(new IHook() {
+                    @Override
+                    public void before() {
+                        Object opt = getField(getArgs(0), mOptRecord);
+                        long lastCompactTime = (long) callMethod(opt, getLastCompactTime);
+                        long start = (long) getArgs(1);
+                        // 15 秒内不允许再次触发。
+                        if (lastCompactTime != 0) {
+                            if (start - lastCompactTime < 15000) {
+                                setResult(true);
+                                return;
+                            }
+                        }
+                        setResult(false);
+                    }
+                }).shouldObserveCall(false)
+
+                .method(shouldRssThrottleCompaction, CachedAppOptimizer$CompactProfile, int.class, String.class, long[].class)
+                .hook(new IHook() {
+                    @Override
+                    public void before() {
+                        long[] rssBefore = (long[]) getArgs(3);
+                        long anonRssBefore = rssBefore[2];
+                        if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
+                            setResult(true); // 进程可能被杀。
+                            return;
+                        }
+
+                        if (anonRssBefore < (1024 * 6)) {
+                            setResult(true);
+                            return;
+                        }
+                        setResult(false);
+                    }
+                }).shouldObserveCall(false)
+        );
+    }
+
+    private void compactApp(Object app, Object compactProfile, Object source, Object force) {
+        Object optRecord = getField(app, mOptRecord);
+        callMethod(optRecord, setReqCompactSource, source);
+        callMethod(optRecord, setReqCompactProfile, compactProfile);
+
+        if (!(boolean) callMethod(optRecord, hasPendingCompact)) {
+            callMethod(optRecord, setHasPendingCompact, true);
+            callMethod(optRecord, setForceCompact, force);
+
+            ArrayList<Object> pendingCompactionProcesses = (ArrayList<Object>) getField(mCachedAppOptimizer, mPendingCompactionProcesses);
+            pendingCompactionProcesses.add(app);
+            Handler compactionHandler = (Handler) getField(mCachedAppOptimizer, mCompactionHandler);
+            compactionHandler.sendMessage(compactionHandler.obtainMessage(1, getCurAdj(app), getSetProcState(app)));
+        }
+    }
+
+    // 当前的 adj 值。
+    private int getCurAdj(Object app) {
+        Object state = getField(app, mState);
+        return (int) callMethod(state, getCurAdj);
+    }
+
+    // 上一次的 adj 值。
+    private int getSetAdj(Object app) {
+        Object state = getField(app, mState);
+        return (int) callMethod(state, getSetAdj);
+    }
+
+    private int getSetProcState(Object app) {
+        Object state = getField(app, mState);
+        return (int) callMethod(state, getSetProcState);
+    }
+
+    @Deprecated
     private void compactionAppCache() {
         // --------------- CachedAppOptimizer ----------------
         /*
@@ -85,11 +270,11 @@ public final class CacheCompaction extends BaseHC {
         chain(CachedAppOptimizer, method(onOomAdjustChanged,
             int.class, int.class, ProcessRecord).hook(
                 new IHook() {
-                    private static final Object SOME = getStaticField(CachedAppOptimizer$CompactProfile, System.SOME);
-                    private static final Object FULL = getStaticField(CachedAppOptimizer$CompactProfile, System.FULL);
-                    private static final Object ANON = getStaticField(CachedAppOptimizer$CompactProfile, System.ANON);
-                    private static final Object SHEll = getStaticField(CachedAppOptimizer$CompactSource, System.SHELL);
-                    private static final Object APP = getStaticField(CachedAppOptimizer$CompactSource, System.APP);
+                    private static final Object SOME = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.SOME);
+                    private static final Object FULL = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.FULL);
+                    private static final Object ANON = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.ANON);
+                    private static final Object SHEll = getStaticField(CachedAppOptimizer$CompactSource, SystemField.SHELL);
+                    private static final Object APP = getStaticField(CachedAppOptimizer$CompactSource, SystemField.APP);
                     private Object state;
                     private Object optRecord;
 

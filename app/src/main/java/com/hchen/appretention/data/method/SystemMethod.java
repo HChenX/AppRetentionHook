@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.method;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.method;
  *
  * @author 焕晨HChen
  */
-public class System {
+public class SystemMethod {
     public static final String killProcessesWhenImperceptible = "killProcessesWhenImperceptible";
     public static final String killProcessLocked = "killProcessLocked";
     public static final String onLmkdConnect = "onLmkdConnect";
@@ -43,6 +43,7 @@ public class System {
     public static final String trimInactiveRecentTasks = "trimInactiveRecentTasks";
     public static final String isInVisibleRange = "isInVisibleRange";
     public static final String onOomAdjustChanged = "onOomAdjustChanged";
+    public static final String compactApp = "compactApp";
     public static final String resolveCompactionProfile = "resolveCompactionProfile";
     public static final String getSetAdj = "getSetAdj";
     public static final String getCurAdj = "getCurAdj";
@@ -51,6 +52,7 @@ public class System {
     public static final String setReqCompactSource = "setReqCompactSource";
     public static final String hasPendingCompact = "hasPendingCompact";
     public static final String setHasPendingCompact = "setHasPendingCompact";
+    public static final String setForceCompact = "setForceCompact";
     public static final String shouldOomAdjThrottleCompaction = "shouldOomAdjThrottleCompaction";
     public static final String interruptProcCompaction = "interruptProcCompaction";
     public static final String setAppStartingMode = "setAppStartingMode";
@@ -62,6 +64,7 @@ public class System {
     public static final String isAlive = "isAlive";
     public static final String start = "start";
     public static final String setProperty = "setProperty";
+    public static final String getBoolean = "getBoolean";
     public static final String setThreadGroupAndCpuset = "setThreadGroupAndCpuset";
     public static final String getThreadId = "getThreadId";
     public static final String updateKillBgRestrictedCachedIdle = "updateKillBgRestrictedCachedIdle";

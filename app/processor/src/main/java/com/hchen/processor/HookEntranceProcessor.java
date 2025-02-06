@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.processor;
 
@@ -71,7 +71,7 @@ public class HookEntranceProcessor extends AbstractProcessor {
                  * You can reference the code of this project,
                  * but as a project developer, I hope you can indicate it when referencing.
 
-                 * Copyright (C) 2023-2024 HChenX
+                 * Copyright (C) 2023-2025 HChenX
                  */
                 package com.hchen.appretention.hook;
 

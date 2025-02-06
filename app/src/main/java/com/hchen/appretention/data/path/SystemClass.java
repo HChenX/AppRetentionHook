@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.path;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.path;
  *
  * @author 焕晨HChen
  */
-public class System {
+public class SystemClass {
     public static final String ProcessList = "com.android.server.am.ProcessList";
     public static final String ProcessList$ImperceptibleKillRunner = "com.android.server.am.ProcessList$ImperceptibleKillRunner";
     public static final String PhantomProcessList = "com.android.server.am.PhantomProcessList";
@@ -35,6 +35,7 @@ public class System {
     public static final String AppProfiler = "com.android.server.am.AppProfiler";
     public static final String OomAdjuster = "com.android.server.am.OomAdjuster";
     public static final String ActiveUids = "com.android.server.am.ActiveUids";
+    public static final String Injector = "com.android.server.am.OomAdjuster.Injector";
     public static final String PlatformCompat = "com.android.server.compat.PlatformCompat";
     public static final String RecentTasks = "com.android.server.wm.RecentTasks";
     public static final String Task = "com.android.server.wm.Task";

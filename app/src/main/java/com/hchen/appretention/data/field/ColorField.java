@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.data.method;
+package com.hchen.appretention.data.field;
 
 /**
- * 系统界面方法名
+ * Color 字段名
  *
  * @author 焕晨HChen
  */
-public class SystemUi {
-    public static final String onCreate = "onCreate";
+public class ColorField {
 }

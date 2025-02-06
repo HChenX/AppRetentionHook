@@ -14,29 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.hyper;
 
-import static com.hchen.appretention.data.method.Hyper.boostCameraByThreshold;
-import static com.hchen.appretention.data.method.Hyper.callMethod;
-import static com.hchen.appretention.data.method.Hyper.callStaticMethod;
-import static com.hchen.appretention.data.method.Hyper.doAdjBoost;
-import static com.hchen.appretention.data.method.Hyper.interceptAppRestartIfNeeded;
-import static com.hchen.appretention.data.method.Hyper.isAllowAdjBoost;
-import static com.hchen.appretention.data.method.Hyper.newInstance;
-import static com.hchen.appretention.data.method.Hyper.notifyActivityChanged;
-import static com.hchen.appretention.data.method.Hyper.notifyCameraForegroundChange;
-import static com.hchen.appretention.data.method.Hyper.notifyCameraForegroundState;
-import static com.hchen.appretention.data.method.Hyper.notifyCameraPostProcessState;
-import static com.hchen.appretention.data.method.Hyper.reclaimMemoryForCamera;
-import static com.hchen.appretention.data.method.Hyper.updateCameraBoosterCloudData;
-import static com.hchen.appretention.data.path.Hyper.CameraOpt;
-import static com.hchen.appretention.data.path.Hyper.ICameraBooster;
-import static com.hchen.appretention.data.path.Hyper.ICameraBooster$CameraBoosterProxy;
-import static com.hchen.appretention.data.path.Hyper.ProcessManagerInternal;
-import static com.hchen.appretention.data.path.Hyper.ServiceThread;
-import static com.hchen.appretention.data.path.System.ActivityManagerService;
+import static com.hchen.appretention.data.method.HyperMethod.boostCameraByThreshold;
+import static com.hchen.appretention.data.method.HyperMethod.callMethod;
+import static com.hchen.appretention.data.method.HyperMethod.callStaticMethod;
+import static com.hchen.appretention.data.method.HyperMethod.doAdjBoost;
+import static com.hchen.appretention.data.method.HyperMethod.interceptAppRestartIfNeeded;
+import static com.hchen.appretention.data.method.HyperMethod.isAllowAdjBoost;
+import static com.hchen.appretention.data.method.HyperMethod.newInstance;
+import static com.hchen.appretention.data.method.HyperMethod.notifyActivityChanged;
+import static com.hchen.appretention.data.method.HyperMethod.notifyCameraForegroundChange;
+import static com.hchen.appretention.data.method.HyperMethod.notifyCameraForegroundState;
+import static com.hchen.appretention.data.method.HyperMethod.notifyCameraPostProcessState;
+import static com.hchen.appretention.data.method.HyperMethod.reclaimMemoryForCamera;
+import static com.hchen.appretention.data.method.HyperMethod.updateCameraBoosterCloudData;
+import static com.hchen.appretention.data.path.HyperClass.CameraOpt;
+import static com.hchen.appretention.data.path.HyperClass.ICameraBooster;
+import static com.hchen.appretention.data.path.HyperClass.ICameraBooster$CameraBoosterProxy;
+import static com.hchen.appretention.data.path.HyperClass.ProcessManagerInternal;
+import static com.hchen.appretention.data.path.HyperClass.ServiceThread;
+import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
 import static com.hchen.hooktool.tool.CoreTool.doNothing;
 import static com.hchen.hooktool.tool.CoreTool.existsAnyMethod;
 import static com.hchen.hooktool.tool.CoreTool.existsClass;
@@ -49,7 +49,7 @@ import static com.hchen.hooktool.tool.CoreTool.returnResult;
 
 import android.content.Context;
 
-import com.hchen.appretention.data.field.Hyper;
+import com.hchen.appretention.data.field.HyperField;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.tool.CoreTool;
 
@@ -65,7 +65,7 @@ public class CameraOpt {
     public static void doHook() {
         if (existsClass(CameraOpt)) {
             Class<?> mCameraOpt = findClass(CameraOpt);
-            if (existsField(mCameraOpt, Hyper.mCameraBoosterClazz) || existsField(mCameraOpt, Hyper.mQuickCameraClazz)) {
+            if (existsField(mCameraOpt, HyperField.mCameraBoosterClazz) || existsField(mCameraOpt, HyperField.mQuickCameraClazz)) {
                 hookMethod(CameraOpt,
                     callStaticMethod,
                     Class.class, String.class, Object[].class,

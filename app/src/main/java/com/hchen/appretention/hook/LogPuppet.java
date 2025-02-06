@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook;
 
-import static com.hchen.appretention.data.method.SystemUi.onCreate;
-import static com.hchen.appretention.data.path.SystemUi.SystemUIApplication;
+import static com.hchen.appretention.data.method.SystemUiMethod.onCreate;
+import static com.hchen.appretention.data.path.SystemUiClass.SystemUIApplication;
 import static com.hchen.appretention.log.SaveLog.ACTION_LOG_SERVICE_CONTENT;
 import static com.hchen.appretention.log.SaveLog.SETTINGS_LOG_SERVICE_COMPLETED;
 import static com.hchen.appretention.log.SaveLog.isUserUnlockedCompeted;
-import static com.hchen.hooktool.log.XposedLog.logE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

@@ -14,48 +14,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.miui;
 
-import static com.hchen.appretention.data.field.Hyper.IS_ENABLE_RECLAIM;
-import static com.hchen.appretention.data.field.Hyper.PROCESS_CLEANER_ENABLED;
-import static com.hchen.appretention.data.field.Hyper.PROC_CPU_EXCEPTION_ENABLE;
-import static com.hchen.appretention.data.field.Hyper.RECLAIM_IF_NEEDED;
-import static com.hchen.appretention.data.field.Hyper.START_PRELOAD_IS_DISABLE;
-import static com.hchen.appretention.data.method.Hyper.checkBackgroundAppException;
-import static com.hchen.appretention.data.method.Hyper.cleanUpMemory;
-import static com.hchen.appretention.data.method.Hyper.getDeviceLevelForRAM;
-import static com.hchen.appretention.data.method.Hyper.handleAutoLockOff;
-import static com.hchen.appretention.data.method.Hyper.handleKillAll;
-import static com.hchen.appretention.data.method.Hyper.handleKillApp;
-import static com.hchen.appretention.data.method.Hyper.handleLimitCpuException;
-import static com.hchen.appretention.data.method.Hyper.handleThermalKillProc;
-import static com.hchen.appretention.data.method.Hyper.isMiuiLiteVersion;
-import static com.hchen.appretention.data.method.Hyper.killPackage;
-import static com.hchen.appretention.data.method.Hyper.killProcess;
-import static com.hchen.appretention.data.method.Hyper.killProcessByMinAdj;
-import static com.hchen.appretention.data.method.Hyper.nStartPressureMonitor;
-import static com.hchen.appretention.data.method.Hyper.onStartJob;
-import static com.hchen.appretention.data.method.Hyper.performCompaction;
-import static com.hchen.appretention.data.method.Hyper.preloadAppEnqueue;
-import static com.hchen.appretention.data.method.Hyper.reclaimBackground;
-import static com.hchen.appretention.data.method.Hyper.startPreloadApp;
-import static com.hchen.appretention.data.method.Hyper.updateScreenState;
-import static com.hchen.appretention.data.path.Hyper.AppStateManager$AppState$RunningProcess;
-import static com.hchen.appretention.data.path.Hyper.Build;
-import static com.hchen.appretention.data.path.Hyper.GameMemoryReclaimer;
-import static com.hchen.appretention.data.path.Hyper.LifecycleConfig;
-import static com.hchen.appretention.data.path.Hyper.MiuiMemReclaimer;
-import static com.hchen.appretention.data.path.Hyper.PreloadAppControllerImpl;
-import static com.hchen.appretention.data.path.Hyper.PreloadLifecycle;
-import static com.hchen.appretention.data.path.Hyper.PressureStateSettings;
-import static com.hchen.appretention.data.path.Hyper.ProcessConfig;
-import static com.hchen.appretention.data.path.Hyper.ProcessKillerIdler;
-import static com.hchen.appretention.data.path.Hyper.ProcessMemoryCleaner;
-import static com.hchen.appretention.data.path.Hyper.ProcessPowerCleaner;
-import static com.hchen.appretention.data.path.Hyper.SmartCpuPolicyManager;
-import static com.hchen.appretention.data.path.Hyper.SystemPressureController;
+import static com.hchen.appretention.data.field.HyperField.IS_ENABLE_RECLAIM;
+import static com.hchen.appretention.data.field.HyperField.PROCESS_CLEANER_ENABLED;
+import static com.hchen.appretention.data.field.HyperField.PROC_CPU_EXCEPTION_ENABLE;
+import static com.hchen.appretention.data.field.HyperField.RECLAIM_IF_NEEDED;
+import static com.hchen.appretention.data.field.HyperField.START_PRELOAD_IS_DISABLE;
+import static com.hchen.appretention.data.method.HyperMethod.checkBackgroundAppException;
+import static com.hchen.appretention.data.method.HyperMethod.cleanUpMemory;
+import static com.hchen.appretention.data.method.HyperMethod.getDeviceLevelForRAM;
+import static com.hchen.appretention.data.method.HyperMethod.handleAutoLockOff;
+import static com.hchen.appretention.data.method.HyperMethod.handleKillAll;
+import static com.hchen.appretention.data.method.HyperMethod.handleKillApp;
+import static com.hchen.appretention.data.method.HyperMethod.handleLimitCpuException;
+import static com.hchen.appretention.data.method.HyperMethod.handleThermalKillProc;
+import static com.hchen.appretention.data.method.HyperMethod.isMiuiLiteVersion;
+import static com.hchen.appretention.data.method.HyperMethod.killPackage;
+import static com.hchen.appretention.data.method.HyperMethod.killProcess;
+import static com.hchen.appretention.data.method.HyperMethod.killProcessByMinAdj;
+import static com.hchen.appretention.data.method.HyperMethod.nStartPressureMonitor;
+import static com.hchen.appretention.data.method.HyperMethod.onStartJob;
+import static com.hchen.appretention.data.method.HyperMethod.performCompaction;
+import static com.hchen.appretention.data.method.HyperMethod.preloadAppEnqueue;
+import static com.hchen.appretention.data.method.HyperMethod.reclaimBackground;
+import static com.hchen.appretention.data.method.HyperMethod.startPreloadApp;
+import static com.hchen.appretention.data.method.HyperMethod.updateScreenState;
+import static com.hchen.appretention.data.path.HyperClass.AppStateManager$AppState$RunningProcess;
+import static com.hchen.appretention.data.path.HyperClass.Build;
+import static com.hchen.appretention.data.path.HyperClass.GameMemoryReclaimer;
+import static com.hchen.appretention.data.path.HyperClass.LifecycleConfig;
+import static com.hchen.appretention.data.path.HyperClass.MiuiMemReclaimer;
+import static com.hchen.appretention.data.path.HyperClass.PreloadAppControllerImpl;
+import static com.hchen.appretention.data.path.HyperClass.PreloadLifecycle;
+import static com.hchen.appretention.data.path.HyperClass.PressureStateSettings;
+import static com.hchen.appretention.data.path.HyperClass.ProcessConfig;
+import static com.hchen.appretention.data.path.HyperClass.ProcessKillerIdler;
+import static com.hchen.appretention.data.path.HyperClass.ProcessMemoryCleaner;
+import static com.hchen.appretention.data.path.HyperClass.ProcessPowerCleaner;
+import static com.hchen.appretention.data.path.HyperClass.SmartCpuPolicyManager;
+import static com.hchen.appretention.data.path.HyperClass.SystemPressureController;
 
 import android.app.job.JobParameters;
 

@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.data.path;
+package com.hchen.appretention.data.method;
 
 /**
- * 电量和性能类名
+ * 电量和性能方法名
  *
  * @author 焕晨HChen
  */
-public class PowerKeeper {
-    public static final String ProcessManager = "miui.process.ProcessManager";
+public class PowerKeeperMethod {
+    public static final String kill = "kill";
 }

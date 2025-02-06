@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.path;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.path;
  *
  * @author 焕晨HChen
  */
-public class Hyper {
+public class HyperClass {
     public static final String ScoutHelper = "com.android.server.ScoutHelper";
     public static final String ScoutDisplayMemoryManager = "com.miui.server.stability.ScoutDisplayMemoryManager";
     public static final String ActivityThreadImpl = "android.app.ActivityThreadImpl";

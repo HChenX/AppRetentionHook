@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.path;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.path;
  *
  * @author 焕晨HChen
  */
-public class OneUi {
+public class OneUiClass {
     public static final String SettingRepositoryDefault = "com.android.server.chimera.SettingRepositoryDefault";
     public static final String ChimeraManager = "com.android.server.chimera.ChimeraManager";
     public static final String PreferenceProvider = "com.android.server.chimera.PreferenceProvider";

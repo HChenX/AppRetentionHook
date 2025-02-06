@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.hook.powerkeeper;
 
-import static com.hchen.appretention.data.method.PowerKeeper.kill;
-import static com.hchen.appretention.data.path.PowerKeeper.ProcessManager;
+import static com.hchen.appretention.data.method.PowerKeeperMethod.kill;
+import static com.hchen.appretention.data.path.PowerKeeperClass.ProcessManager;
 
 import com.hchen.hooktool.BaseHC;
 import com.hchen.processor.HookEntrance;

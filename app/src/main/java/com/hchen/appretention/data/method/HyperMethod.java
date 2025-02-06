@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.method;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.method;
  *
  * @author 焕晨HChen
  */
-public class Hyper {
+public class HyperMethod {
     public static final String resumeMemLeak = "resumeMemLeak";
     public static final String reclaimMemoryForGameIfNeed = "reclaimMemoryForGameIfNeed";
     public static final String reclaimBackground = "reclaimBackground";

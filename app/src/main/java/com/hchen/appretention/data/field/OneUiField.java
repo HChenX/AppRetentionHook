@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
 
- * Copyright (C) 2023-2024 HChenX
+ * Copyright (C) 2023-2025 HChenX
  */
 package com.hchen.appretention.data.field;
 
@@ -23,7 +23,7 @@ package com.hchen.appretention.data.field;
  *
  * @author 焕晨HChen
  */
-public class OneUi {
+public class OneUiField {
     public static final String WRITEBACK_ENABLED = "WRITEBACK_ENABLED";
     public static final String INSTANCE = "INSTANCE";
     public static final String MAX_NEVERKILLEDAPP_NUM = "MAX_NEVERKILLEDAPP_NUM";
