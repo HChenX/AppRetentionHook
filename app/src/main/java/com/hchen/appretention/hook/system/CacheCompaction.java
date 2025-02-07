@@ -270,7 +270,7 @@ public final class CacheCompaction extends BaseHC {
     private void compactApp(Object app, int action, Object compactProfile, Object source, Object force) {
         Object optRecord = getField(app, mOptRecord);
 
-        if (!useOldCompactMode) {
+        if (useOldCompactMode) {
             callMethod(optRecord, setReqCompactAction, action);
         } else {
             callMethod(optRecord, setReqCompactSource, source);

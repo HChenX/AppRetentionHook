@@ -42,7 +42,7 @@ import java.util.Arrays;
 public final class UpdateOomLevels extends BaseHC {
     private static final int OOM_MIN_FREE_DISCOUNT = 3;
     private static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
-    // private Object mProcessListInstance = null;
+    private Object mProcessListInstance = null;
 
     @Override
     public void init() {
@@ -60,14 +60,14 @@ public final class UpdateOomLevels extends BaseHC {
         /*
          * 获取 ProcessList 的实例
          * */
-        // hookConstructor(ProcessList,
-        //     new IHook() {
-        //         @Override
-        //         public void after() {
-        //             mProcessListInstance = thisObject();
-        //         }
-        //     }
-        // );
+        hookConstructor(ProcessList,
+            new IHook() {
+                @Override
+                public void after() {
+                    mProcessListInstance = thisObject();
+                }
+            }
+        );
 
         /*
          * 当系统连接 lmkd 时会初始化一些 lmkd 参数。
@@ -133,7 +133,6 @@ public final class UpdateOomLevels extends BaseHC {
                     ByteBuffer bufCopy = buffer.duplicate();
                     bufCopy.rewind();
                     if (bufCopy.getInt() == 0) {
-                        mProcessListInstance = thisObject();
                         setOomMinFreeBuf(bufCopy);
                         setArgs(0, buffer);
                     }
