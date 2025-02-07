@@ -234,24 +234,6 @@ public class MiuiV14 extends BaseHC {
         );
 
         /*
-         * 禁止系统压力控制器清理内存。
-         * */
-        setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
-        chain(SystemPressureController,
-            /*
-             * 禁止随屏幕状态启动压力监测器。
-             * */
-            method(updateScreenState, boolean.class)
-                .doNothing()
-
-                /*
-                 * 禁止启动内存压力监测器。
-                 * */
-                .method(nStartPressureMonitor)
-                .doNothing()
-        );
-
-        /*
          * 是 MiuiMemoryService 几个核心方法。
          * */
         // Changed: Support Miui14

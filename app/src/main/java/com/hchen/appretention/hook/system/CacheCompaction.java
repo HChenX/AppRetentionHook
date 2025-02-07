@@ -76,7 +76,6 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -182,9 +181,8 @@ public final class CacheCompaction extends BaseHC {
         );
 
         // 不许替换
-        hookMethod(CachedAppOptimizer,
+        hookAllMethod(CachedAppOptimizer,
             resolveCompactionProfile,
-            CachedAppOptimizer$CompactProfile,
             new IHook() {
                 @Override
                 public void before() {
@@ -194,14 +192,9 @@ public final class CacheCompaction extends BaseHC {
         );
 
         // 阻止原生功能
-        Method compactAppMethod = null;
-        if (existsMethod(CachedAppOptimizer, compactApp, ProcessRecord, boolean.class, String.class))
-            compactAppMethod = findMethod(CachedAppOptimizer, compactApp, ProcessRecord, boolean.class, String.class);
-        else if (existsMethod(CachedAppOptimizer, compactApp, ProcessRecord, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource, boolean.class)) {
-            compactAppMethod = findMethod(CachedAppOptimizer, compactApp, ProcessRecord, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource, boolean.class);
-        }
-        hook(compactAppMethod,
-            doNothing()
+        hookAllMethod(CachedAppOptimizer,
+            compactApp,
+            doNothing().shouldObserveCall(false)
         );
 
         hookMethod(CachedAppOptimizer,
@@ -225,10 +218,10 @@ public final class CacheCompaction extends BaseHC {
         chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
             .returnResult(false).shouldObserveCall(false) 进程恢复到可感知状态了 */
 
-            method(shouldThrottleMiscCompaction, ProcessRecord, int.class)
+            anyMethod(shouldThrottleMiscCompaction)
                 .returnResult(false).shouldObserveCall(false)
 
-                .method(shouldTimeThrottleCompaction, ProcessRecord, long.class, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource)
+                .anyMethod(shouldTimeThrottleCompaction)
                 .hook(new IHook() {
                     @Override
                     public void before() {
@@ -246,7 +239,7 @@ public final class CacheCompaction extends BaseHC {
                     }
                 }).shouldObserveCall(false)
 
-                .method(shouldRssThrottleCompaction, CachedAppOptimizer$CompactProfile, int.class, String.class, long[].class)
+                .anyMethod(shouldRssThrottleCompaction)
                 .hook(new IHook() {
                     @Override
                     public void before() {
