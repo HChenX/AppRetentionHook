@@ -123,7 +123,6 @@ public final class UpdateOomLevels extends BaseHC {
             writeLmkd,
             ByteBuffer.class, ByteBuffer.class,
             new IHook() {
-                Object mProcessListInstance;
 
                 @Override
                 public void before() {
