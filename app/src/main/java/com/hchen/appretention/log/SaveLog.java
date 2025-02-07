@@ -18,6 +18,8 @@
  */
 package com.hchen.appretention.log;
 
+import static com.hchen.appretention.data.prop.SystemProp.FALSE;
+import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 import static com.hchen.hooktool.log.XposedLog.logENoSave;
 
 import android.annotation.SuppressLint;
@@ -440,7 +442,7 @@ public class SaveLog {
     }
 
     public static boolean isUserUnlockedCompeted() {
-        return SystemPropTool.getProp(USER_UNLOCKED_COMPLETED_PROP, "false").equals("true");
+        return SystemPropTool.getProp(USER_UNLOCKED_COMPLETED_PROP, FALSE).equals(TRUE);
     }
 
     private static void waitSystemBootCompletedIfNeed() {

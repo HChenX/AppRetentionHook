@@ -26,6 +26,7 @@ import static com.hchen.appretention.data.field.SystemField.mState;
 import static com.hchen.appretention.data.field.SystemField.mUseBootCompact;
 import static com.hchen.appretention.data.field.SystemField.mUseCompaction;
 import static com.hchen.appretention.data.method.HyperMethod.compactBackgroundProcess;
+import static com.hchen.appretention.data.method.SystemMethod.compactApp;
 import static com.hchen.appretention.data.method.SystemMethod.getBoolean;
 import static com.hchen.appretention.data.method.SystemMethod.getCurAdj;
 import static com.hchen.appretention.data.method.SystemMethod.getLastCompactTime;
@@ -39,6 +40,7 @@ import static com.hchen.appretention.data.method.SystemMethod.setAppStartingMode
 import static com.hchen.appretention.data.method.SystemMethod.setForceCompact;
 import static com.hchen.appretention.data.method.SystemMethod.setHasPendingCompact;
 import static com.hchen.appretention.data.method.SystemMethod.setProperty;
+import static com.hchen.appretention.data.method.SystemMethod.setReqCompactAction;
 import static com.hchen.appretention.data.method.SystemMethod.setReqCompactProfile;
 import static com.hchen.appretention.data.method.SystemMethod.setReqCompactSource;
 import static com.hchen.appretention.data.method.SystemMethod.setThreadGroupAndCpuset;
@@ -62,6 +64,7 @@ import static com.hchen.appretention.data.path.SystemClass.Injector;
 import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
 import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
+import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -73,6 +76,7 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -90,6 +94,12 @@ public final class CacheCompaction extends BaseHC {
     private Object APP;
     private Object SHELL;
 
+    // --------- old ---------
+    private static boolean useOldCompactMode = false;
+    private static final int COMPACT_ACTION_NONE = 0;
+    private static final int COMPACT_ACTION_FILE = 1;
+    private static final int COMPACT_ACTION_ANON = 2;
+    private static final int COMPACT_ACTION_FULL = 3;
 
     @Override
     public void init() {
@@ -113,14 +123,20 @@ public final class CacheCompaction extends BaseHC {
                 @Override
                 public void after() {
                     mCachedAppOptimizer = getThisField(SystemField.mCachedAppOptimizer);
-                    initEnum();
+                    initEnumIfNeed();
                 }
             }
         );
     }
 
-    private void initEnum() {
-        if (mCachedAppOptimizer == null || NONE != null || SOME != null) return;
+    private void initEnumIfNeed() {
+        if (mCachedAppOptimizer == null || useOldCompactMode) return;
+        if (NONE != null || SOME != null) return;
+        if (!existsClass(CachedAppOptimizer$CompactProfile)) {
+            useOldCompactMode = true;
+            return;
+        }
+
         NONE = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.NONE);
         SOME = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.SOME);
         ANON = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.ANON);
@@ -144,7 +160,7 @@ public final class CacheCompaction extends BaseHC {
                     returnNull();
 
                     if (mCachedAppOptimizer == null) return;
-                    initEnum();
+                    initEnumIfNeed();
                     Object app = getArgs(0);
 
                     if (getCurAdj(app) == getSetAdj(app)) return;
@@ -154,12 +170,12 @@ public final class CacheCompaction extends BaseHC {
                             getCurAdj(app) == PrecessAdjInfo.HOME_APP_ADJ
                     )) { // 应用从可感知进入后台
                         if (ANON != null && ANON_MORE == null)
-                            compactApp(app, ANON, SHELL, false);
+                            compactApp(app, COMPACT_ACTION_ANON, ANON, SHELL, false);
                         else if (ANON_MORE != null) {
-                            compactApp(app, ANON_MORE, SHELL, false);
+                            compactApp(app, COMPACT_ACTION_ANON, ANON_MORE, SHELL, false);
                         }
                     } else if (getCurAdj(app) >= PrecessAdjInfo.CACHED_APP_MIN_ADJ && getCurAdj(app) <= PrecessAdjInfo.CACHED_APP_MAX_ADJ) {
-                        compactApp(app, FULL, SHELL, false);
+                        compactApp(app, COMPACT_ACTION_FULL, FULL, SHELL, false);
                     }
                 }
             }.shouldObserveCall(false)
@@ -177,15 +193,26 @@ public final class CacheCompaction extends BaseHC {
             }.shouldObserveCall(false)
         );
 
+        // 阻止原生功能
+        Method compactAppMethod = null;
+        if (existsMethod(CachedAppOptimizer, compactApp, ProcessRecord, boolean.class, String.class))
+            compactAppMethod = findMethod(CachedAppOptimizer, compactApp, ProcessRecord, boolean.class, String.class);
+        else if (existsMethod(CachedAppOptimizer, compactApp, ProcessRecord, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource, boolean.class)) {
+            compactAppMethod = findMethod(CachedAppOptimizer, compactApp, ProcessRecord, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource, boolean.class);
+        }
+        hook(compactAppMethod,
+            doNothing()
+        );
+
         hookMethod(CachedAppOptimizer,
             updateUseCompaction,
             new IHook() {
                 @Override
                 public void before() {
-                    Boolean enabled = (Boolean) callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", true);
+                    Boolean enabled = (Boolean) callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", false);
 
                     if (!enabled) {
-                        Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", "true", true);
+                        Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", TRUE, true);
                         if (result != null && result) {
                             logD(TAG, "Success to put use_compaction new value 'true'");
                         } else
@@ -240,10 +267,15 @@ public final class CacheCompaction extends BaseHC {
         );
     }
 
-    private void compactApp(Object app, Object compactProfile, Object source, Object force) {
+    private void compactApp(Object app, int action, Object compactProfile, Object source, Object force) {
         Object optRecord = getField(app, mOptRecord);
-        callMethod(optRecord, setReqCompactSource, source);
-        callMethod(optRecord, setReqCompactProfile, compactProfile);
+
+        if (!useOldCompactMode) {
+            callMethod(optRecord, setReqCompactAction, action);
+        } else {
+            callMethod(optRecord, setReqCompactSource, source);
+            callMethod(optRecord, setReqCompactProfile, compactProfile);
+        }
 
         if (!(boolean) callMethod(optRecord, hasPendingCompact)) {
             callMethod(optRecord, setHasPendingCompact, true);
@@ -359,7 +391,7 @@ public final class CacheCompaction extends BaseHC {
             .hook(new IHook() {
                 @Override
                 public void before() {
-                    Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", "true", true);
+                    Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", TRUE, true);
                     if (result != null && result) {
                         logD(TAG, "Success to put use_compaction new value 'true'");
                     } else

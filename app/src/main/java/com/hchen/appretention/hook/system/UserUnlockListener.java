@@ -20,6 +20,8 @@ package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.method.SystemMethod.performReceive;
 import static com.hchen.appretention.data.path.SystemClass.UserController$3;
+import static com.hchen.appretention.data.prop.SystemProp.FALSE;
+import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 import static com.hchen.appretention.log.SaveLog.USER_UNLOCKED_COMPLETED_PROP;
 
 import android.content.Intent;
@@ -41,14 +43,14 @@ import com.hchen.hooktool.tool.additional.SystemPropTool;
 public class UserUnlockListener extends BaseHC {
     @Override
     public void init() {
-        SystemPropTool.setProp(USER_UNLOCKED_COMPLETED_PROP, "false");
+        SystemPropTool.setProp(USER_UNLOCKED_COMPLETED_PROP, FALSE);
         hookMethod(UserController$3,
             performReceive,
             Intent.class, int.class, String.class, Bundle.class, boolean.class, boolean.class, int.class,
             new IHook() {
                 @Override
                 public void after() {
-                    SystemPropTool.setProp(USER_UNLOCKED_COMPLETED_PROP, "true");
+                    SystemPropTool.setProp(USER_UNLOCKED_COMPLETED_PROP, TRUE);
                     AndroidLog.logI(TAG, "user unlocked completed!!!!");
                 }
             }

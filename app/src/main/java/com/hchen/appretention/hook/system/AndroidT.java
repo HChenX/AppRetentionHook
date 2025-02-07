@@ -69,6 +69,9 @@ import com.hchen.processor.HookEntrance;
 public class AndroidT extends BaseHC {
     @Override
     public void init() {
+        new UpdateOomLevels().onLoadPackage();
+        new CacheCompaction().onLoadPackage();
+
         // ----------- ProcessList ----------------------
         /*
          * 将不可感知的进程添加进列表 mWorkItems (ProcessList$ImperceptibleKillRunner)

@@ -50,6 +50,7 @@ public class SystemMethod {
     public static final String getSetProcState = "getSetProcState";
     public static final String setReqCompactProfile = "setReqCompactProfile";
     public static final String setReqCompactSource = "setReqCompactSource";
+    public static final String setReqCompactAction = "setReqCompactAction";
     public static final String hasPendingCompact = "hasPendingCompact";
     public static final String setHasPendingCompact = "setHasPendingCompact";
     public static final String setForceCompact = "setForceCompact";

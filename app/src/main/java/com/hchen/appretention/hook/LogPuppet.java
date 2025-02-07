@@ -20,6 +20,7 @@ package com.hchen.appretention.hook;
 
 import static com.hchen.appretention.data.method.SystemUiMethod.onCreate;
 import static com.hchen.appretention.data.path.SystemUiClass.SystemUIApplication;
+import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 import static com.hchen.appretention.log.SaveLog.ACTION_LOG_SERVICE_CONTENT;
 import static com.hchen.appretention.log.SaveLog.SETTINGS_LOG_SERVICE_COMPLETED;
 import static com.hchen.appretention.log.SaveLog.isUserUnlockedCompeted;
@@ -171,7 +172,7 @@ public class LogPuppet extends BaseHC {
         private static Process mLogcat;
 
         private static void init(Application application) {
-            if (BuildConfig.DEBUG || Settings.System.getString(application.getContentResolver(), SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE).equals("true")) {
+            if (BuildConfig.DEBUG || Settings.System.getString(application.getContentResolver(), SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE).equals(TRUE)) {
                 if (!isKillEventRecording)
                     startRecord();
                 else

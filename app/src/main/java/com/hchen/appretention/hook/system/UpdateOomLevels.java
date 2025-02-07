@@ -18,11 +18,13 @@
  */
 package com.hchen.appretention.hook.system;
 
-import static com.hchen.appretention.data.field.SystemField.isChangedOomMinFree;
 import static com.hchen.appretention.data.method.SystemMethod.onLmkdConnect;
 import static com.hchen.appretention.data.method.SystemMethod.updateOomLevels;
 import static com.hchen.appretention.data.method.SystemMethod.writeLmkd;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
+
+import android.system.Os;
+import android.system.OsConstants;
 
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.hooktool.BaseHC;
@@ -38,26 +40,34 @@ import java.util.Arrays;
  * @author 焕晨HChen
  */
 public final class UpdateOomLevels extends BaseHC {
-    private static final int OOM_MIN_FREE_DISCOUNT = 4;
-    private Object mProcessListInstance = null;
+    private static final int OOM_MIN_FREE_DISCOUNT = 3;
+    private static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
+    // private Object mProcessListInstance = null;
 
     @Override
     public void init() {
         updateOomLevels();
     }
 
+    /*
+     *  K50 12G
+     * oom adj: [0, 100, 200, 250, 900, 950], oom min free: [73728, 92160, 110592, 129024, 221184, 322560]
+     * -900 75497472 -800 75497472 -700 75497472 0 75497472 100 94371840 200 113246208
+     * 225 132120576 250 132120576 300 226492416 400 226492416 500 226492416 600 226492416 700 226492416
+     * 800 226492416 900 226492416 999 330301440
+     * */
     private void updateOomLevels() {
         /*
          * 获取 ProcessList 的实例
          * */
-        hookConstructor(ProcessList,
-            new IHook() {
-                @Override
-                public void after() {
-                    mProcessListInstance = thisObject();
-                }
-            }
-        );
+        // hookConstructor(ProcessList,
+        //     new IHook() {
+        //         @Override
+        //         public void after() {
+        //             mProcessListInstance = thisObject();
+        //         }
+        //     }
+        // );
 
         /*
          * 当系统连接 lmkd 时会初始化一些 lmkd 参数。
@@ -68,13 +78,14 @@ public final class UpdateOomLevels extends BaseHC {
             OutputStream.class, new IHook() {
                 @Override
                 public void before() {
-                    if (Boolean.TRUE.equals(getThisAdditionalInstanceField(isChangedOomMinFree)))
-                        return;
-                    int[] mOomMinFree = (int[]) getThisField(SystemField.mOomMinFree);
-                    if (mOomMinFree == null) return;
-                    int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                    setThisField(SystemField.mOomMinFree, mOomMinFreeArray);
-                    setThisAdditionalInstanceField(isChangedOomMinFree, true);
+                    updateOomMinFree(thisObject());
+                    // if (Boolean.TRUE.equals(getThisAdditionalInstanceField(isChangedOomMinFree)))
+                    //     return;
+                    // int[] mOomMinFree = (int[]) getThisField(SystemField.mOomMinFree);
+                    // if (mOomMinFree == null) return;
+                    // int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
+                    // setThisField(SystemField.mOomMinFree, mOomMinFreeArray);
+                    // setThisAdditionalInstanceField(isChangedOomMinFree, true);
                 }
             }
         );
@@ -86,20 +97,21 @@ public final class UpdateOomLevels extends BaseHC {
             updateOomLevels,
             int.class, int.class, boolean.class,
             new IHook() {
-                @Override
-                public void before() {
-                    setThisAdditionalInstanceField(isChangedOomMinFree, false);
-                }
+                // @Override
+                // public void before() {
+                //     setThisAdditionalInstanceField(isChangedOomMinFree, false);
+                // }
 
                 @Override
                 public void after() {
-                    if ((getArgs(2) instanceof Boolean b) && !b) {
-                        int[] mOomMinFree = (int[]) getThisField(SystemField.mOomMinFree);
-                        if (mOomMinFree == null) return;
-                        int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                        setThisField(SystemField.mOomMinFree, mOomMinFreeArray);
-                        setThisAdditionalInstanceField(isChangedOomMinFree, true);
-                    }
+                    updateOomMinFree(thisObject());
+                    // if ((getArgs(2) instanceof Boolean b) && !b) {
+                    //     int[] mOomMinFree = (int[]) getThisField(SystemField.mOomMinFree);
+                    //     if (mOomMinFree == null) return;
+                    //     int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
+                    //     setThisField(SystemField.mOomMinFree, mOomMinFreeArray);
+                    //     setThisAdditionalInstanceField(isChangedOomMinFree, true);
+                    // }
                 }
             }
         );
@@ -111,20 +123,19 @@ public final class UpdateOomLevels extends BaseHC {
             writeLmkd,
             ByteBuffer.class, ByteBuffer.class,
             new IHook() {
+                Object mProcessListInstance;
+
                 @Override
                 public void before() {
                     ByteBuffer buffer = (ByteBuffer) getArgs(0);
+                    if (buffer == null) return;
+
                     ByteBuffer bufCopy = buffer.duplicate();
                     bufCopy.rewind();
                     if (bufCopy.getInt() == 0) {
-                        if (mProcessListInstance == null)
-                            return;
-
-                        // false 说明 oomMinFree 未被更改。
-                        if (Boolean.FALSE.equals(getAdditionalInstanceField(mProcessListInstance, isChangedOomMinFree))) {
-                            setOomMinFreeBuf(bufCopy);
-                            setArgs(0, buffer);
-                        }
+                        mProcessListInstance = thisObject();
+                        setOomMinFreeBuf(bufCopy);
+                        setArgs(0, buffer);
                     }
                 }
 
@@ -132,22 +143,33 @@ public final class UpdateOomLevels extends BaseHC {
                  * 设置 OomMinFree 值。
                  * */
                 private void setOomMinFreeBuf(ByteBuffer bufCopy) {
-                    bufCopy.rewind();
-                    bufCopy.putInt(0);
                     int[] mOomAdj = (int[]) getField(mProcessListInstance, SystemField.mOomAdj);
                     int[] mOomMinFree = (int[]) getField(mProcessListInstance, SystemField.mOomMinFree);
                     if (mOomMinFree == null || mOomAdj == null)
                         return;
 
-                    int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
-                    setField(mProcessListInstance, SystemField.mOomMinFree, mOomMinFreeArray);
-                    setAdditionalInstanceField(mProcessListInstance, isChangedOomMinFree, true);
+                    int[] mOomMinFreeArray = updateOomMinFree(mProcessListInstance);
+                    if (mOomMinFreeArray == null) return;
+                    // setAdditionalInstanceField(mProcessListInstance, isChangedOomMinFree, true);
+
+                    bufCopy.rewind();
+                    bufCopy.putInt(0);
                     for (int i = 0; i < mOomAdj.length; i++) {
-                        bufCopy.putInt(((mOomMinFreeArray[i] * 1024) / 4096));
+                        bufCopy.putInt(((mOomMinFreeArray[i] * 1024) / PAGE_SIZE));
                         bufCopy.putInt(mOomAdj[i]);
                     }
                 }
             }.shouldObserveCall(false)
         );
+    }
+
+    private int[] updateOomMinFree(Object processListInstance) {
+        int[] mOomMinFree = (int[]) getField(processListInstance, SystemField.mOomMinFree);
+        if (mOomMinFree == null)
+            return null;
+
+        int[] mOomMinFreeArray = Arrays.stream(mOomMinFree).map(operand -> operand / OOM_MIN_FREE_DISCOUNT).toArray();
+        setField(processListInstance, SystemField.mOomMinFree, mOomMinFreeArray);
+        return mOomMinFreeArray;
     }
 }

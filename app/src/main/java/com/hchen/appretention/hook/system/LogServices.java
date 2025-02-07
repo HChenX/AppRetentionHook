@@ -18,6 +18,8 @@
  */
 package com.hchen.appretention.hook.system;
 
+import static com.hchen.appretention.data.prop.SystemProp.FALSE;
+import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 import static com.hchen.appretention.hook.system.LogServices.KillEventLogRecord.SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE;
 
 import android.annotation.SuppressLint;
@@ -58,7 +60,7 @@ public class LogServices extends BaseHC {
 
     @Override
     protected void init() {
-        SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, "false");
+        SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, FALSE);
 
         hookMethod("com.android.server.am.ActivityManagerService",
             "systemReady",
@@ -94,7 +96,7 @@ public class LogServices extends BaseHC {
             if (action != null) {
                 switch (action) {
                     case Intent.ACTION_BOOT_COMPLETED -> {
-                        SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, "true");
+                        SystemPropTool.setProp(SaveLog.USER_UNLOCKED_COMPLETED_PROP, TRUE);
                         KillEventLogRecord.init(context);
                         RecordSystemProp.startRecord();
                         context.getContentResolver().registerContentObserver(Settings.System.getUriFor(SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE),
@@ -157,7 +159,7 @@ public class LogServices extends BaseHC {
         private static Process mLogcat;
 
         private static void init(Context context) {
-            if (BuildConfig.DEBUG || Settings.System.getString(context.getContentResolver(), SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE).equals("true")) {
+            if (BuildConfig.DEBUG || Settings.System.getString(context.getContentResolver(), SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE).equals(TRUE)) {
                 if (!isKillEventRecording)
                     startRecord();
                 else

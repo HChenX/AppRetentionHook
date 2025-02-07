@@ -66,6 +66,8 @@ import static com.hchen.appretention.data.path.HyperClass.ProcessPowerCleaner;
 import static com.hchen.appretention.data.path.HyperClass.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.HyperClass.SystemPressureController;
 import static com.hchen.appretention.data.path.HyperClass.SystemServerImpl;
+import static com.hchen.appretention.data.prop.SystemProp.FALSE;
+import static com.hchen.appretention.data.prop.SystemProp.ZERO;
 
 import android.app.job.JobParameters;
 
@@ -101,9 +103,9 @@ public class HyperV1 extends BaseHC {
         /*
          * 关闭 spc。
          * */
-        SystemPropTool.setProp("persist.sys.spc.enabled", "false");
-        SystemPropTool.setProp("persist.sys.spc.cpuexception.enable", "false");
-        SystemPropTool.setProp("persist.sys.spc.process.tracker.enable", "false");
+        SystemPropTool.setProp("persist.sys.spc.enabled", FALSE);
+        SystemPropTool.setProp("persist.sys.spc.cpuexception.enable", FALSE);
+        SystemPropTool.setProp("persist.sys.spc.process.tracker.enable", FALSE);
         setStaticField(PressureStateSettings, PROCESS_CLEANER_ENABLED, false);
         setStaticField(PressureStateSettings, PROC_CPU_EXCEPTION_ENABLE, false);
         setStaticField(PressureStateSettings, PROCESS_TRACKER_ENABLE, false);
@@ -148,6 +150,9 @@ public class HyperV1 extends BaseHC {
          *
          * 部分新机型 HyperOSV1 删除了 PeriodicCleanerService。
          * */
+        SystemPropTool.setProp("persist.sys.periodic.u.enable", FALSE);
+        SystemPropTool.setProp("persist.sys.periodic.u.startprocess.enable", FALSE);
+
         if (existsMethod(SystemServerImpl, addMiuiPeriodicCleanerService, ActivityTaskManagerService)) {
             hookMethod(SystemServerImpl,
                 addMiuiPeriodicCleanerService,
@@ -159,8 +164,8 @@ public class HyperV1 extends BaseHC {
         /*
          * 禁用 MemoryFreezeStubImpl。
          * */
-        SystemPropTool.setProp("persist.miui.extm.enable", "0");
-        SystemPropTool.setProp("persist.sys.mfz.enable", "false");
+        SystemPropTool.setProp("persist.miui.extm.enable", ZERO);
+        SystemPropTool.setProp("persist.sys.mfz.enable", FALSE);
         hookMethod(MemoryFreezeStubImpl,
             isEnable,
             returnResult(false).shouldObserveCall(false)
@@ -169,7 +174,7 @@ public class HyperV1 extends BaseHC {
         /*
          * 禁用 MemoryStandardProcessControl。
          *  */
-        SystemPropTool.setProp("persist.sys.memory_standard.enable", "false");
+        SystemPropTool.setProp("persist.sys.memory_standard.enable", FALSE);
         chain(MemoryStandardProcessControl, method(isEnable)
                 .returnResult(false)
 
@@ -313,8 +318,8 @@ public class HyperV1 extends BaseHC {
         /*
          * 禁止压缩进程。
          * */
-        SystemPropTool.setProp("persist.sys.mms.compact_enable", "false");
-        SystemPropTool.setProp("persist.sys.mms.single_compact_enable", "false");
+        SystemPropTool.setProp("persist.sys.mms.compact_enable", FALSE);
+        SystemPropTool.setProp("persist.sys.mms.single_compact_enable", FALSE);
         setStaticField(MiuiMemoryService, sCompactionEnable, false);
         setStaticField(MiuiMemoryService, sCompactSingleProcEnable, false);
         setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);

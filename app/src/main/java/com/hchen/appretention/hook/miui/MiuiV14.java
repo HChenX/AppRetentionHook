@@ -22,14 +22,16 @@ import static com.hchen.appretention.data.field.HyperField.IS_ENABLE_RECLAIM;
 import static com.hchen.appretention.data.field.HyperField.PROCESS_CLEANER_ENABLED;
 import static com.hchen.appretention.data.field.HyperField.PROC_CPU_EXCEPTION_ENABLE;
 import static com.hchen.appretention.data.field.HyperField.RECLAIM_IF_NEEDED;
-import static com.hchen.appretention.data.field.HyperField.START_PRELOAD_IS_DISABLE;
-import static com.hchen.appretention.data.method.HyperMethod.checkBackgroundAppException;
+import static com.hchen.appretention.data.field.HyperField.sCompactSingleProcEnable;
+import static com.hchen.appretention.data.field.HyperField.sCompactionEnable;
 import static com.hchen.appretention.data.method.HyperMethod.cleanUpMemory;
+import static com.hchen.appretention.data.method.HyperMethod.doClean;
 import static com.hchen.appretention.data.method.HyperMethod.getDeviceLevelForRAM;
 import static com.hchen.appretention.data.method.HyperMethod.handleAutoLockOff;
 import static com.hchen.appretention.data.method.HyperMethod.handleKillAll;
 import static com.hchen.appretention.data.method.HyperMethod.handleKillApp;
 import static com.hchen.appretention.data.method.HyperMethod.handleLimitCpuException;
+import static com.hchen.appretention.data.method.HyperMethod.handleScreenOff;
 import static com.hchen.appretention.data.method.HyperMethod.handleThermalKillProc;
 import static com.hchen.appretention.data.method.HyperMethod.isMiuiLiteVersion;
 import static com.hchen.appretention.data.method.HyperMethod.killPackage;
@@ -40,15 +42,15 @@ import static com.hchen.appretention.data.method.HyperMethod.onStartJob;
 import static com.hchen.appretention.data.method.HyperMethod.performCompaction;
 import static com.hchen.appretention.data.method.HyperMethod.preloadAppEnqueue;
 import static com.hchen.appretention.data.method.HyperMethod.reclaimBackground;
-import static com.hchen.appretention.data.method.HyperMethod.startPreloadApp;
 import static com.hchen.appretention.data.method.HyperMethod.updateScreenState;
 import static com.hchen.appretention.data.path.HyperClass.AppStateManager$AppState$RunningProcess;
 import static com.hchen.appretention.data.path.HyperClass.Build;
 import static com.hchen.appretention.data.path.HyperClass.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.HyperClass.LifecycleConfig;
 import static com.hchen.appretention.data.path.HyperClass.MiuiMemReclaimer;
+import static com.hchen.appretention.data.path.HyperClass.MiuiMemoryService;
+import static com.hchen.appretention.data.path.HyperClass.PeriodicCleanerService;
 import static com.hchen.appretention.data.path.HyperClass.PreloadAppControllerImpl;
-import static com.hchen.appretention.data.path.HyperClass.PreloadLifecycle;
 import static com.hchen.appretention.data.path.HyperClass.PressureStateSettings;
 import static com.hchen.appretention.data.path.HyperClass.ProcessConfig;
 import static com.hchen.appretention.data.path.HyperClass.ProcessKillerIdler;
@@ -56,11 +58,11 @@ import static com.hchen.appretention.data.path.HyperClass.ProcessMemoryCleaner;
 import static com.hchen.appretention.data.path.HyperClass.ProcessPowerCleaner;
 import static com.hchen.appretention.data.path.HyperClass.SmartCpuPolicyManager;
 import static com.hchen.appretention.data.path.HyperClass.SystemPressureController;
+import static com.hchen.appretention.data.prop.SystemProp.FALSE;
 
 import android.app.job.JobParameters;
 
 import com.hchen.hooktool.BaseHC;
-import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
 import com.hchen.processor.HookEntrance;
 
@@ -78,8 +80,8 @@ public class MiuiV14 extends BaseHC {
         /*
          * 关闭 spc。
          * */
-        SystemPropTool.setProp("persist.sys.spc.enabled", "false");
-        SystemPropTool.setProp("persist.sys.spc.cpuexception.enable", "false");
+        SystemPropTool.setProp("persist.sys.spc.enabled", FALSE);
+        SystemPropTool.setProp("persist.sys.spc.cpuexception.enable", FALSE);
         setStaticField(PressureStateSettings, PROCESS_CLEANER_ENABLED, false);
         setStaticField(PressureStateSettings, PROC_CPU_EXCEPTION_ENABLE, false);
         // setStaticField(PressureStateSettings, PROCESS_TRACKER_ENABLE, false); // Miui14 不包含
@@ -111,6 +113,20 @@ public class MiuiV14 extends BaseHC {
             getDeviceLevelForRAM,
             int.class,
             returnResult(3)
+        );
+
+        /*
+         * 禁用 PeriodicCleanerService, Only Miui.
+         * */
+        SystemPropTool.setProp("persist.sys.periodic.enable", FALSE);
+        hookMethod(PeriodicCleanerService,
+            handleScreenOff,
+            doNothing()
+        );
+        hookMethod(PeriodicCleanerService,
+            doClean,
+            int.class, int.class, int.class, String.class,
+            doNothing()
         );
 
         /*
@@ -171,7 +187,12 @@ public class MiuiV14 extends BaseHC {
         /*
          * 禁止压缩进程。
          * */
+        SystemPropTool.setProp("persist.sys.mms.compact_enable", FALSE);
+        SystemPropTool.setProp("persist.sys.mms.single_compact_enable", FALSE);
+
         setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
+        setStaticField(MiuiMemoryService, sCompactionEnable, false);
+        setStaticField(MiuiMemoryService, sCompactSingleProcEnable, false);
         hookMethod(MiuiMemReclaimer,
             performCompaction,
             String.class, int.class,
@@ -200,15 +221,16 @@ public class MiuiV14 extends BaseHC {
          * 禁止预启动。
          * */
         chain(PreloadAppControllerImpl, method(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
-            .doNothing().shouldObserveCall(false)
+                .doNothing().shouldObserveCall(false)
 
-            .method(startPreloadApp, PreloadLifecycle)
-            .hook(new IHook() {
-                @Override
-                public void before() {
-                    setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
-                }
-            }).shouldObserveCall(false)
+            // Changed: 多余的 Hook。
+            // .method(startPreloadApp, PreloadLifecycle)
+            // .hook(new IHook() {
+            //     @Override
+            //     public void before() {
+            //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
+            //     }
+            // }).shouldObserveCall(false)
         );
 
         /*
@@ -245,8 +267,9 @@ public class MiuiV14 extends BaseHC {
             .method(killProcessByMinAdj, int.class, String.class, List.class)
             .doNothing()
 
-            .method(checkBackgroundAppException, String.class, int.class)
-            .returnResult(0)
+            // Changed: 多余的 Hook。
+            // .method(checkBackgroundAppException, String.class, int.class)
+            // .returnResult(0)
         );
     }
 }
