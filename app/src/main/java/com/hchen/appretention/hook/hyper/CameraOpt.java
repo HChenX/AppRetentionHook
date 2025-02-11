@@ -37,6 +37,7 @@ import static com.hchen.appretention.data.path.HyperClass.ICameraBooster$CameraB
 import static com.hchen.appretention.data.path.HyperClass.ProcessManagerInternal;
 import static com.hchen.appretention.data.path.HyperClass.ServiceThread;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
+import static com.hchen.appretention.data.prop.SystemProp.ZERO;
 import static com.hchen.hooktool.tool.CoreTool.doNothing;
 import static com.hchen.hooktool.tool.CoreTool.existsAnyMethod;
 import static com.hchen.hooktool.tool.CoreTool.existsClass;
@@ -52,6 +53,7 @@ import android.content.Context;
 import com.hchen.appretention.data.field.HyperField;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.tool.CoreTool;
+import com.hchen.hooktool.tool.additional.SystemPropTool;
 
 import java.lang.reflect.Method;
 
@@ -63,6 +65,14 @@ import java.lang.reflect.Method;
 public class CameraOpt {
 
     public static void doHook() {
+        SystemPropTool.setProp("persist.sys.lmkd.extend_reclaim.enable", ZERO);
+        SystemPropTool.setProp("persist.sys.lmkd.double_watermark.enable", ZERO);
+        SystemPropTool.setProp("persist.sys.lmkd.camera_adaptive_lmk.enable", ZERO);
+        SystemPropTool.setProp("persist.sys.lmk.camera.mem_reclaim", ZERO);
+        SystemPropTool.setProp("persist.sys.miui.camera.boost.enable", ZERO);
+        SystemPropTool.setProp("persist.sys.miui.camera.boost.opt", ZERO);
+        SystemPropTool.setProp("persist.sys.miui.camera.boost.killAdj_threshold", "1001");
+
         if (existsClass(CameraOpt)) {
             Class<?> mCameraOpt = findClass(CameraOpt);
             if (existsField(mCameraOpt, HyperField.mCameraBoosterClazz) || existsField(mCameraOpt, HyperField.mQuickCameraClazz)) {
@@ -104,7 +114,7 @@ public class CameraOpt {
                 //     hook(service, doNothing().shouldObserveCall(false));
                 // }
             }
-        } else {
+        } else if (existsClass(ICameraBooster)) {
             hookMethod(ICameraBooster,
                 newInstance,
                 ProcessManagerInternal, ActivityManagerService, ServiceThread, Context.class,

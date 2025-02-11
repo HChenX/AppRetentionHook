@@ -70,12 +70,14 @@ import com.hchen.processor.HookEntrance;
 import java.util.List;
 
 /**
- * Miui14
+ * 适用于低于 Miui 14 的任何 Miui 版本
+ * <p>
+ * 仅可用，未作专门适配。
  *
  * @author 焕晨HChen
  */
-@HookEntrance(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 14f)
-public class MiuiV14 extends BaseHC {
+@HookEntrance(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 13f, downward = true)
+public class MiuiDef extends BaseHC {
     @Override
     public void init() {
         /*
@@ -239,16 +241,16 @@ public class MiuiV14 extends BaseHC {
          * */
         // Changed: Support Miui14
         chain(ProcessMemoryCleaner, method(cleanUpMemory, List.class, long.class)
-            .returnResult(true)
+                .returnResult(true)
 
-            .method(killPackage, AppStateManager$AppState$RunningProcess, int.class, String.class)
-            .returnResult(0L)
+                .method(killPackage, AppStateManager$AppState$RunningProcess, int.class, String.class)
+                .returnResult(0L)
 
-            .method(killProcess, AppStateManager$AppState$RunningProcess, int.class, String.class)
-            .returnResult(0L)
+                .method(killProcess, AppStateManager$AppState$RunningProcess, int.class, String.class)
+                .returnResult(0L)
 
-            .method(killProcessByMinAdj, int.class, String.class, List.class)
-            .doNothing()
+                .method(killProcessByMinAdj, int.class, String.class, List.class)
+                .doNothing()
 
             // Changed: 多余的 Hook。
             // .method(checkBackgroundAppException, String.class, int.class)

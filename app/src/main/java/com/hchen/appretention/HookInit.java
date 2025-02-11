@@ -42,6 +42,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  */
 public class HookInit extends HCEntrance {
     private static final String TAG = "AppRetention";
+    @Deprecated
     private static final String[] hookPackages = {
         "android",
         "com.miui.powerkeeper",
@@ -67,13 +68,30 @@ public class HookInit extends HCEntrance {
             public void accept(String s, EntranceMap entranceMap) {
                 if (!entranceMap.mTargetPackage.equals(lpparam.packageName))
                     return;
-                if (!entranceMap.mTargetBrand.equals("Any") && !DeviceTool.isRightRom(entranceMap.mTargetBrand))
+                if (!"Any".equals(entranceMap.mTargetBrand) && !DeviceTool.isRightRom(entranceMap.mTargetBrand))
                     return;
                 if (!(entranceMap.mTargetSdk == 0) && !DeviceTool.isAndroidVersion(entranceMap.mTargetSdk))
                     return;
-                if (!(entranceMap.mTargetOS == -1f) &&
-                    !(DeviceTool.isHyperOSVersion(entranceMap.mTargetOS) || DeviceTool.isMiuiVersion(entranceMap.mTargetOS)))
-                    return;
+                if ("Xiaomi".equals(entranceMap.mTargetBrand)) {
+                    if (entranceMap.mTargetOS != -1) {
+                        if (DeviceTool.getHyperOSVersion() != 0f) {
+                            if (!DeviceTool.isHyperOSVersion(entranceMap.mTargetOS) && !entranceMap.mUpward && !entranceMap.mDownward)
+                                return;
+                            if (entranceMap.mUpward && !(DeviceTool.getHyperOSVersion() >= entranceMap.mTargetOS))
+                                return;
+                            if (entranceMap.mDownward && !(DeviceTool.getHyperOSVersion() <= entranceMap.mTargetOS))
+                                return;
+                        } else if (DeviceTool.getMiuiVersion() != 0f) {
+                            if (!DeviceTool.isMiuiVersion(entranceMap.mTargetOS) && !entranceMap.mUpward && !entranceMap.mDownward)
+                                return;
+                            if (entranceMap.mUpward && !(DeviceTool.getMiuiVersion() >= entranceMap.mTargetOS))
+                                return;
+                            if (entranceMap.mDownward && !(DeviceTool.getMiuiVersion() <= entranceMap.mTargetOS))
+                                return;
+                        }
+                    }
+                }
+
                 try {
                     Class<?> hookClass = getClass().getClassLoader().loadClass(s);
                     BaseHC baseHC = (BaseHC) hookClass.getDeclaredConstructor().newInstance();
@@ -82,7 +100,8 @@ public class HookInit extends HCEntrance {
                     // SaveLog.initSaveLog(className);
                     HCInit.initLoadPackageParam(lpparam);
                     baseHC.onLoadPackage();
-                } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException |
+                } catch (ClassNotFoundException | NoSuchMethodException |
+                         IllegalAccessException |
                          InstantiationException | InvocationTargetException e) {
                     logENoSave(TAG, e);
                 }
@@ -94,24 +113,28 @@ public class HookInit extends HCEntrance {
         }
     }
 
+    @Deprecated
     private void initHook(BaseHC baseHC) {
         baseHC.onLoadPackage();
     }
 
-    private DexKitBridge bridge = null;
+    @Deprecated
+    private DexKitBridge mBridge = null;
 
+    @Deprecated
     public DexKitBridge initDexkit(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        if (bridge == null) {
+        if (mBridge == null) {
             System.loadLibrary("dexkit");
-            bridge = DexKitBridge.create(loadPackageParam.appInfo.sourceDir);
+            mBridge = DexKitBridge.create(loadPackageParam.appInfo.sourceDir);
         }
-        return bridge;
+        return mBridge;
     }
 
+    @Deprecated
     public void closeDexkit() {
-        if (bridge != null) {
-            bridge.close();
-            bridge = null;
+        if (mBridge != null) {
+            mBridge.close();
+            mBridge = null;
         }
     }
 }

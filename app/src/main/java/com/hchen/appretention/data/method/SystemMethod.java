@@ -45,6 +45,7 @@ public class SystemMethod {
     public static final String onOomAdjustChanged = "onOomAdjustChanged";
     public static final String compactApp = "compactApp";
     public static final String resolveCompactionProfile = "resolveCompactionProfile";
+    public static final String applyOomAdjLSP = "applyOomAdjLSP";
     public static final String getSetAdj = "getSetAdj";
     public static final String getCurAdj = "getCurAdj";
     public static final String getSetProcState = "getSetProcState";

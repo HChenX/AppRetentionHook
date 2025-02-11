@@ -42,7 +42,7 @@ import javax.lang.model.element.TypeElement;
 @AutoService(Processor.class)
 @SupportedAnnotationTypes("com.hchen.processor.HookEntrance")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
-public class HookEntranceProcessor extends AbstractProcessor {
+public class HookProcessor extends AbstractProcessor {
     boolean isProcessed = false;
 
     @Override
@@ -87,12 +87,16 @@ public class HookEntranceProcessor extends AbstractProcessor {
                     public String mTargetPackage;
                     public int mTargetSdk;
                     public float mTargetOS;
+                    public boolean mDownward;
+                    public boolean mUpward;
 
-                    public EntranceMap(String targetBrand, String targetPackage, int targetSdk, float targetOS){
+                    public EntranceMap(String targetBrand, String targetPackage, int targetSdk, float targetOS, boolean downward, boolean upward){
                         this.mTargetBrand = targetBrand;
                         this.mTargetPackage = targetPackage;
                         this.mTargetSdk = targetSdk;
                         this.mTargetOS = targetOS;
+                        this.mDownward = downward;
+                        this.mUpward = upward;
                     }
 
                     public static HashMap<String, EntranceMap> get() {
@@ -114,10 +118,12 @@ public class HookEntranceProcessor extends AbstractProcessor {
                     String targetPackage = hookEntrance.targetPackage();
                     int targetSdk = hookEntrance.targetSdk();
                     float targetOS = hookEntrance.targetOS();
+                    boolean downward = hookEntrance.downward();
+                    boolean upward = hookEntrance.upward();
                     try {
                         writer.write("        ");
                         writer.write("dataMap.put(\"" + fullClassName + "\", new EntranceMap(\"" + targetBrand + "\", "
-                            + "\"" + targetPackage + "\"" + ", " + targetSdk + ", " + targetOS + "f));\n");
+                            + "\"" + targetPackage + "\"" + ", " + targetSdk + ", " + targetOS + "f, " + downward + ", " + upward + "));\n");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

@@ -25,7 +25,7 @@ import static com.hchen.appretention.data.field.SystemField.mPendingCompactionPr
 import static com.hchen.appretention.data.field.SystemField.mState;
 import static com.hchen.appretention.data.field.SystemField.mUseBootCompact;
 import static com.hchen.appretention.data.field.SystemField.mUseCompaction;
-import static com.hchen.appretention.data.method.HyperMethod.compactBackgroundProcess;
+import static com.hchen.appretention.data.method.SystemMethod.applyOomAdjLSP;
 import static com.hchen.appretention.data.method.SystemMethod.compactApp;
 import static com.hchen.appretention.data.method.SystemMethod.getBoolean;
 import static com.hchen.appretention.data.method.SystemMethod.getCurAdj;
@@ -48,7 +48,6 @@ import static com.hchen.appretention.data.method.SystemMethod.shouldRssThrottleC
 import static com.hchen.appretention.data.method.SystemMethod.shouldThrottleMiscCompaction;
 import static com.hchen.appretention.data.method.SystemMethod.shouldTimeThrottleCompaction;
 import static com.hchen.appretention.data.method.SystemMethod.updateUseCompaction;
-import static com.hchen.appretention.data.path.HyperClass.OomAdjusterImpl;
 import static com.hchen.appretention.data.path.HyperClass.ServiceThread;
 import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
@@ -76,6 +75,7 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -150,14 +150,19 @@ public final class CacheCompaction extends BaseHC {
     }
 
     private void compactionAppCacheNew() {
-        hookMethod(OomAdjusterImpl,
-            compactBackgroundProcess,
-            ProcessRecord,
+        Method applyOomAdjLSPMethod = null;
+        if (existsMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class, int.class, boolean.class))
+            applyOomAdjLSPMethod = findMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class, int.class, boolean.class);
+        else if (existsMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class, int.class)) {
+            applyOomAdjLSPMethod = findMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class, int.class);
+        } else if (existsMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class)) {
+            applyOomAdjLSPMethod = findMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class);
+        }
+
+        hook(applyOomAdjLSPMethod,
             new IHook() {
                 @Override
                 public void before() {
-                    returnNull();
-
                     if (mCachedAppOptimizer == null) return;
                     initEnumIfNeed();
                     Object app = getArgs(0);

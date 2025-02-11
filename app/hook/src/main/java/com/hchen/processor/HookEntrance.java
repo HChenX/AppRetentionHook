@@ -50,4 +50,15 @@ public @interface HookEntrance {
      * 目标系统 ROM 版本
      */
     float targetOS() default -1f;
+
+    /**
+     * 是否向下兼容
+     * */
+    boolean downward() default false;
+
+    /**
+     * 是否向上兼容
+     * */
+    boolean upward() default false;
+
 }
