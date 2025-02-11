@@ -10,85 +10,133 @@
 ![language](https://img.shields.io/badge/language-java-purple)
 
 <p><b><a href="README-en.md">English</a> | <a href="README.md">简体中文</a></b></p>
-<p>This is a Lsp module, Achieving app retention by modifying the system kill logic through Hook.</p>
+<p>Hook system kill logic to implement background keep alive</p>
 </div>
 
-# ✨Module Introduction
+---
 
-* This is a Lsp module,You need to install Lsp activate.
-* #### Usage:
-    * First: Install this Lsp module into your phone.
-    * Secondly：Click the Lsp icon to enter the Lsp interface, Select this module and activate it.
-    * At last：Tick the scope:
-    * [MIUI] `System`&`Powerkeeper[If have]`
-    * [OPPO] `Athena`&`Battery`&`System`
-    * Then restart your phone and it will work normally.
+## ✨ Module Introduction
 
-- This module uses the kill logic of the hook system to keep the background application alive。
-- This module is suitable
-  for: `HyperOS(A14)` `MIUI14(A13,A12,A11)` `OPPO系统(A14,A13,A12)` `AOSP(A14,A13,A12,A11)`
-  and other.
+AppRetentionHook is an **LSP module** that implements **background retention** by hooking into the system’s kill logic.
+📌 **Version 5.1 is a completely refactored new version!!** Give it a try!
 
-# 🌟Module Effect
+🔹 **Supported Systems** (for version 5.1):
 
-- After personal testing, the retention time of the background App has increased greatly, and there
-  has been no background killing for a long time.
-- To my great surprise, even after one night, the app survived in the background and was not killed.
-- `These include, but are not limited to: TikTok GitHub(Android) Twitter(X) Telegram YouTobe and other software`
+- ✅ **HyperOS V1 / V2**
+- ✅ **AOSP 10-15**
+- ✅ **Samsung OneUI** (Usage scope is unknown)
+- 🚧 **Color OS** (Not fully adapted yet, but usable)
 
-# 💡Module Description
+---
 
-- Module use Hook to change system kill logic. Make app retention time growth.
-- But precisely because of this, the module may cause a series of problems:
+## 🛠 Usage Notice
 
-* Be like:
-    * 1.System memory manage failure, can't clean low memory if is.
-    * 2.Increase phone idle power consumption. But i think is not important problems. Because is
-      very little.
-    * 3.The most serious thing is that it may cause the phone to not turn on. So you must be fully
-      prepared.
+> 📌 **Why might some applications still be killed?**
+> **This module only intercepts kills triggered by system scheduling; it cannot address application crashes, self-termination, or other similar behaviors!**
 
-- Reminder: Use for example: `OPPO` `VIVO` `Huawei`and other third-party vendors, they may contain
-  vendor-defined kill logic, which has a certain impact on the effect of the module.
-- If you can accept these possible issues will give you a very surprising experience with the
-  module.
+📌 **Intercepted Kill Sources (system behaviors):**
 
-# 🔍Frequently Asked Questions
+- Idle device cleanup
+- Process count limitations
+- Maximum background process restrictions
+- Restricted application policies
+- Scheduled task cleanup
+- Doze/empty process restrictions
 
-- Q: How to use?
-- A: Please read carefully the README.md.
-- Q: Will it conflict with other Lsp modules with similar functions?
-- A: That's for sure. Please don't use with Don-t-Kill, Same functionality in Cemiuiler, A1 Lsp
-  module, and other.
-- Q: Why is my phone stuck?
-- A: Because change system kill logic, so please pay attention to the usage of phone memory.
-- Q: Why my phone power consumption increase?
-- A: This is normal, and a reasonable range is acceptable.
-- Q: Why my phone can't turn on?
-- A: It may be caused by some changes, please uninstall and provide feedback.
+⚠ **The module does NOT intercept the following kill behaviors:**
 
-# 🙏Acknowledgments
+- Active killing by lmkd (triggered by memory overload)
+- Application ANR (not responding), updates, self-termination, uninstallation, crashes, etc.
 
-- The module code has referenced the following project, and we sincerely appreciate it:
+💡 **Module Objective:**
+**Opened applications will not be killed due to system scheduling, thereby prolonging their background retention as much as possible!**
 
-|     Project Name     |                            Project Link                            |
-|:--------------------:|:------------------------------------------------------------------:|
-|      Cemiuiler       | [Cemiuiler](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
-|      Don't Kill      |         [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)         |
-| Translation provided |                              Provider                              |
-|       English        |             焕晨HChen , ℓοѕτ οиє ⌕ — 🚫🥄(Telegram Name)             |
-|  Simplified Chinese  |                              焕晨HChen                               |
+---
 
-# 📢Project Statement
+## 🔧 Installation and Usage
 
-- Any use of this project must indicate the author and source, and plagiarism is not acceptable!!
-- Plagiarism of this project may lead to project closure!!
+📌 **Please enable this module within LSP!**
 
-# 🌏Disclaimers
+1. **Installation**: Download and install this module.
+2. **Activation**: Open LSP, select this module, and enable it.
+3. **Select the applicable scopes** (depending on the system):
+    - **MIUI / HyperOS**: `System Framework (system)` and `Battery & Performance (powerkeeper)` [if available]
+    - **Color OS**: `Athena`, `Battery`, and `System Framework (system)` (Note: Version 5.1 is not fully adapted for Color OS, but it is usable)
+    - **OneUI**: `System Framework (system)`
+4. **Restart your device!**
 
-- If you use this module, you are agreeing to accept all consequences.
-- This project holds no responsibility for any projects derived from it.
+---
 
-# 🎉Conclusion
+## 🌟 Module Effects
 
-- Thank you for using this module. Enjoy your day! ♥️
+✅ Testing shows that the background retention time of apps has **significantly increased**, with no system-initiated app kills observed over extended periods.
+✅ **Even after an entire night, apps continue to run in the background.**
+✅ **Example Apps** (including but not limited to):
+
+- QQ, Bilibili, Douyin
+- GitHub (Android), Twitter (X), Telegram, YouTube, etc.
+
+---
+
+## ⚠ Potential Issues
+
+⚠ **Due to modifications in the system’s operational logic, this module may have the following impacts:**
+
+1. **Failure of system memory management**: When memory is low, automatic cleanup will not occur, which may result in system freezes.
+2. **Increased standby power consumption**: Although the impact is minor, battery usage may be slightly higher.
+3. **Some devices may experience boot hang issues.**
+
+🚨 **Strongly Recommended**: Please ensure you have a backup before using this module to avoid extreme issues such as failure to boot!
+
+---
+
+## 🔍 Frequently Asked Questions
+
+❓ **Q: How do I use this module?**
+💡 A: Please carefully read the README and ensure that the correct LSP scopes are configured.
+
+❓ **Q: Does this module conflict with other retention modules?**
+💡 A: Yes, **please do not use multiple modules with the same functionality simultaneously!**
+Examples of conflicting modules include:
+- **Don-t-Kill**
+- **Cemiuiler** (overlapping functionalities)
+- **A1 Memory Management LSP Module**
+
+❓ **Q: Why is my system freezing?**
+💡 A: Please check your device's **memory usage**. This module does not perform automatic memory cleanup.
+
+❓ **Q: Why has my standby power consumption increased?**
+💡 A: With apps staying alive in the background for longer, **increased power consumption is a normal phenomenon**, though the impact is minimal.
+
+❓ **Q: Why does my device hang during boot?**
+💡 A: Some devices may be incompatible. If you encounter this issue, please uninstall the module and provide feedback.
+
+---
+
+## 🙏 Acknowledgments
+
+💡 Some parts of this module's code reference the following projects. Special thanks to:
+
+| Project Name   | Project Link                                                                      |
+|----------------|-----------------------------------------------------------------------------------|
+| Cemiuiler      | [Cemiuiler GitHub](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main)           |
+| Don't Kill     | [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)                                 |
+
+📌 **Translation Provided By:**
+
+- **English**: HChen (焕晨HChen), ℓοѕτ οиє ⌕ — 🚫🥄 (Telegram Name)
+- **Simplified Chinese**: HChen (焕晨HChen)
+
+---
+
+## 📢 Project Disclaimer
+
+⚠ **By using this module, you agree to assume all risks and consequences!**
+⚠ **This project is not responsible for any derivative projects!**
+⚠ **Plagiarism will result in the project becoming closed source! Please attribute the author!**
+
+---
+
+## 🎉 Conclusion
+
+💖 **Thank you for your support. Enjoy your day!** 🚀
