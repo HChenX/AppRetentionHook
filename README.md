@@ -23,7 +23,7 @@ AppRetentionHook 是一款 **Lsp 模块**，通过 **Hook 系统 kill 逻辑** �
 🔹 **适配系统**（5.1 版本支持范围）：
 
 - ✅ **HyperOS V1 / V2**
-- ✅ **AOSP 10-15**
+- ✅ **AOSP 11-15**
 - ✅ **三星 OneUI**（可用范围未知）
 - 🚧 **Color OS（暂不完全适配，但可用）**
 
