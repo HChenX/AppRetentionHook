@@ -74,7 +74,7 @@ public class HookInit extends HCEntrance {
                     return;
                 if ("Xiaomi".equals(entranceMap.mTargetBrand)) {
                     if (entranceMap.mTargetOS != -1) {
-                        if (DeviceTool.getHyperOSVersion() != 0f) {
+                        if (entranceMap.isHyperOS) {
                             if (!DeviceTool.isHyperOSVersion(entranceMap.mTargetOS) && !entranceMap.mUpward && !entranceMap.mDownward)
                                 return;
                             if (entranceMap.mUpward && !(DeviceTool.getHyperOSVersion() >= entranceMap.mTargetOS))
@@ -88,7 +88,7 @@ public class HookInit extends HCEntrance {
                                 return;
                             if (entranceMap.mDownward && !(DeviceTool.getMiuiVersion() <= entranceMap.mTargetOS))
                                 return;
-                        }
+                        } else return;
                     }
                 }
 

@@ -82,7 +82,7 @@ import java.util.List;
  *
  * @author 焕晨HChen
  */
-@HookEntrance(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 1.0f)
+@HookEntrance(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 1.0f, isHyperOS = true)
 public class HyperV1 extends BaseHC {
 
     @Override

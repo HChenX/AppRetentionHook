@@ -159,7 +159,7 @@ public class LogServices extends BaseHC {
         private static Process mLogcat;
 
         private static void init(Context context) {
-            if (BuildConfig.DEBUG || Settings.System.getString(context.getContentResolver(), SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE).equals(TRUE)) {
+            if (BuildConfig.DEBUG || TRUE.equals(Settings.System.getString(context.getContentResolver(), SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE))) {
                 if (!isKillEventRecording)
                     startRecord();
                 else

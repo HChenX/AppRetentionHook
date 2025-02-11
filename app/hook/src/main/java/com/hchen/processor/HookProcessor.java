@@ -89,12 +89,14 @@ public class HookProcessor extends AbstractProcessor {
                     public float mTargetOS;
                     public boolean mDownward;
                     public boolean mUpward;
+                    public boolean isHyperOS;
 
-                    public EntranceMap(String targetBrand, String targetPackage, int targetSdk, float targetOS, boolean downward, boolean upward){
+                    public EntranceMap(String targetBrand, String targetPackage, int targetSdk, float targetOS, boolean isHyperOS, boolean downward, boolean upward){
                         this.mTargetBrand = targetBrand;
                         this.mTargetPackage = targetPackage;
                         this.mTargetSdk = targetSdk;
                         this.mTargetOS = targetOS;
+                        this.isHyperOS = isHyperOS;
                         this.mDownward = downward;
                         this.mUpward = upward;
                     }
@@ -118,12 +120,13 @@ public class HookProcessor extends AbstractProcessor {
                     String targetPackage = hookEntrance.targetPackage();
                     int targetSdk = hookEntrance.targetSdk();
                     float targetOS = hookEntrance.targetOS();
+                    boolean isHyperOS = hookEntrance.isHyperOS();
                     boolean downward = hookEntrance.downward();
                     boolean upward = hookEntrance.upward();
                     try {
                         writer.write("        ");
                         writer.write("dataMap.put(\"" + fullClassName + "\", new EntranceMap(\"" + targetBrand + "\", "
-                            + "\"" + targetPackage + "\"" + ", " + targetSdk + ", " + targetOS + "f, " + downward + ", " + upward + "));\n");
+                            + "\"" + targetPackage + "\"" + ", " + targetSdk + ", " + targetOS + "f, " + isHyperOS + ", " + downward + ", " + upward + "));\n");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

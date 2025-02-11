@@ -52,6 +52,11 @@ public @interface HookEntrance {
     float targetOS() default -1f;
 
     /**
+     * 是否是 HyperOS 系统
+     */
+    boolean isHyperOS() default false;
+
+    /**
      * 是否向下兼容
      * */
     boolean downward() default false;
