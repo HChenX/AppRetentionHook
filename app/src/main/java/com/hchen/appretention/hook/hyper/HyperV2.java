@@ -71,7 +71,8 @@ import static com.hchen.appretention.data.path.HyperClass.SystemPressureControll
 import static com.hchen.appretention.data.path.HyperClass.SystemPressureControllerNative;
 import static com.hchen.appretention.data.path.HyperClass.SystemServerImpl;
 import static com.hchen.appretention.data.prop.SystemProp.FALSE;
-import static com.hchen.appretention.data.prop.SystemProp.ZERO;
+import static com.hchen.appretention.data.prop.SystemProp.ONE;
+import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 
 import android.app.job.JobParameters;
 
@@ -148,9 +149,14 @@ public class HyperV2 extends BaseHC {
         );
 
         /*
+         * 启用小米增强回写。
+         * */
+        SystemPropTool.setProp("persist.miui.extm.enable", ONE);
+        SystemPropTool.setProp("persist.miui.extm.dm_opt.enable", TRUE);
+
+        /*
          * 禁用 MemoryFreezeStubImpl。
          * */
-        SystemPropTool.setProp("persist.miui.extm.enable", ZERO);
         SystemPropTool.setProp("persist.sys.mfz.enable", FALSE);
         hookMethod(MemoryFreezeStubImpl,
             isEnable,
