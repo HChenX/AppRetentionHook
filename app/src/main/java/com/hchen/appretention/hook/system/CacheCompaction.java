@@ -199,7 +199,7 @@ public final class CacheCompaction extends BaseHC {
         // 阻止原生功能
         hookAllMethod(CachedAppOptimizer,
             compactApp,
-            doNothing().shouldObserveCall(false)
+            returnResult(false).shouldObserveCall(false)
         );
 
         hookMethod(CachedAppOptimizer,

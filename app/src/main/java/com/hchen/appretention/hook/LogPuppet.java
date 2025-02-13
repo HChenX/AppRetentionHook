@@ -149,7 +149,7 @@ public class LogPuppet extends BaseHC {
                 String key = logContentData.mLogFileName;
                 ArrayList<String> content = logContentData.mLogContentCache;
 
-                SaveLog.createFile(key);
+                // SaveLog.createFileIfNeed(key);
                 SaveLog.openFile(key, id);
                 SaveLog.writeFile(key, content);
 
@@ -187,7 +187,7 @@ public class LogPuppet extends BaseHC {
         }
 
         private static void startRecord() {
-            SaveLog.createFile(mKillEventRecordFile);
+            // SaveLog.createFileIfNeed(mKillEventRecordFile);
             SaveLog.openFile(mKillEventRecordFile, SaveLog.getRandomNumber());
             mExecutorService = Executors.newSingleThreadExecutor();
             mExecutorService.submit(() -> {
@@ -256,7 +256,7 @@ public class LogPuppet extends BaseHC {
         private static BufferedReader mReader;
 
         public static void startRecord() {
-            SaveLog.createFile(mRecordFile);
+            // SaveLog.createFileIfNeed(mRecordFile);
             SaveLog.openFile(mRecordFile, SaveLog.getRandomNumber());
             ExecutorService mExecutorService = Executors.newSingleThreadExecutor();
             mExecutorService.submit(() -> {

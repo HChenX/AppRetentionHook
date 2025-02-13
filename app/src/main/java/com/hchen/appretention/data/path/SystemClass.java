@@ -29,6 +29,7 @@ public class SystemClass {
     public static final String PhantomProcessList = "com.android.server.am.PhantomProcessList";
     public static final String ProcessCpuTracker = "com.android.internal.os.ProcessCpuTracker";
     public static final String ActivityManagerService = "com.android.server.am.ActivityManagerService";
+    public static final String TimingsTraceAndSlog = "com.android.server.utils.TimingsTraceAndSlog";
     public static final String DeviceConfig = "android.provider.DeviceConfig";
     public static final String ProcessRecord = "com.android.server.am.ProcessRecord";
     public static final String LowMemDetector = "com.android.server.am.LowMemDetector";

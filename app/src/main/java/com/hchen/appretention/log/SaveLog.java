@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hchen.appretention.BuildConfig;
+import com.hchen.appretention.hook.system.LogServices;
 import com.hchen.hooktool.HCData;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.ContextTool;
@@ -84,7 +85,7 @@ public class SaveLog {
 
     @Deprecated
     public static void initSaveLog(String key) {
-        createFile(key);
+        createFileIfNeed(key);
         openFile(key, getRandomNumber());
     }
 
@@ -98,34 +99,42 @@ public class SaveLog {
         waitSystemBootCompletedIfNeed();
     }
 
-    public static void createFile(String key) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
-        if (data != null && data.isCreatedFile) return;
-        LOG_FILE_FULL_PATH = LOG_FILE_PATH + key + ".log";
+    private static boolean createFileIfNeed(String fileName) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
+        if (data != null && data.isCreatedFile) return true;
+        LOG_FILE_FULL_PATH = LOG_FILE_PATH + fileName + ".log";
         data = new LogFileStateData();
 
         File file = new File(LOG_FILE_FULL_PATH);
         File path = file.getParentFile();
-        if (path == null) return;
+        if (path == null) return false;
         try {
             if (!path.exists()) {
                 if (!path.mkdirs()) {
                     logENoSave(TAG, "Create log dirs failed! Path: " + LOG_FILE_FULL_PATH);
-                    return;
+                    return false;
                 }
             }
             if (!file.exists() && !file.createNewFile()) {
                 logENoSave(TAG, "Create log file failed! Path: " + LOG_FILE_FULL_PATH);
+                return false;
             }
             data.isCreatedFile = true;
         } catch (IOException e) {
             logENoSave(TAG, "Create log file failed! Path: " + LOG_FILE_FULL_PATH, e);
+            return false;
         }
-        mLogFileStateDataMap.put(key, data);
+        mLogFileStateDataMap.put(fileName, data);
+        return true;
     }
 
-    public static void openFile(String key, String logId) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
+    public static void openFile(String fileName, String logId) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
+        if (data == null) {
+            if (createFileIfNeed(fileName)) {
+                data = mLogFileStateDataMap.get(fileName);
+            } else return;
+        }
         if (data == null) return;
         if (!data.isCreatedFile) return;
         if (data.isOpened) return;
@@ -137,15 +146,15 @@ public class SaveLog {
         } catch (IOException e) {
             logENoSave(TAG, "Open log file failed! Path: " + LOG_FILE_FULL_PATH, e);
         }
-        if (shouldResetFile(key, logId)) {
-            resetFile(key);
-            initFileContent(key, logId);
+        if (shouldResetFile(fileName, logId)) {
+            resetFile(fileName);
+            initFileContent(fileName, logId);
         }
     }
 
     @Nullable
-    private static ArrayList<String> readFile(String key) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
+    private static ArrayList<String> readFile(String fileName) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
         if (data == null) return null;
         if (!data.isCreatedFile) return null;
         if (!data.isOpened || data.mReader == null) return null;
@@ -197,7 +206,7 @@ public class SaveLog {
                 });
             });
         }
-        AndroidLog.logI(TAG, "isWaitingSystemBootCompleted: " + isWaitingSystemBootCompleted +
+        AndroidLog.logI(TAG, "Debug: isWaitingSystemBootCompleted: " + isWaitingSystemBootCompleted +
             " isWaitingLogServiceBootCompleted: " + isWaitingLogServiceBootCompleted + " log: " + log);
     }
 
@@ -275,14 +284,14 @@ public class SaveLog {
         return tag;
     }
 
-    public static void writeFile(String key, ArrayList<String> logs) {
+    public static void writeFile(String fileName, ArrayList<String> logs) {
         for (String log : logs) {
-            writeFile(key, log);
+            writeFile(fileName, log);
         }
     }
 
-    public static void writeFile(String key, String log) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
+    public static void writeFile(String fileName, String log) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
         if (data == null) return;
         if (!data.isCreatedFile) return;
         if (!data.isOpened || data.mWriter == null) return;
@@ -295,8 +304,8 @@ public class SaveLog {
         }
     }
 
-    private static void resetFile(String key) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
+    private static void resetFile(String fileName) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
         if (data == null) return;
         if (!data.isCreatedFile) return;
         try {
@@ -309,10 +318,11 @@ public class SaveLog {
         }
     }
 
-    public static void closeFile(String key) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
+    public static void closeFile(String fileName) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
         if (data == null) return;
         if (!data.isCreatedFile) return;
+        if (!data.isOpened) return;
         try {
             if (data.mWriter != null) data.mWriter.close();
             if (data.mReader != null) data.mReader.close();
@@ -336,9 +346,9 @@ public class SaveLog {
         if (oldFiles != null)
             for (File f : oldFiles) {
                 if (f.delete()) {
-                    AndroidLog.logI(TAG, "success to delete old log file: " + f.getPath());
+                    AndroidLog.logI(TAG, "Success to delete old log file: " + f.getPath());
                 } else
-                    AndroidLog.logE(TAG, "failed to delete old log file: " + f.getPath());
+                    AndroidLog.logE(TAG, "Failed to delete old log file: " + f.getPath());
             }
 
         File filePath = new File(LOG_FILE_PATH);
@@ -349,24 +359,24 @@ public class SaveLog {
                 File targetFile = new File(LOG_OLD_FILE_PATH, file.getName());
                 try {
                     Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                    AndroidLog.logI(TAG, "success to copy log file to old path: " + targetFile.getPath());
+                    AndroidLog.logI(TAG, "Success to copy log file to old path: " + targetFile.getPath());
                 } catch (IOException e) {
-                    logENoSave(TAG, "failed to copy log file to old path: " + file.getPath(), e);
+                    logENoSave(TAG, "Failed to copy log file to old path: " + file.getPath(), e);
                 }
 
                 if (file.delete()) {
-                    AndroidLog.logI(TAG, "success to delete log file: " + file.getPath());
+                    AndroidLog.logI(TAG, "Success to delete log file: " + file.getPath());
                 } else
-                    AndroidLog.logE(TAG, "failed to delete log file: " + file.getPath());
+                    AndroidLog.logE(TAG, "Failed to delete log file: " + file.getPath());
             }
         }
     }
 
-    private static boolean shouldResetFile(String key, String logId) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
+    private static boolean shouldResetFile(String fileName, String logId) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
         if (data == null) return false;
         if (!data.isCreatedFile) return false;
-        ArrayList<String> content = readFile(key);
+        ArrayList<String> content = readFile(fileName);
         if (content == null) return false;
         if (content.isEmpty()) return true;
         for (String s : content) {
@@ -380,11 +390,11 @@ public class SaveLog {
         return false;
     }
 
-    private static void initFileContent(String key, String logId) {
-        LogFileStateData data = mLogFileStateDataMap.get(key);
+    private static void initFileContent(String fileName, String logId) {
+        LogFileStateData data = mLogFileStateDataMap.get(fileName);
         if (data == null) return;
         if (!data.isCreatedFile) return;
-        if (data.mWriter == null) return;
+        if (!data.isOpened || data.mWriter == null) return;
         try {
             data.mWriter.write("###############################################");
             data.mWriter.newLine();
@@ -442,7 +452,7 @@ public class SaveLog {
     }
 
     public static boolean isUserUnlockedCompeted() {
-        return SystemPropTool.getProp(USER_UNLOCKED_COMPLETED_PROP, FALSE).equals(TRUE);
+        return TRUE.equals(SystemPropTool.getProp(USER_UNLOCKED_COMPLETED_PROP, FALSE));
     }
 
     private static void waitSystemBootCompletedIfNeed() {
@@ -468,7 +478,7 @@ public class SaveLog {
                         break;
                 }
 
-                AndroidLog.logI(TAG, "user unlocked!!");
+                AndroidLog.logI(TAG, "User unlocked!!");
 
                 pushWithAsyncContext(context -> {
                     int maxWhileCount1 = 3;
@@ -504,12 +514,13 @@ public class SaveLog {
 
     @SuppressLint("MissingPermission")
     private static synchronized void sendLogContentBroadcast(Context context, LogContentData logContentData) {
+        if (!LogServices.mSupportLogServices) return;
         if (context == null || hasProcessingBroadcast) return;
         hasProcessingBroadcast = true;
         Intent intent = new Intent();
         intent.setAction(ACTION_LOG_SERVICE_CONTENT);
         intent.putExtra("logData", logContentData);
-        AndroidLog.logI(TAG, "send broadcast logId: " + logContentData.mLogId + " logKey: " + logContentData.mLogFileName
+        AndroidLog.logI(TAG, "Send broadcast logId: " + logContentData.mLogId + " logFileName: " + logContentData.mLogFileName
             + " logContent: " + logContentData.mLogContent);
         logContentData.createLogContentCache();
         logContentData.mLogContent.clear();
@@ -521,7 +532,7 @@ public class SaveLog {
                     flushLog(context);
                 } else
                     hasProcessingBroadcast = false; // 处理失败, 接收方可能尚未注册, 跳过！可能丢失日志数据！
-                AndroidLog.logI(TAG, "broadcast result code: " + getResultCode());
+                AndroidLog.logI(TAG, "Broadcast result code: " + getResultCode());
             }
 
             @Override

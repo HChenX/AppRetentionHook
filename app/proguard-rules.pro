@@ -14,12 +14,12 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
 -keep class com.hchen.appretention.HookInit
--keep class com.hchen.appretention.hook.**
--keep class com.hchen.appretention.hook.**$*
+-keepnames class com.hchen.appretention.hook.**
+-keepnames class com.hchen.appretention.hook.**$*
