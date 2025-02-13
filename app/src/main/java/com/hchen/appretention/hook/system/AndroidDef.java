@@ -20,31 +20,22 @@ package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.field.SystemField.CUR_MAX_CACHED_PROCESSES;
 import static com.hchen.appretention.data.field.SystemField.MAX_PHANTOM_PROCESSES;
-import static com.hchen.appretention.data.field.SystemField.USE_MODERN_TRIM;
 import static com.hchen.appretention.data.field.SystemField.mGlobalMaxNumTasks;
-import static com.hchen.appretention.data.field.SystemField.mKillBgRestrictedAndCachedIdle;
 import static com.hchen.appretention.data.field.SystemField.mMemFactorOverride;
-import static com.hchen.appretention.data.field.SystemField.mNextNoKillDebugMessageTime;
 import static com.hchen.appretention.data.method.SystemMethod.checkExcessivePowerUsageLPr;
 import static com.hchen.appretention.data.method.SystemMethod.isInVisibleRange;
 import static com.hchen.appretention.data.method.SystemMethod.killProcessesWhenImperceptible;
 import static com.hchen.appretention.data.method.SystemMethod.performIdleMaintenance;
-import static com.hchen.appretention.data.method.SystemMethod.shouldKillExcessiveProcesses;
 import static com.hchen.appretention.data.method.SystemMethod.trimInactiveRecentTasks;
 import static com.hchen.appretention.data.method.SystemMethod.trimPhantomProcessesIfNecessary;
-import static com.hchen.appretention.data.method.SystemMethod.updateAndTrimProcessLSP;
-import static com.hchen.appretention.data.method.SystemMethod.updateKillBgRestrictedCachedIdle;
 import static com.hchen.appretention.data.method.SystemMethod.updateMaxCachedProcesses;
 import static com.hchen.appretention.data.method.SystemMethod.updateMaxPhantomProcesses;
 import static com.hchen.appretention.data.method.SystemMethod.updatePerfConfigConstants;
 import static com.hchen.appretention.data.method.SystemMethod.updateProcessCpuStatesLocked;
-import static com.hchen.appretention.data.method.SystemMethod.updateUseModernTrim;
-import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerConstants;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
 import static com.hchen.appretention.data.path.SystemClass.AppProfiler;
 import static com.hchen.appretention.data.path.SystemClass.LowMemDetector;
-import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
 import static com.hchen.appretention.data.path.SystemClass.PhantomProcessList;
 import static com.hchen.appretention.data.path.SystemClass.ProcessCpuTracker;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
@@ -67,12 +58,12 @@ import com.hchen.processor.HookEntrance;
  *
  * @author 焕晨HChen
  */
-@HookEntrance(targetPackage = "android", targetSdk = 31, downward = true)
+@HookEntrance(targetPackage = "android", targetSdks = 30, downward = true)
 public class AndroidDef extends BaseHC {
     @Override
     protected void init() {
-        // new UpdateOomLevels().onLoadPackage(); // 低版本未作专门适配
-        // new CacheCompaction().onLoadPackage(); // 低版本未作专门适配
+        // UpdateOomLevels.init(); // 未做专门适配
+        CacheCompaction.enableCompaction();
 
         // ----------- ProcessList ----------------------
         /*
@@ -148,7 +139,7 @@ public class AndroidDef extends BaseHC {
             ActivityManagerService, Looper.class, LowMemDetector,
             new IHook() {
                 @Override
-                public void before() {
+                public void after() {
                     setThisField(mMemFactorOverride, 0);
                 }
             }
@@ -160,29 +151,31 @@ public class AndroidDef extends BaseHC {
          *
          * 被调用 OomAdjuster 方法 updateAndTrimProcessLSP
          * */
-        hookMethod(OomAdjuster,
-            shouldKillExcessiveProcesses,
-            long.class,
-            returnResult(false).shouldObserveCall(false)
-        );
+        // Changed: Android 不包含
+        // hookMethod(OomAdjuster,
+        //     shouldKillExcessiveProcesses,
+        //     long.class,
+        //     returnResult(false).shouldObserveCall(false)
+        // );
 
         /*
          * 更新和修剪进程。
          * 设置此方法第三个参数为 0L，是为了使以下代码返回假：
          * app.getLastActivityTime() < oldTime
          * */
-        hookMethod(OomAdjuster,
-            updateAndTrimProcessLSP,
-            long.class, long.class, long.class,
-            ActiveUids, // int.class, AndroidT 不包含
-            new IHook() {
-                @Override
-                public void before() {
-                    setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
-                    // setArgs(2, 0L); // 不保护空进程
-                }
-            }.shouldObserveCall(false)
-        );
+        // Changed: Android 不需要
+        // hookMethod(OomAdjuster,
+        //     updateAndTrimProcessLSP,
+        //     long.class, long.class, long.class,
+        //     ActiveUids, // int.class, AndroidT 不包含
+        //     new IHook() {
+        //         @Override
+        //         public void before() {
+        //             setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
+        //             setArgs(2, 0L); // 不保护空进程
+        //         }
+        //     }.shouldObserveCall(false)
+        // );
 
         // ------------ RecentTasks ---------------
         /*
@@ -230,22 +223,23 @@ public class AndroidDef extends BaseHC {
                     // setThisField(CUR_TRIM_EMPTY_PROCESSES, Integer.MAX_VALUE); // 修剪空进程数 (别问为啥是又是 max 了。Changed: 不要更改空进程限制
                     // setThisField(MAX_CACHED_PROCESSES, Integer.MAX_VALUE); // 最大缓存进程数量。Changed: 没用的修改
                     setThisField(MAX_PHANTOM_PROCESSES, Integer.MAX_VALUE); // 最大虚幻进程数量
-                    setThisField(mKillBgRestrictedAndCachedIdle, false); // 禁止 kill 后台受限和缓存空闲的应用
+                    // setThisField(mKillBgRestrictedAndCachedIdle, false); // 禁止 kill 后台受限和缓存空闲的应用 Changed: Android 不包含
 
-                    if (existsField(mClass, USE_MODERN_TRIM))
-                        setThisField(USE_MODERN_TRIM, true); // 使用现代 trim。Note: AndroidV 删除
+                    // if (existsField(mClass, USE_MODERN_TRIM))
+                    //     setThisField(USE_MODERN_TRIM, true); // 使用现代 trim。Note: Android 删除
                 }
             })
 
             /* 一般情况不会被主动调用，仅保险使用 */
-            .method(updateKillBgRestrictedCachedIdle)
-            .doNothing()
+            // Changed: Android 不包含
+            // .method(updateKillBgRestrictedCachedIdle)
+            // .doNothing()
 
-            .methodIfExist(updateUseModernTrim) // Note: AndroidV 删除
-            .doNothing()
+            // .methodIfExist(updateUseModernTrim) // Note: Android 不包含
+            // .doNothing()
 
             /*.method(updateProactiveKillsEnabled)
-            .doNothing()*/ // AndroidT 不包含
+            .doNothing()*/ // Android 不包含
 
             .method(updateMaxCachedProcesses)
             .doNothing()
@@ -260,7 +254,7 @@ public class AndroidDef extends BaseHC {
         /*
          * 禁止主动杀戮。
          * */
-        // AndroidT 不包含
+        // Android 不包含
         // setStaticField(ActivityManagerConstants, PROACTIVE_KILLS_ENABLED, false);
     }
 }

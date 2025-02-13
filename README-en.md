@@ -23,7 +23,7 @@ AppRetentionHook is an **LSP module** that implements **background retention** b
 🔹 **Supported Systems** (for version 5.1):
 
 - ✅ **HyperOS V1 / V2**
-- ✅ **AOSP 11-15**
+- ✅ **AOSP 10-15**
 - ✅ **Samsung OneUI** (Usage scope is unknown)
 - 🚧 **Color OS** (Not fully adapted yet, but usable)
 

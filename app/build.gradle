@@ -35,7 +35,7 @@ android {
 
     defaultConfig {
         applicationId "com.hchen.appretention"
-        minSdk 30
+        minSdk 29
         targetSdk 34
         //noinspection HighAppVersionCode
         versionCode 2025021400

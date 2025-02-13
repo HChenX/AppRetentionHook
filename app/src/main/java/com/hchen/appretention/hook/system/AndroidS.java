@@ -20,7 +20,6 @@ package com.hchen.appretention.hook.system;
 
 import static com.hchen.appretention.data.field.SystemField.CUR_MAX_CACHED_PROCESSES;
 import static com.hchen.appretention.data.field.SystemField.MAX_PHANTOM_PROCESSES;
-import static com.hchen.appretention.data.field.SystemField.USE_MODERN_TRIM;
 import static com.hchen.appretention.data.field.SystemField.mGlobalMaxNumTasks;
 import static com.hchen.appretention.data.field.SystemField.mMemFactorOverride;
 import static com.hchen.appretention.data.method.SystemMethod.checkExcessivePowerUsageLPr;
@@ -33,7 +32,6 @@ import static com.hchen.appretention.data.method.SystemMethod.updateMaxCachedPro
 import static com.hchen.appretention.data.method.SystemMethod.updateMaxPhantomProcesses;
 import static com.hchen.appretention.data.method.SystemMethod.updatePerfConfigConstants;
 import static com.hchen.appretention.data.method.SystemMethod.updateProcessCpuStatesLocked;
-import static com.hchen.appretention.data.method.SystemMethod.updateUseModernTrim;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerConstants;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
 import static com.hchen.appretention.data.path.SystemClass.AppProfiler;
@@ -54,11 +52,11 @@ import com.hchen.hooktool.hook.IHook;
 import com.hchen.processor.HookEntrance;
 
 /**
- * 安卓 12
+ * 安卓 12 和 12L
  *
  * @author 焕晨HChen
  */
-@HookEntrance(targetPackage = "android", targetSdk = 32)
+@HookEntrance(targetPackage = "android", targetSdks = {32, 31})
 public class AndroidS extends BaseHC {
     @Override
     protected void init() {
@@ -139,7 +137,7 @@ public class AndroidS extends BaseHC {
             ActivityManagerService, Looper.class, LowMemDetector,
             new IHook() {
                 @Override
-                public void before() {
+                public void after() {
                     setThisField(mMemFactorOverride, 0);
                 }
             }
@@ -225,8 +223,8 @@ public class AndroidS extends BaseHC {
                     setThisField(MAX_PHANTOM_PROCESSES, Integer.MAX_VALUE); // 最大虚幻进程数量
                     // setThisField(mKillBgRestrictedAndCachedIdle, false); // 禁止 kill 后台受限和缓存空闲的应用 Changed: AndroidS 不包含
 
-                    if (existsField(mClass, USE_MODERN_TRIM))
-                        setThisField(USE_MODERN_TRIM, true); // 使用现代 trim。Note: AndroidS 删除
+                    // if (existsField(mClass, USE_MODERN_TRIM))
+                    //     setThisField(USE_MODERN_TRIM, true); // 使用现代 trim。Note: AndroidS 删除
                 }
             })
 
@@ -235,8 +233,8 @@ public class AndroidS extends BaseHC {
             // .method(updateKillBgRestrictedCachedIdle)
             // .doNothing()
 
-            .methodIfExist(updateUseModernTrim) // Note: AndroidS 不包含
-            .doNothing()
+            // .methodIfExist(updateUseModernTrim) // Note: AndroidS 不包含
+            // .doNothing()
 
             /*.method(updateProactiveKillsEnabled)
             .doNothing()*/ // AndroidS 不包含

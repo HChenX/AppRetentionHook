@@ -44,7 +44,7 @@ public @interface HookEntrance {
     /**
      * 目标安卓版本
      */
-    int targetSdk() default 0;
+    int[] targetSdks() default 0;
 
     /**
      * 目标系统 ROM 版本

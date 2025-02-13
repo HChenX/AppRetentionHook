@@ -22,6 +22,7 @@ import com.google.auto.service.AutoService;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -85,16 +86,16 @@ public class HookProcessor extends AbstractProcessor {
                 public class EntranceMap {
                     public String mTargetBrand;
                     public String mTargetPackage;
-                    public int mTargetSdk;
+                    public int[] mTargetSdks;
                     public float mTargetOS;
                     public boolean mDownward;
                     public boolean mUpward;
                     public boolean isHyperOS;
 
-                    public EntranceMap(String targetBrand, String targetPackage, int targetSdk, float targetOS, boolean isHyperOS, boolean downward, boolean upward){
+                    public EntranceMap(String targetBrand, String targetPackage, int[] targetSdks, float targetOS, boolean isHyperOS, boolean downward, boolean upward){
                         this.mTargetBrand = targetBrand;
                         this.mTargetPackage = targetPackage;
-                        this.mTargetSdk = targetSdk;
+                        this.mTargetSdks = targetSdks;
                         this.mTargetOS = targetOS;
                         this.isHyperOS = isHyperOS;
                         this.mDownward = downward;
@@ -118,15 +119,16 @@ public class HookProcessor extends AbstractProcessor {
                     HookEntrance hookEntrance = element.getAnnotation(HookEntrance.class);
                     String targetBrand = hookEntrance.targetBrand();
                     String targetPackage = hookEntrance.targetPackage();
-                    int targetSdk = hookEntrance.targetSdk();
+                    int[] targetSdks = hookEntrance.targetSdks();
                     float targetOS = hookEntrance.targetOS();
                     boolean isHyperOS = hookEntrance.isHyperOS();
                     boolean downward = hookEntrance.downward();
                     boolean upward = hookEntrance.upward();
+                    String targetSdkStrings = Arrays.toString(targetSdks).replace("[", "").replace("]", "");
                     try {
                         writer.write("        ");
                         writer.write("dataMap.put(\"" + fullClassName + "\", new EntranceMap(\"" + targetBrand + "\", "
-                            + "\"" + targetPackage + "\"" + ", " + targetSdk + ", " + targetOS + "f, " + isHyperOS + ", " + downward + ", " + upward + "));\n");
+                            + "\"" + targetPackage + "\"" + ", new int[]{" + targetSdkStrings + "}, " + targetOS + "f, " + isHyperOS + ", " + downward + ", " + upward + "));\n");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

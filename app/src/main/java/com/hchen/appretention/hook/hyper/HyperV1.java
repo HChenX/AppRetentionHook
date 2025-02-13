@@ -176,7 +176,7 @@ public class HyperV1 extends BaseHC {
          *  */
         SystemPropTool.setProp("persist.sys.memory_standard.enable", FALSE);
         chain(MemoryStandardProcessControl, method(isEnable)
-                .returnResult(false)
+                .returnResult(false).shouldObserveCall(false)
 
             // .method(init, Context.class, ActivityManagerService)
             // .returnResult(false) // Changed: 多余的 Hook

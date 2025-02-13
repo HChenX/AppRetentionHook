@@ -67,7 +67,7 @@ import com.hchen.processor.HookEntrance;
  *
  * @author 焕晨HChen
  */
-@HookEntrance(targetPackage = "android", targetSdk = 35)
+@HookEntrance(targetPackage = "android", targetSdks = 35)
 public class AndroidV extends BaseHC {
     @Override
     public void init() {
@@ -148,7 +148,7 @@ public class AndroidV extends BaseHC {
             ActivityManagerService, Looper.class, LowMemDetector,
             new IHook() {
                 @Override
-                public void before() {
+                public void after() {
                     setThisField(mMemFactorOverride, 0);
                 }
             }

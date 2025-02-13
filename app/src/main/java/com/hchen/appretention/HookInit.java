@@ -31,6 +31,7 @@ import com.hchen.hooktool.tool.additional.DeviceTool;
 import org.luckypray.dexkit.DexKitBridge;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
@@ -70,7 +71,7 @@ public class HookInit extends HCEntrance {
                     return;
                 if (!"Any".equals(entranceMap.mTargetBrand) && !DeviceTool.isRightRom(entranceMap.mTargetBrand))
                     return;
-                if (!(entranceMap.mTargetSdk == 0) && !DeviceTool.isAndroidVersion(entranceMap.mTargetSdk))
+                if (!(entranceMap.mTargetSdks[0] == 0) && Arrays.stream(entranceMap.mTargetSdks).noneMatch(DeviceTool::isAndroidVersion))
                     return;
                 if ("Xiaomi".equals(entranceMap.mTargetBrand)) {
                     if (entranceMap.mTargetOS != -1) {
