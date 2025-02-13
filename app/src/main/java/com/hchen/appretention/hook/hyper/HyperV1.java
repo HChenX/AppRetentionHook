@@ -25,6 +25,7 @@ import static com.hchen.appretention.data.field.HyperField.PROC_CPU_EXCEPTION_EN
 import static com.hchen.appretention.data.field.HyperField.RECLAIM_IF_NEEDED;
 import static com.hchen.appretention.data.field.HyperField.sCompactSingleProcEnable;
 import static com.hchen.appretention.data.field.HyperField.sCompactionEnable;
+import static com.hchen.appretention.data.method.HyperMethod.SetdmoptEnable;
 import static com.hchen.appretention.data.method.HyperMethod.addMiuiPeriodicCleanerService;
 import static com.hchen.appretention.data.method.HyperMethod.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.HyperMethod.getDeviceLevelForRAM;
@@ -48,6 +49,7 @@ import static com.hchen.appretention.data.method.HyperMethod.scanProcessAndClean
 import static com.hchen.appretention.data.method.HyperMethod.updateScreenState;
 import static com.hchen.appretention.data.path.HyperClass.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.HyperClass.Build;
+import static com.hchen.appretention.data.path.HyperClass.ExtendMImpl;
 import static com.hchen.appretention.data.path.HyperClass.GameMemoryCleanerDeprecated;
 import static com.hchen.appretention.data.path.HyperClass.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.HyperClass.IAppState$IRunningProcess;
@@ -141,8 +143,12 @@ public class HyperV1 extends BaseHC {
         );
 
         // 后台限制。
-        if (existsMethod(OomAdjusterImpl, getBackgroundAppCount))
-            hookMethod(OomAdjusterImpl, getBackgroundAppCount, returnResult(100));
+        if (existsMethod(OomAdjusterImpl, getBackgroundAppCount)) {
+            hookMethod(OomAdjusterImpl,
+                getBackgroundAppCount,
+                returnResult(100)
+            );
+        }
 
         /*
          * 阻止定期清洁。
@@ -153,7 +159,6 @@ public class HyperV1 extends BaseHC {
          * */
         SystemPropTool.setProp("persist.sys.periodic.u.enable", FALSE);
         SystemPropTool.setProp("persist.sys.periodic.u.startprocess.enable", FALSE);
-
         if (existsMethod(SystemServerImpl, addMiuiPeriodicCleanerService, ActivityTaskManagerService)) {
             hookMethod(SystemServerImpl,
                 addMiuiPeriodicCleanerService,
@@ -167,6 +172,12 @@ public class HyperV1 extends BaseHC {
          * */
         SystemPropTool.setProp("persist.miui.extm.enable", ONE);
         SystemPropTool.setProp("persist.miui.extm.dm_opt.enable", TRUE);
+        if (existsMethod(ExtendMImpl, SetdmoptEnable)) {
+            hookMethod(ExtendMImpl,
+                SetdmoptEnable,
+                doNothing()
+            );
+        }
 
         /*
          * 禁用 MemoryFreezeStubImpl。

@@ -25,6 +25,7 @@ import static com.hchen.appretention.data.field.HyperField.PROC_CPU_EXCEPTION_EN
 import static com.hchen.appretention.data.field.HyperField.RECLAIM_IF_NEEDED;
 import static com.hchen.appretention.data.field.HyperField.sCompactSingleProcEnable;
 import static com.hchen.appretention.data.field.HyperField.sCompactionEnable;
+import static com.hchen.appretention.data.method.HyperMethod.SetdmoptEnable;
 import static com.hchen.appretention.data.method.HyperMethod.addMiuiPeriodicCleanerService;
 import static com.hchen.appretention.data.method.HyperMethod.getBackgroundAppCount;
 import static com.hchen.appretention.data.method.HyperMethod.getDeviceLevelForRAM;
@@ -50,6 +51,7 @@ import static com.hchen.appretention.data.method.HyperMethod.scanProcessAndClean
 import static com.hchen.appretention.data.method.HyperMethod.updateScreenState;
 import static com.hchen.appretention.data.path.HyperClass.ActivityTaskManagerService;
 import static com.hchen.appretention.data.path.HyperClass.Build;
+import static com.hchen.appretention.data.path.HyperClass.ExtendMImpl;
 import static com.hchen.appretention.data.path.HyperClass.GameMemoryCleanerDeprecated;
 import static com.hchen.appretention.data.path.HyperClass.GameMemoryReclaimer;
 import static com.hchen.appretention.data.path.HyperClass.IAppState$IRunningProcess;
@@ -132,7 +134,10 @@ public class HyperV2 extends BaseHC {
 
         // 后台限制。似乎没啥用，可能影响 adj 分数判定。
         // Changed: HyperV2 始终存在此方法。
-        hookMethod(OomAdjusterImpl, getBackgroundAppCount, returnResult(100));
+        hookMethod(OomAdjusterImpl,
+            getBackgroundAppCount,
+            returnResult(100)
+        );
 
         /*
          * 阻止定期清洁。
@@ -153,6 +158,12 @@ public class HyperV2 extends BaseHC {
          * */
         SystemPropTool.setProp("persist.miui.extm.enable", ONE);
         SystemPropTool.setProp("persist.miui.extm.dm_opt.enable", TRUE);
+        if (existsMethod(ExtendMImpl, SetdmoptEnable)) {
+            hookMethod(ExtendMImpl,
+                SetdmoptEnable,
+                doNothing()
+            );
+        }
 
         /*
          * 禁用 MemoryFreezeStubImpl。
@@ -236,7 +247,6 @@ public class HyperV2 extends BaseHC {
          * */
         SystemPropTool.setProp("persist.sys.mms.compact_enable", FALSE);
         SystemPropTool.setProp("persist.sys.mms.single_compact_enable", FALSE);
-
         setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
         setStaticField(MiuiMemoryService, sCompactionEnable, false);
         setStaticField(MiuiMemoryService, sCompactSingleProcEnable, false);
@@ -329,7 +339,8 @@ public class HyperV2 extends BaseHC {
         // Changed: Support HyperV2
         hookMethod(SystemPressureControllerNative,
             nStartPressureMonitor,
-            doNothing());
+            doNothing()
+        );
 
         CameraOpt.doHook();
     }

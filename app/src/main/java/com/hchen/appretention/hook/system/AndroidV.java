@@ -85,7 +85,8 @@ public class AndroidV extends BaseHC {
         hookMethod(ProcessList,
             killProcessesWhenImperceptible,
             int[].class, String.class, int.class,
-            doNothing());
+            doNothing()
+        );
 
         // ----------------- PhantomProcessList ---------------
         /*

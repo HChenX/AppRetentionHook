@@ -36,6 +36,7 @@ public class HyperClass {
     public static final String SystemServerImpl = "com.android.server.SystemServerImpl";
     public static final String ActivityTaskManagerService = "com.android.server.wm.ActivityTaskManagerService";
     public static final String MemoryFreezeStubImpl = "com.android.server.am.MemoryFreezeStubImpl";
+    public static final String ExtendMImpl = "com.android.server.ExtendMImpl";
     public static final String MemoryStandardProcessControl = "com.android.server.am.MemoryStandardProcessControl";
     public static final String SystemPressureController = "com.android.server.am.SystemPressureController";
     public static final String SystemPressureControllerNative = "com.android.server.am.SystemPressureControllerNative";

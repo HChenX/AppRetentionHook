@@ -86,7 +86,8 @@ public class AndroidU extends BaseHC {
         hookMethod(ProcessList,
             killProcessesWhenImperceptible,
             int[].class, String.class, int.class,
-            doNothing());
+            doNothing()
+        );
 
         /*
          * ProcessList$ImperceptibleKillRunner 类内部的私有进程 kill 方法。
