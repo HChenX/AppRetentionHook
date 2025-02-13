@@ -23,3 +23,10 @@
 -keep class com.hchen.appretention.HookInit
 -keepnames class com.hchen.appretention.hook.**
 -keepnames class com.hchen.appretention.hook.**$*
+-keep class com.hchen.appretention.log.SaveLog$LogContentData {
+    public static ** CREATOR;
+    *;
+}
+-keep class * implements android.os.Parcelable {
+    public static ** CREATOR;
+}

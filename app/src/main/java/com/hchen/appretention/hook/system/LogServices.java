@@ -34,6 +34,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.provider.Settings;
 
 import com.hchen.appretention.BuildConfig;
@@ -125,8 +126,10 @@ public class LogServices extends BaseHC {
                         SaveLog.LogContentData logContentData;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             logContentData = intent.getParcelableExtra("logData", SaveLog.LogContentData.class);
-                        } else
-                            logContentData = intent.getParcelableExtra("logData");
+                        } else {
+                            Parcelable rawData = intent.getParcelableExtra("logData");
+                            logContentData = (rawData instanceof SaveLog.LogContentData) ? (SaveLog.LogContentData) rawData : null;
+                        }
                         if (logContentData == null) {
                             XposedLog.logW(TAG, "Broadcast receiver: log logContent data is null!");
                             return;
