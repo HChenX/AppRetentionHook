@@ -119,7 +119,7 @@ public class LogServices extends BaseHC {
                                 }
                             }
                         );
-                        XposedLog.logI(TAG, "system boot completed!!");
+                        XposedLog.logI(TAG, "System boot completed!!");
                     }
                     case SaveLog.ACTION_LOG_SERVICE_CONTENT -> {
                         SaveLog.LogContentData logContentData;

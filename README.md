@@ -18,9 +18,9 @@
 ## ✨ 模块介绍
 
 AppRetentionHook 是一款 **Lsp 模块**，通过 **Hook 系统 kill 逻辑** 来实现 **后台保活**。
-📌 **5.1 版本是重构后的全新版本！！** 快来体验吧！
+📌 **5.1+ 版本是重构后的全新版本！！** 快来体验吧！
 
-🔹 **适配系统**（5.1 版本支持范围）：
+🔹 **适配系统**（5.1+ 版本支持范围）：
 
 - ✅ **HyperOS V1 / V2**
 - ✅ **AOSP 10-15**
@@ -61,7 +61,7 @@ AppRetentionHook 是一款 **Lsp 模块**，通过 **Hook 系统 kill 逻辑** �
 2. **激活**：进入 Lsp 选择本模块并启用
 3. **勾选作用域**（不同系统）：
     - **MIUI / HyperOS**：`系统框架(system)` 和 `电量与性能(powerkeeper) [如果有]`
-    - **Color OS**：`雅典娜(Athena)`、`电池`、`系统框架(system)`（5.1 版本未适配，仅可用）
+    - **Color OS**：`雅典娜(Athena)`、`电池`、`系统框架(system)`（5.1+ 版本未适配，仅可用）
     - **OneUi**：`系统框架(system)`
 4. **重启设备即可！**
 
@@ -122,6 +122,7 @@ AppRetentionHook 是一款 **Lsp 模块**，通过 **Hook 系统 kill 逻辑** �
 |------------|---------------------------------------------------------------------------|
 | Cemiuiler  | [Cemiuiler GitHub](https://github.com/Team-Cemiuiler/Cemiuiler/tree/main) |
 | Don't Kill | [Don-t-Kill](https://github.com/HChenX/Don-t-Kill)                        |
+| HookTool   | [HookTool](https://github.com/HChenX/HookTool)                            |
 
 📌 **翻译提供**
 
@@ -137,4 +138,5 @@ AppRetentionHook 是一款 **Lsp 模块**，通过 **Hook 系统 kill 逻辑** �
 ⚠ **抄袭将导致项目闭源！请注明作者！**
 
 ## 🎉结尾
+
 💖 **感谢你的支持，Enjoy your day!** 🚀
