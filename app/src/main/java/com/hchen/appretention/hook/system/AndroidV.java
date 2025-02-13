@@ -71,8 +71,8 @@ import com.hchen.processor.HookEntrance;
 public class AndroidV extends BaseHC {
     @Override
     public void init() {
-        new UpdateOomLevels().onLoadPackage();
-        new CacheCompaction().onLoadPackage();
+        UpdateOomLevels.init();
+        CacheCompaction.init();
 
         // ----------- ProcessList ----------------------
         /*

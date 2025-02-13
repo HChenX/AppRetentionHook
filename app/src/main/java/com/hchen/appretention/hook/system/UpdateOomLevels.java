@@ -22,12 +22,15 @@ import static com.hchen.appretention.data.method.SystemMethod.onLmkdConnect;
 import static com.hchen.appretention.data.method.SystemMethod.updateOomLevels;
 import static com.hchen.appretention.data.method.SystemMethod.writeLmkd;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
+import static com.hchen.hooktool.tool.CoreTool.getField;
+import static com.hchen.hooktool.tool.CoreTool.hookConstructor;
+import static com.hchen.hooktool.tool.CoreTool.hookMethod;
+import static com.hchen.hooktool.tool.CoreTool.setField;
 
 import android.system.Os;
 import android.system.OsConstants;
 
 import com.hchen.appretention.data.field.SystemField;
-import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
 import java.io.OutputStream;
@@ -39,15 +42,10 @@ import java.util.Arrays;
  *
  * @author 焕晨HChen
  */
-public final class UpdateOomLevels extends BaseHC {
+public final class UpdateOomLevels {
     private static final int OOM_MIN_FREE_DISCOUNT = 3;
     private static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
-    private Object mProcessListInstance = null;
-
-    @Override
-    public void init() {
-        updateOomLevels();
-    }
+    private static Object mProcessListInstance = null;
 
     /*
      *  K50 12G
@@ -56,7 +54,7 @@ public final class UpdateOomLevels extends BaseHC {
      * 225 132120576 250 132120576 300 226492416 400 226492416 500 226492416 600 226492416 700 226492416
      * 800 226492416 900 226492416 999 330301440
      * */
-    private void updateOomLevels() {
+    public static void init() {
         /*
          * 获取 ProcessList 的实例
          * */
@@ -75,7 +73,8 @@ public final class UpdateOomLevels extends BaseHC {
          * */
         hookMethod(ProcessList,
             onLmkdConnect,
-            OutputStream.class, new IHook() {
+            OutputStream.class,
+            new IHook() {
                 @Override
                 public void before() {
                     updateOomMinFree(thisObject());
@@ -161,7 +160,7 @@ public final class UpdateOomLevels extends BaseHC {
         );
     }
 
-    private int[] updateOomMinFree(Object processListInstance) {
+    private static int[] updateOomMinFree(Object processListInstance) {
         int[] mOomMinFree = (int[]) getField(processListInstance, SystemField.mOomMinFree);
         if (mOomMinFree == null)
             return null;

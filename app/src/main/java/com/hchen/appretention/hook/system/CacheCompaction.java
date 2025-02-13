@@ -64,6 +64,27 @@ import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
 import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 import static com.hchen.appretention.data.prop.SystemProp.TRUE;
+import static com.hchen.hooktool.BaseHC.anyMethod;
+import static com.hchen.hooktool.BaseHC.method;
+import static com.hchen.hooktool.BaseHC.methodIfExist;
+import static com.hchen.hooktool.log.XposedLog.logD;
+import static com.hchen.hooktool.log.XposedLog.logW;
+import static com.hchen.hooktool.tool.ChainTool.chain;
+import static com.hchen.hooktool.tool.CoreTool.callMethod;
+import static com.hchen.hooktool.tool.CoreTool.callStaticMethod;
+import static com.hchen.hooktool.tool.CoreTool.existsClass;
+import static com.hchen.hooktool.tool.CoreTool.existsConstructor;
+import static com.hchen.hooktool.tool.CoreTool.existsField;
+import static com.hchen.hooktool.tool.CoreTool.existsMethod;
+import static com.hchen.hooktool.tool.CoreTool.findConstructor;
+import static com.hchen.hooktool.tool.CoreTool.findMethod;
+import static com.hchen.hooktool.tool.CoreTool.getField;
+import static com.hchen.hooktool.tool.CoreTool.getStaticField;
+import static com.hchen.hooktool.tool.CoreTool.hook;
+import static com.hchen.hooktool.tool.CoreTool.hookAllMethod;
+import static com.hchen.hooktool.tool.CoreTool.hookMethod;
+import static com.hchen.hooktool.tool.CoreTool.newInstance;
+import static com.hchen.hooktool.tool.CoreTool.returnResult;
 
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -71,7 +92,6 @@ import android.os.Process;
 
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.appretention.data.other.PrecessAdjInfo;
-import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
 import java.lang.reflect.Constructor;
@@ -83,15 +103,16 @@ import java.util.ArrayList;
  *
  * @author 焕晨HChen
  */
-public final class CacheCompaction extends BaseHC {
-    private Object mCachedAppOptimizer = null;
-    private Object NONE;
-    private Object SOME;
-    private Object ANON;
-    private Object FULL;
-    private Object ANON_MORE;
-    private Object APP;
-    private Object SHELL;
+public final class CacheCompaction {
+    private static final String TAG = "CacheCompaction";
+    private static Object mCachedAppOptimizer = null;
+    private static Object NONE;
+    private static Object SOME;
+    private static Object ANON;
+    private static Object FULL;
+    private static Object ANON_MORE;
+    private static Object APP;
+    private static Object SHELL;
 
     // --------- old ---------
     private static boolean useOldCompactMode = false;
@@ -100,8 +121,7 @@ public final class CacheCompaction extends BaseHC {
     private static final int COMPACT_ACTION_ANON = 2;
     private static final int COMPACT_ACTION_FULL = 3;
 
-    @Override
-    public void init() {
+    public static void init() {
         // compactionAppCache();
         compactionAppCacheNew();
 
@@ -128,7 +148,27 @@ public final class CacheCompaction extends BaseHC {
         );
     }
 
-    private void initEnumIfNeed() {
+    public static void enableCompaction() {
+        hookMethod(CachedAppOptimizer,
+            updateUseCompaction,
+            new IHook() {
+                @Override
+                public void before() {
+                    Boolean enabled = (Boolean) callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", false);
+
+                    if (!enabled) {
+                        Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", TRUE, true);
+                        if (result != null && result) {
+                            logD(TAG, "Success to put use_compaction new value 'true'");
+                        } else
+                            logW(TAG, "Failed to put use_compaction value to 'true'");
+                    }
+                }
+            }.shouldObserveCall(false)
+        );
+    }
+
+    private static void initEnumIfNeed() {
         if (mCachedAppOptimizer == null || useOldCompactMode) return;
         if (NONE != null || SOME != null) return;
         if (!existsClass(CachedAppOptimizer$CompactProfile)) {
@@ -149,7 +189,7 @@ public final class CacheCompaction extends BaseHC {
         }
     }
 
-    private void compactionAppCacheNew() {
+    private static void compactionAppCacheNew() {
         Method applyOomAdjLSPMethod = null;
         if (existsMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class, int.class, boolean.class))
             applyOomAdjLSPMethod = findMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class, int.class, boolean.class);
@@ -202,23 +242,7 @@ public final class CacheCompaction extends BaseHC {
             returnResult(false).shouldObserveCall(false)
         );
 
-        hookMethod(CachedAppOptimizer,
-            updateUseCompaction,
-            new IHook() {
-                @Override
-                public void before() {
-                    Boolean enabled = (Boolean) callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", false);
-
-                    if (!enabled) {
-                        Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", TRUE, true);
-                        if (result != null && result) {
-                            logD(TAG, "Success to put use_compaction new value 'true'");
-                        } else
-                            logW(TAG, "Failed to put use_compaction value to 'true'");
-                    }
-                }
-            }.shouldObserveCall(false)
-        );
+        enableCompaction();
 
         chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
             .returnResult(false).shouldObserveCall(false) 进程恢复到可感知状态了 */
@@ -265,7 +289,7 @@ public final class CacheCompaction extends BaseHC {
         );
     }
 
-    private void compactApp(Object app, int action, Object compactProfile, Object source, Object force) {
+    private static void compactApp(Object app, int action, Object compactProfile, Object source, Object force) {
         Object optRecord = getField(app, mOptRecord);
 
         if (useOldCompactMode) {
@@ -287,18 +311,18 @@ public final class CacheCompaction extends BaseHC {
     }
 
     // 当前的 adj 值。
-    private int getCurAdj(Object app) {
+    private static int getCurAdj(Object app) {
         Object state = getField(app, mState);
         return (int) callMethod(state, getCurAdj);
     }
 
     // 上一次的 adj 值。
-    private int getSetAdj(Object app) {
+    private static int getSetAdj(Object app) {
         Object state = getField(app, mState);
         return (int) callMethod(state, getSetAdj);
     }
 
-    private int getSetProcState(Object app) {
+    private static int getSetProcState(Object app) {
         Object state = getField(app, mState);
         return (int) callMethod(state, getSetProcState);
     }

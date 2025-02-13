@@ -61,13 +61,13 @@ import com.hchen.hooktool.hook.IHook;
 import com.hchen.processor.HookEntrance;
 
 /**
- * 适用于低于安卓 13 的任何版本
+ * 适用于低于安卓 12 的任何版本
  * <p>
  * 仅可用，未作专门适配
  *
  * @author 焕晨HChen
  */
-@HookEntrance(targetPackage = "android", targetSdk = 32, downward = true)
+@HookEntrance(targetPackage = "android", targetSdk = 31, downward = true)
 public class AndroidDef extends BaseHC {
     @Override
     protected void init() {
