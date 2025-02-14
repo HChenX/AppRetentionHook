@@ -124,14 +124,18 @@ public class LogServices extends BaseHC {
                     }
                     case SaveLog.ACTION_LOG_SERVICE_CONTENT -> {
                         SaveLog.LogContentData logContentData;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            logContentData = intent.getParcelableExtra("logData", SaveLog.LogContentData.class);
-                        } else {
-                            Parcelable rawData = intent.getParcelableExtra("logData");
-                            logContentData = (rawData instanceof SaveLog.LogContentData) ? (SaveLog.LogContentData) rawData : null;
-                        }
-                        if (logContentData == null) {
-                            XposedLog.logW(TAG, "Broadcast receiver: log logContent data is null!");
+                        try {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                logContentData = intent.getParcelableExtra("logData", SaveLog.LogContentData.class);
+                            } else {
+                                Parcelable rawData = intent.getParcelableExtra("logData");
+                                logContentData = (rawData instanceof SaveLog.LogContentData) ? (SaveLog.LogContentData) rawData : null;
+                            }
+                            if (logContentData == null) {
+                                XposedLog.logW(TAG, "Broadcast receiver: log logContent data is null!");
+                                return;
+                            }
+                        } catch (Throwable ignore) {
                             return;
                         }
 
