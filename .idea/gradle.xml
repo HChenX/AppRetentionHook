@@ -15,6 +15,7 @@
             <option value="$PROJECT_DIR$/aosp" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/app/hook" />
+            <option value="$PROJECT_DIR$/color" />
             <option value="$PROJECT_DIR$/k50" />
             <option value="$PROJECT_DIR$/k80p" />
           </set>

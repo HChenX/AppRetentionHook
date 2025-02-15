@@ -22,3 +22,5 @@ local.properties
 /11p/.*
 /aosp
 /aosp/.*
+/color
+/color/.*
