@@ -39,12 +39,12 @@ import android.provider.Settings;
 
 import com.hchen.appretention.BuildConfig;
 import com.hchen.appretention.log.SaveLog;
+import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.log.XposedLog;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
-import com.hchen.processor.HookEntrance;
 
 import java.io.BufferedReader;
 import java.io.IOException;

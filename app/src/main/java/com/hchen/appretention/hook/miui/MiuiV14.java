@@ -63,9 +63,9 @@ import static com.hchen.appretention.data.prop.SystemProp.FALSE;
 import android.app.job.JobParameters;
 
 import com.hchen.appretention.hook.hyper.CameraOpt;
+import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
-import com.hchen.processor.HookEntrance;
 
 import java.util.List;
 

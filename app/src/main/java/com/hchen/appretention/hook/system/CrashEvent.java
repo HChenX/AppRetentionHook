@@ -25,9 +25,9 @@ import android.app.ApplicationErrorReport;
 import android.content.Context;
 
 import com.hchen.appretention.data.field.SystemField;
+import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.processor.HookEntrance;
 
 import java.lang.reflect.Method;
 

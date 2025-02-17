@@ -16,7 +16,7 @@
 
  * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.processor;
+package com.hchen.collect;
 
 import com.google.auto.service.AutoService;
 
@@ -41,7 +41,7 @@ import javax.lang.model.element.TypeElement;
  * @author 焕晨HChen
  */
 @AutoService(Processor.class)
-@SupportedAnnotationTypes("com.hchen.processor.HookEntrance")
+@SupportedAnnotationTypes("com.hchen.collect.HookEntrance")
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
 public class HookProcessor extends AbstractProcessor {
     boolean isProcessed = false;

@@ -21,8 +21,8 @@ package com.hchen.appretention.hook.powerkeeper;
 import static com.hchen.appretention.data.method.PowerKeeperMethod.kill;
 import static com.hchen.appretention.data.path.PowerKeeperClass.ProcessManager;
 
+import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
-import com.hchen.processor.HookEntrance;
 
 /**
  * 禁止电量和性能杀后台

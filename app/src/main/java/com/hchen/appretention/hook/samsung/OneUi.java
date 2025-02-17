@@ -52,9 +52,9 @@ import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 
 import android.content.Context;
 
+import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.processor.HookEntrance;
 
 /**
  * 三星 OneUi

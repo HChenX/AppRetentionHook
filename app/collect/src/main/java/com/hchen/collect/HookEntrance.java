@@ -16,7 +16,7 @@
 
  * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.processor;
+package com.hchen.collect;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

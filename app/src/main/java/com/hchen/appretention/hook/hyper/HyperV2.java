@@ -78,9 +78,9 @@ import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 
 import android.app.job.JobParameters;
 
+import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.tool.additional.SystemPropTool;
-import com.hchen.processor.HookEntrance;
 
 import java.util.List;
 
@@ -156,9 +156,10 @@ public class HyperV2 extends BaseHC {
         /*
          * 启用小米增强回写。
          * */
-        SystemPropTool.setProp("persist.miui.extm.enable", ONE);
-        SystemPropTool.setProp("persist.miui.extm.dm_opt.enable", TRUE);
         if (existsMethod(ExtendMImpl, SetdmoptEnable)) {
+            SystemPropTool.setProp("persist.miui.extm.enable", ONE);
+            SystemPropTool.setProp("persist.miui.extm.dm_opt.enable", TRUE);
+
             hookMethod(ExtendMImpl,
                 SetdmoptEnable,
                 doNothing()

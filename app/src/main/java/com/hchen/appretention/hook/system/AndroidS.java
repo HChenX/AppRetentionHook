@@ -47,9 +47,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.processor.HookEntrance;
 
 /**
  * 安卓 12 和 12L
