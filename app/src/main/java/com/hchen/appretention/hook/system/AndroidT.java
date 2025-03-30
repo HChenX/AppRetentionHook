@@ -56,6 +56,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.hchen.appretention.hook.system.opt.ApplyAdjOpt;
 import com.hchen.appretention.hook.system.opt.CacheCompaction;
 import com.hchen.appretention.hook.system.opt.OomLevelsOpt;
 import com.hchen.collect.HookEntrance;
@@ -73,6 +74,7 @@ public class AndroidT extends BaseHC {
     public void init() {
         OomLevelsOpt.init();
         CacheCompaction.init();
+        ApplyAdjOpt.init();
 
         // ----------- ProcessList ----------------------
         /*

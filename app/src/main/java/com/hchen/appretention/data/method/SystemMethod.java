@@ -46,6 +46,7 @@ public class SystemMethod {
     public static final String compactApp = "compactApp";
     public static final String resolveCompactionProfile = "resolveCompactionProfile";
     public static final String applyOomAdjLSP = "applyOomAdjLSP";
+    public static final String forEachLruProcessesLOSP = "forEachLruProcessesLOSP";
     public static final String removeLruProcessLocked = "removeLruProcessLocked";
     public static final String procStateToImportance = "procStateToImportance";
     public static final String getCurProcState = "getCurProcState";

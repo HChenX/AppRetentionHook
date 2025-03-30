@@ -20,11 +20,13 @@ package com.hchen.appretention.hook.system.opt;
 
 import static com.hchen.appretention.data.field.SystemField.mContext;
 import static com.hchen.appretention.data.method.SystemMethod.applyOomAdjLSP;
+import static com.hchen.appretention.data.method.SystemMethod.forEachLruProcessesLOSP;
 import static com.hchen.appretention.data.method.SystemMethod.getCurProcState;
 import static com.hchen.appretention.data.method.SystemMethod.procStateToImportance;
 import static com.hchen.appretention.data.method.SystemMethod.removeLruProcessLocked;
 import static com.hchen.appretention.data.method.SystemMethod.setCurAdj;
 import static com.hchen.appretention.data.method.SystemMethod.setCurRawAdj;
+import static com.hchen.appretention.data.method.SystemMethod.systemReady;
 import static com.hchen.appretention.data.method.SystemMethod.updateLruProcessLocked;
 import static com.hchen.appretention.data.path.HyperClass.ServiceThread;
 import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
@@ -55,20 +57,18 @@ import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 
 import com.hchen.appretention.data.field.SystemField;
-import com.hchen.appretention.data.method.SystemMethod;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.log.XposedLog;
 import com.hchen.hooktool.tool.ChainTool;
-import com.hchen.hooktool.tool.CoreTool;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Adj 计算
@@ -85,7 +85,6 @@ public class ApplyAdjOpt {
     private static final int MAIN_PROCESS_MAX_ADJ = 699;
     private static final int SUB_PROCESS_MIN_ADJ = 700;
     private static final int SUB_PROCESS_MAX_ADJ = 799;
-
 
     public static void init() {
         Constructor<?> oomAdjuster = null;
@@ -144,8 +143,7 @@ public class ApplyAdjOpt {
                 })
         );
 
-        hook(
-            applyOomAdjLSPMethod,
+        hook(applyOomAdjLSPMethod,
             new IHook() {
                 @Override
                 public void before() {
@@ -171,38 +169,37 @@ public class ApplyAdjOpt {
 
     private static void updateBackgroundAppList() {
         if (mService == null || mProcessList == null) return;
-        ArrayList<Object> lruProcessList = new ArrayList<>();
         synchronized (mService) {
-            lruProcessList = (ArrayList<Object>) CoreTool.callMethod(mProcessList, SystemMethod.getLruProcessesLOSP);
-            if (lruProcessList == null) return;
-            AndroidLog.logD(TAG, "lruProcessList size = " + lruProcessList.size());
-
             mPreviousBackgroundAppList.clear();
-            for (Object pr : lruProcessList) {
-                ApplicationInfo info = (ApplicationInfo) getField(pr, SystemField.info);
-                if (info == null) continue;
-                boolean isSystem = isSystemApp(info);
-                if (isSystem) continue; // 跳过系统 App
 
-                Object mState = getField(pr, SystemField.mState);
-                Integer importance = (Integer) callStaticMethod(
-                    ActivityManager$RunningAppProcessInfo,
-                    procStateToImportance,
-                    callMethod(mState, getCurProcState)
-                );
-                if (importance != null) {
-                    if (importance > ImportanceInfo.IMPORTANCE_VISIBLE) { // 假定为后台
-                        mPreviousBackgroundAppList.add(pr); // 根据 mProcessList 顺序，越不重要越在前面
+            callMethod(mProcessList, forEachLruProcessesLOSP, false, new Consumer<Object>() {
+                @Override
+                public void accept(Object pr) {
+                    ApplicationInfo info = (ApplicationInfo) getField(pr, SystemField.info);
+                    if (info != null) {
+                        boolean isSystem = isSystemApp(info);
+                        if (!isSystem) {
+                            Object mState = getField(pr, SystemField.mState);
+                            Integer importance = (Integer) callStaticMethod(
+                                ActivityManager$RunningAppProcessInfo,
+                                procStateToImportance,
+                                callMethod(mState, getCurProcState)
+                            );
+                            if (importance != null) {
+                                if (importance > ImportanceInfo.IMPORTANCE_VISIBLE) { // 假定为后台
+                                    mPreviousBackgroundAppList.add(pr); // 根据 mProcessList 顺序，越不重要越在前面
+                                }
+                            }
+                        }
                     }
                 }
-            }
-            Collections.reverse(mPreviousBackgroundAppList); // 反转
+            });
         }
     }
 
     private static void hookSystemReady() {
-        hookMethod("com.android.server.am.ActivityManagerService",
-            "systemReady",
+        hookMethod(ActivityManagerService,
+            systemReady,
             Runnable.class, TimingsTraceAndSlog,
             new IHook() {
                 @Override

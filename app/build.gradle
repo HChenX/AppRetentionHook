@@ -38,8 +38,8 @@ android {
         minSdk 29
         targetSdk 34
         //noinspection HighAppVersionCode
-        versionCode 2025022000
-        versionName "5.2.2"
+        versionCode 2025033000
+        versionName "5.2.3"
         ndk {
             // noinspection ChromeOsAbiSupport
             abiFilters 'arm64-v8a', 'armeabi-v7a'
