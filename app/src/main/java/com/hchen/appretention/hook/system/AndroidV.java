@@ -58,6 +58,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.hchen.appretention.hook.system.opt.ApplyAdjOpt;
+import com.hchen.appretention.hook.system.opt.CacheCompaction;
+import com.hchen.appretention.hook.system.opt.OomLevelsOpt;
 import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
@@ -71,8 +74,9 @@ import com.hchen.hooktool.hook.IHook;
 public class AndroidV extends BaseHC {
     @Override
     public void init() {
-        UpdateOomLevels.init();
+        OomLevelsOpt.init();
         CacheCompaction.init();
+        ApplyAdjOpt.init();
 
         // ----------- ProcessList ----------------------
         /*
@@ -164,7 +168,7 @@ public class AndroidV extends BaseHC {
         hookMethod(OomAdjuster,
             shouldKillExcessiveProcesses,
             long.class,
-            returnResult(false).shouldObserveCall(false)
+            returnResult(false)
         );
 
         // ------------ RecentTasks ---------------
@@ -179,7 +183,7 @@ public class AndroidV extends BaseHC {
                 public void before() {
                     setThisField(mGlobalMaxNumTasks, Integer.MAX_VALUE);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         /*
@@ -195,7 +199,7 @@ public class AndroidV extends BaseHC {
                 public void before() {
                     setArgs(2, 0);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // ----------- ActivityManagerConstants -------------
@@ -261,7 +265,7 @@ public class AndroidV extends BaseHC {
                     setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
                     // setArgs(2, 0L); // Changed: 不要保护空进程
                 }
-            }.shouldObserveCall(false)
+            }
         );
     }
 }

@@ -58,6 +58,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.hchen.appretention.hook.system.opt.ApplyAdjOpt;
+import com.hchen.appretention.hook.system.opt.CacheCompaction;
+import com.hchen.appretention.hook.system.opt.OomLevelsOpt;
 import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
@@ -72,8 +75,9 @@ public class AndroidU extends BaseHC {
 
     @Override
     public void init() {
-        UpdateOomLevels.init();
+        OomLevelsOpt.init();
         CacheCompaction.init();
+        ApplyAdjOpt.init();
 
         // ----------- ProcessList ----------------------
         /*
@@ -213,7 +217,7 @@ public class AndroidU extends BaseHC {
          *       public void before() {
          *           setThisField(mMemFactorOverride, 0);
          *       }
-         *    }.shouldObserveCall(false)
+         *    }
          * );
          * */
 
@@ -231,7 +235,7 @@ public class AndroidU extends BaseHC {
         /*
          *hook(LowMemDetector,
          *   getMemFactor,
-         *   returnResult(0).shouldObserveCall(false)
+         *   returnResult(0)
          *);
          * */
 
@@ -241,7 +245,7 @@ public class AndroidU extends BaseHC {
         /*
          *hook(LowMemDetector,
          *   isAvailable,
-         *   returnResult(true).shouldObserveCall(false)
+         *   returnResult(true)
          *);
          * */
 
@@ -254,7 +258,7 @@ public class AndroidU extends BaseHC {
         hookMethod(OomAdjuster,
             shouldKillExcessiveProcesses,
             long.class,
-            returnResult(false).shouldObserveCall(false)
+            returnResult(false)
         );
 
         /*
@@ -272,7 +276,7 @@ public class AndroidU extends BaseHC {
                     setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
                     // setArgs(2, 0L); // 不保护空进程
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // ------------ RecentTasks ---------------
@@ -287,7 +291,7 @@ public class AndroidU extends BaseHC {
                 public void before() {
                     setThisField(mGlobalMaxNumTasks, Integer.MAX_VALUE);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         /*
@@ -303,7 +307,7 @@ public class AndroidU extends BaseHC {
                 public void before() {
                     setArgs(2, 0);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // ----------- ActivityManagerConstants -------------

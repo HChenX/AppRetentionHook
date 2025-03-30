@@ -47,6 +47,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.hchen.appretention.hook.system.opt.CacheCompaction;
 import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
@@ -156,7 +157,7 @@ public class AndroidDef extends BaseHC {
         // hookMethod(OomAdjuster,
         //     shouldKillExcessiveProcesses,
         //     long.class,
-        //     returnResult(false).shouldObserveCall(false)
+        //     returnResult(false)
         // );
 
         /*
@@ -175,7 +176,7 @@ public class AndroidDef extends BaseHC {
         //             setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
         //             setArgs(2, 0L); // 不保护空进程
         //         }
-        //     }.shouldObserveCall(false)
+        //     }
         // );
 
         // ------------ RecentTasks ---------------
@@ -183,14 +184,15 @@ public class AndroidDef extends BaseHC {
          * 修剪最近不活跃的任务卡片。
          * 设置 mGlobalMaxNumTasks 为 MAX_VALUE 可防止它从列表中删除 task。
          * */
-        hookMethod(RecentTasks,
+        hookMethod(
+            RecentTasks,
             trimInactiveRecentTasks,
             new IHook() {
                 @Override
                 public void before() {
                     setThisField(mGlobalMaxNumTasks, Integer.MAX_VALUE);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         /*
@@ -206,7 +208,7 @@ public class AndroidDef extends BaseHC {
                 public void before() {
                     setArgs(2, 0);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // ----------- ActivityManagerConstants -------------

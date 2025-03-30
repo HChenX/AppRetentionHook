@@ -56,6 +56,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.hchen.appretention.hook.system.opt.CacheCompaction;
+import com.hchen.appretention.hook.system.opt.OomLevelsOpt;
 import com.hchen.collect.HookEntrance;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
@@ -69,7 +71,7 @@ import com.hchen.hooktool.hook.IHook;
 public class AndroidT extends BaseHC {
     @Override
     public void init() {
-        UpdateOomLevels.init();
+        OomLevelsOpt.init();
         CacheCompaction.init();
 
         // ----------- ProcessList ----------------------
@@ -162,7 +164,7 @@ public class AndroidT extends BaseHC {
         hookMethod(OomAdjuster,
             shouldKillExcessiveProcesses,
             long.class,
-            returnResult(false).shouldObserveCall(false)
+            returnResult(false)
         );
 
         /*
@@ -180,7 +182,7 @@ public class AndroidT extends BaseHC {
                     setThisField(mNextNoKillDebugMessageTime, Long.MAX_VALUE); // 处理频繁的日志
                     // setArgs(2, 0L); // 不保护空进程
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // ------------ RecentTasks ---------------
@@ -195,7 +197,7 @@ public class AndroidT extends BaseHC {
                 public void before() {
                     setThisField(mGlobalMaxNumTasks, Integer.MAX_VALUE);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         /*
@@ -211,7 +213,7 @@ public class AndroidT extends BaseHC {
                 public void before() {
                     setArgs(2, 0);
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // ----------- ActivityManagerConstants -------------

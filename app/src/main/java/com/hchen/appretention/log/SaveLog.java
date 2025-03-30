@@ -36,7 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hchen.appretention.BuildConfig;
-import com.hchen.appretention.hook.system.LogServices;
+import com.hchen.appretention.hook.system.log.LogServices;
 import com.hchen.hooktool.HCData;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.tool.additional.ContextTool;
@@ -249,7 +249,8 @@ public class SaveLog {
             "UpdateOomLevels",
             "LogServices",
             "KillEventLogRecord",
-            "RecordSystemProp"
+            "RecordSystemProp",
+            "ApplyAdjOpt"
         };
         String[] shouldRedirectToHyper = new String[]{
             "CameraOpt"

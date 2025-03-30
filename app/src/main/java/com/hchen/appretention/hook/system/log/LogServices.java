@@ -16,14 +16,14 @@
 
  * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.hook.system;
+package com.hchen.appretention.hook.system.log;
 
 import static com.hchen.appretention.data.method.SystemMethod.systemReady;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
 import static com.hchen.appretention.data.path.SystemClass.TimingsTraceAndSlog;
 import static com.hchen.appretention.data.prop.SystemProp.FALSE;
 import static com.hchen.appretention.data.prop.SystemProp.TRUE;
-import static com.hchen.appretention.hook.system.LogServices.KillEventLogRecord.SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE;
+import static com.hchen.appretention.hook.system.log.LogServices.KillEventLogRecord.SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;

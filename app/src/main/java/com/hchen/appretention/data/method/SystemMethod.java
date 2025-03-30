@@ -46,6 +46,12 @@ public class SystemMethod {
     public static final String compactApp = "compactApp";
     public static final String resolveCompactionProfile = "resolveCompactionProfile";
     public static final String applyOomAdjLSP = "applyOomAdjLSP";
+    public static final String removeLruProcessLocked = "removeLruProcessLocked";
+    public static final String procStateToImportance = "procStateToImportance";
+    public static final String getCurProcState = "getCurProcState";
+    public static final String setCurRawAdj = "setCurRawAdj";
+    public static final String setCurAdj = "setCurAdj";
+    public static final String updateLruProcessLocked = "updateLruProcessLocked";
     public static final String systemReady = "systemReady";
     public static final String getSetAdj = "getSetAdj";
     public static final String getCurAdj = "getCurAdj";
@@ -78,4 +84,5 @@ public class SystemMethod {
     public static final String updatePerfConfigConstants = "updatePerfConfigConstants";
     public static final String performReceive = "performReceive";
     public static final String handleAppCrashInActivityController = "handleAppCrashInActivityController";
+    public static final String getLruProcessesLOSP = "getLruProcessesLOSP";
 }

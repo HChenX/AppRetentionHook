@@ -56,4 +56,11 @@ public class SystemField {
     public static final String isChangedOomMinFree = "isChangedOomMinFree";
     public static final String mContext = "mContext";
     public static final String mCachedAppOptimizer = "mCachedAppOptimizer";
+    public static final String mProcessList = "mProcessList";
+    public static final String mService = "mService";
+    public static final String info = "info";
+    public static final String processName = "processName";
+    public static final String uid = "uid";
+    public static final String isolated = "isolated";
+    public static final String isSdkSandbox = "isSdkSandbox";
 }

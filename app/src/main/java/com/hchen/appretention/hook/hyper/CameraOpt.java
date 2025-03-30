@@ -79,7 +79,7 @@ public class CameraOpt {
                 hookMethod(CameraOpt,
                     callStaticMethod,
                     Class.class, String.class, Object[].class,
-                    returnResult(null).shouldObserveCall(false)
+                    returnResult(null)
                 );
                 // 帮助 CameraOpt 初始化
                 // Class<?> mCameraBoosterClazz = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraBoosterClazz);
@@ -92,7 +92,7 @@ public class CameraOpt {
                 hookMethod(CameraOpt,
                     callMethod,
                     String.class, Object[].class,
-                    returnResult(null).shouldObserveCall(false)
+                    returnResult(null)
                 );
                 // Class<?> mCameraOptManager = (Class<?>) getStaticField(mCameraOpt, Hyper.mCameraOptManager);
                 // if (existsMethod(CameraOptManager, mCameraOptManager.getClassLoader(), ensureService)) {
@@ -111,7 +111,7 @@ public class CameraOpt {
                 //             return true;
                 //         }
                 //     })[0];
-                //     hook(service, doNothing().shouldObserveCall(false));
+                //     hook(service, doNothing());
                 // }
             }
         } else if (existsClass(ICameraBooster)) {
@@ -157,11 +157,11 @@ public class CameraOpt {
                 Method method = findAllMethod(cameraBooster, m)[0];
                 if (method == null) continue;
                 if (method.getName().equals(interceptAppRestartIfNeeded)) {
-                    hook(method, returnResult(false).shouldObserveCall(false));
+                    hook(method, returnResult(false));
                 } else if (isAllowAdjBoost.equals(method.getName())) {
-                    hook(method, returnResult(true).shouldObserveCall(false));
+                    hook(method, returnResult(true));
                 } else
-                    hook(method, doNothing().shouldObserveCall(false));
+                    hook(method, doNothing());
             }
         }
     }

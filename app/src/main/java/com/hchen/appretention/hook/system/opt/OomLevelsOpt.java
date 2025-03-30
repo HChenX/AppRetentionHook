@@ -16,7 +16,7 @@
 
  * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.hook.system;
+package com.hchen.appretention.hook.system.opt;
 
 import static com.hchen.appretention.data.method.SystemMethod.onLmkdConnect;
 import static com.hchen.appretention.data.method.SystemMethod.updateOomLevels;
@@ -42,7 +42,7 @@ import java.util.Arrays;
  *
  * @author 焕晨HChen
  */
-public final class UpdateOomLevels {
+public final class OomLevelsOpt {
     private static final int OOM_MIN_FREE_DISCOUNT = 3;
     private static final int PAGE_SIZE = (int) Os.sysconf(OsConstants._SC_PAGESIZE);
     private static Object mProcessListInstance = null;
@@ -156,7 +156,7 @@ public final class UpdateOomLevels {
                         bufCopy.putInt(mOomAdj[i]);
                     }
                 }
-            }.shouldObserveCall(false)
+            }
         );
     }
 

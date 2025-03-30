@@ -35,6 +35,7 @@ public class SystemClass {
     public static final String LowMemDetector = "com.android.server.am.LowMemDetector";
     public static final String AppProfiler = "com.android.server.am.AppProfiler";
     public static final String OomAdjuster = "com.android.server.am.OomAdjuster";
+    public static final String ActivityManager$RunningAppProcessInfo = "android.app.ActivityManager$RunningAppProcessInfo";
     public static final String ActiveUids = "com.android.server.am.ActiveUids";
     public static final String Injector = "com.android.server.am.OomAdjuster.Injector";
     public static final String PlatformCompat = "com.android.server.compat.PlatformCompat";

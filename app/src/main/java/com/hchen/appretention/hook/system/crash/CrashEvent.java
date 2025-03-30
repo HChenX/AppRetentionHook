@@ -16,7 +16,7 @@
 
  * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.hook.system;
+package com.hchen.appretention.hook.system.crash;
 
 import static com.hchen.appretention.data.method.SystemMethod.handleAppCrashInActivityController;
 import static com.hchen.appretention.data.path.SystemClass.AppErrors;

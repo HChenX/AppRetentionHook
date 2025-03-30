@@ -16,7 +16,7 @@
 
  * Copyright (C) 2023-2025 HChenX
  */
-package com.hchen.appretention.hook.system;
+package com.hchen.appretention.hook.system.opt;
 
 import static com.hchen.appretention.data.field.SystemField.mCachedAppOptimizerThread;
 import static com.hchen.appretention.data.field.SystemField.mCompactionHandler;
@@ -90,6 +90,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 
+import androidx.annotation.NonNull;
+
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.appretention.data.other.PrecessAdjInfo;
 import com.hchen.hooktool.hook.IHook;
@@ -97,6 +99,7 @@ import com.hchen.hooktool.hook.IHook;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * 激进化系统的内存压缩
@@ -105,6 +108,7 @@ import java.util.ArrayList;
  */
 public final class CacheCompaction {
     private static final String TAG = "CacheCompaction";
+    private static boolean isHandlerNotInit = false;
     private static Object mCachedAppOptimizer = null;
     private static Object NONE;
     private static Object SOME;
@@ -156,7 +160,7 @@ public final class CacheCompaction {
                 public void before() {
                     Boolean enabled = (Boolean) callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", false);
 
-                    if (!enabled) {
+                    if (Boolean.FALSE.equals(enabled)) {
                         Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", TRUE, true);
                         if (result != null && result) {
                             logD(TAG, "Success to put use_compaction new value 'true'");
@@ -164,13 +168,12 @@ public final class CacheCompaction {
                             logW(TAG, "Failed to put use_compaction value to 'true'");
                     }
                 }
-            }.shouldObserveCall(false)
+            }
         );
     }
 
     private static void initEnumIfNeed() {
         if (mCachedAppOptimizer == null || useOldCompactMode) return;
-        if (NONE != null || SOME != null) return;
         if (!existsClass(CachedAppOptimizer$CompactProfile)) {
             useOldCompactMode = true;
             return;
@@ -198,31 +201,44 @@ public final class CacheCompaction {
         } else if (existsMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class)) {
             applyOomAdjLSPMethod = findMethod(OomAdjuster, applyOomAdjLSP, ProcessRecord, boolean.class, long.class, long.class);
         }
+        if (applyOomAdjLSPMethod == null) {
+            logW(TAG, "applyOomAdjLSPMethod is null! can't use CacheCompaction!!");
+            return;
+        }
+
+        enableCompaction();
 
         hook(applyOomAdjLSPMethod,
             new IHook() {
                 @Override
                 public void before() {
                     if (mCachedAppOptimizer == null) return;
-                    initEnumIfNeed();
+                    if (isHandlerNotInit) {
+                        logW(TAG, "CachedAppOptimizer handler not init! Will cancel hook!!");
+                        removeSelf();
+                        return;
+                    }
                     Object app = getArgs(0);
+                    if (app == null) return;
 
-                    if (getCurAdj(app) == getSetAdj(app)) return;
+                    Integer curAdj = getCurAdj(app);
+                    Integer setAdj = getSetAdj(app);
+                    if (curAdj == null || setAdj == null) return;
+                    if (Objects.equals(curAdj, setAdj)) return;
 
-                    if (getSetAdj(app) <= PrecessAdjInfo.PERCEPTIBLE_APP_ADJ && (
-                        getCurAdj(app) == PrecessAdjInfo.PREVIOUS_APP_ADJ ||
-                            getCurAdj(app) == PrecessAdjInfo.HOME_APP_ADJ
+                    if (setAdj <= PrecessAdjInfo.PERCEPTIBLE_APP_ADJ && (
+                        curAdj == PrecessAdjInfo.PREVIOUS_APP_ADJ || curAdj == PrecessAdjInfo.HOME_APP_ADJ
                     )) { // 应用从可感知进入后台
-                        if (ANON != null && ANON_MORE == null)
+                        if (ANON != null && ANON_MORE == null) {
                             compactApp(app, COMPACT_ACTION_ANON, ANON, SHELL, false);
-                        else if (ANON_MORE != null) {
+                        } else if (ANON_MORE != null) {
                             compactApp(app, COMPACT_ACTION_ANON, ANON_MORE, SHELL, false);
                         }
-                    } else if (getCurAdj(app) >= PrecessAdjInfo.CACHED_APP_MIN_ADJ && getCurAdj(app) <= PrecessAdjInfo.CACHED_APP_MAX_ADJ) {
+                    } else if (curAdj >= PrecessAdjInfo.CACHED_APP_MIN_ADJ && curAdj <= PrecessAdjInfo.CACHED_APP_MAX_ADJ) {
                         compactApp(app, COMPACT_ACTION_FULL, FULL, SHELL, false);
                     }
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // 不许替换
@@ -233,30 +249,31 @@ public final class CacheCompaction {
                 public void before() {
                     setResult(getArgs(0));
                 }
-            }.shouldObserveCall(false)
+            }
         );
 
         // 阻止原生功能
         hookAllMethod(CachedAppOptimizer,
             compactApp,
-            returnResult(false).shouldObserveCall(false)
+            returnResult(false)
         );
 
-        enableCompaction();
-
         chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
-            .returnResult(false).shouldObserveCall(false) 进程恢复到可感知状态了 */
+            .returnResult(false) 进程恢复到可感知状态了 */
 
             anyMethod(shouldThrottleMiscCompaction)
-                .returnResult(false).shouldObserveCall(false)
+                .returnResult(false)
 
                 .anyMethod(shouldTimeThrottleCompaction)
                 .hook(new IHook() {
                     @Override
                     public void before() {
                         Object opt = getField(getArgs(0), mOptRecord);
-                        long lastCompactTime = (long) callMethod(opt, getLastCompactTime);
-                        long start = (long) getArgs(1);
+                        Long lastCompactTime = (Long) callMethod(opt, getLastCompactTime);
+                        Long start = (Long) getArgs(1);
+                        if (lastCompactTime == null || start == null)
+                            return;
+
                         // 15 秒内不允许再次触发。
                         if (lastCompactTime != 0) {
                             if (start - lastCompactTime < 15000) {
@@ -266,13 +283,15 @@ public final class CacheCompaction {
                         }
                         setResult(false);
                     }
-                }).shouldObserveCall(false)
+                })
 
                 .anyMethod(shouldRssThrottleCompaction)
                 .hook(new IHook() {
                     @Override
                     public void before() {
                         long[] rssBefore = (long[]) getArgs(3);
+                        if (rssBefore == null) return;
+
                         long anonRssBefore = rssBefore[2];
                         if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
                             setResult(true); // 进程可能被杀。
@@ -285,47 +304,56 @@ public final class CacheCompaction {
                         }
                         setResult(false);
                     }
-                }).shouldObserveCall(false)
+                })
         );
     }
 
-    private static void compactApp(Object app, int action, Object compactProfile, Object source, Object force) {
+    private static void compactApp(@NonNull Object app, int action, Object compactProfile, Object source, Object force) {
         Object optRecord = getField(app, mOptRecord);
 
-        if (useOldCompactMode) {
-            callMethod(optRecord, setReqCompactAction, action);
-        } else {
-            callMethod(optRecord, setReqCompactSource, source);
-            callMethod(optRecord, setReqCompactProfile, compactProfile);
-        }
+        Boolean b = (Boolean) callMethod(optRecord, hasPendingCompact);
+        if (b != null && !b) {
+            Handler compactionHandler = (Handler) getField(mCachedAppOptimizer, mCompactionHandler);
+            if (compactionHandler == null) {
+                isHandlerNotInit = true;
+                return;
+            }
 
-        if (!(boolean) callMethod(optRecord, hasPendingCompact)) {
+            if (useOldCompactMode) {
+                callMethod(optRecord, setReqCompactAction, action);
+            } else {
+                callMethod(optRecord, setReqCompactSource, source);
+                callMethod(optRecord, setReqCompactProfile, compactProfile);
+            }
             callMethod(optRecord, setHasPendingCompact, true);
             callMethod(optRecord, setForceCompact, force);
 
             ArrayList<Object> pendingCompactionProcesses = (ArrayList<Object>) getField(mCachedAppOptimizer, mPendingCompactionProcesses);
+            assert pendingCompactionProcesses != null; // 不可能是 null
             pendingCompactionProcesses.add(app);
-            Handler compactionHandler = (Handler) getField(mCachedAppOptimizer, mCompactionHandler);
+
             compactionHandler.sendMessage(compactionHandler.obtainMessage(1, getCurAdj(app), getSetProcState(app)));
         }
     }
 
     // 当前的 adj 值。
-    private static int getCurAdj(Object app) {
+    private static Integer getCurAdj(Object app) {
         Object state = getField(app, mState);
-        return (int) callMethod(state, getCurAdj);
+        return (Integer) callMethod(state, getCurAdj);
     }
 
     // 上一次的 adj 值。
-    private static int getSetAdj(Object app) {
+    private static Integer getSetAdj(Object app) {
         Object state = getField(app, mState);
-        return (int) callMethod(state, getSetAdj);
+        return (Integer) callMethod(state, getSetAdj);
     }
 
-    private static int getSetProcState(Object app) {
+    private static Integer getSetProcState(Object app) {
         Object state = getField(app, mState);
-        return (int) callMethod(state, getSetProcState);
+        return (Integer) callMethod(state, getSetProcState);
     }
+
+    // ---------------------------------------------------------------------------------------
 
     @Deprecated
     private void compactionAppCache() {
@@ -399,7 +427,7 @@ public final class CacheCompaction {
                     private void setHasPendingCompact(boolean pendingCompact) {
                         callMethod(optRecord, setHasPendingCompact, pendingCompact);
                     }
-                }).shouldObserveCall(false)
+                })
 
             .method(resolveCompactionProfile, CachedAppOptimizer$CompactProfile)
             .hook(new IHook() {
@@ -407,7 +435,7 @@ public final class CacheCompaction {
                 public void before() {
                     setResult(getArgs(0));
                 }
-            }).shouldObserveCall(false)
+            })
 
             .method(updateUseCompaction)
             .hook(new IHook() {
@@ -438,7 +466,7 @@ public final class CacheCompaction {
                         callStaticMethod(Process.class, setThreadGroupAndCpuset, cachedAppOptimizerThread.getThreadId(), 2);
                     }
                 }
-            }).shouldObserveCall(false)
+            })
 
             .constructor(ActivityManagerService,
                 CachedAppOptimizer$PropertyChangedCallbackForTest,
@@ -450,14 +478,14 @@ public final class CacheCompaction {
                         setThisField(mUseBootCompact, true);
                     setThisField(mUseCompaction, true);
                 }
-            }).shouldObserveCall(false)
+            })
         );
 
         chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
-            .returnResult(false).shouldObserveCall(false) 进程恢复到可感知状态了 */
+            .returnResult(false) 进程恢复到可感知状态了 */
 
             method(shouldThrottleMiscCompaction, ProcessRecord, int.class)
-                .returnResult(false).shouldObserveCall(false)
+                .returnResult(false)
 
                 .method(shouldTimeThrottleCompaction, ProcessRecord, long.class, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource)
                 .hook(new IHook() {
@@ -475,7 +503,7 @@ public final class CacheCompaction {
                         }
                         setResult(false);
                     }
-                }).shouldObserveCall(false)
+                })
 
                 .method(shouldRssThrottleCompaction, CachedAppOptimizer$CompactProfile, int.class, String.class, long[].class)
                 .hook(new IHook() {
@@ -493,14 +521,14 @@ public final class CacheCompaction {
                         }
                         setResult(false);
                     }
-                }).shouldObserveCall(false)
+                })
         );
 
         chain(CachedAppOptimizer$DefaultProcessDependencies, methodIfExist(interruptProcCompaction)
-            .doNothing().shouldObserveCall(false)
+            .doNothing()
 
             .methodIfExist(setAppStartingMode, boolean.class)
-            .doNothing().shouldObserveCall(false)
+            .doNothing()
         );
     }
 }

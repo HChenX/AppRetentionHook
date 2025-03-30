@@ -152,7 +152,7 @@ public class MiuiV14 extends BaseHC {
              * */
             // Changed: Miui14 不包含
             // .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-            // .doNothing().shouldObserveCall(false)
+            // .doNothing()
         );
 
         chain(ProcessPowerCleaner,
@@ -222,7 +222,7 @@ public class MiuiV14 extends BaseHC {
          * 禁止预启动。
          * */
         chain(PreloadAppControllerImpl, method(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
-                .doNothing().shouldObserveCall(false)
+                .doNothing()
 
             // Changed: 多余的 Hook。
             // .method(startPreloadApp, PreloadLifecycle)
@@ -231,7 +231,7 @@ public class MiuiV14 extends BaseHC {
             //     public void before() {
             //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
             //     }
-            // }).shouldObserveCall(false)
+            // })
         );
 
         /*

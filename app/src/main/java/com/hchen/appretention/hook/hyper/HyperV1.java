@@ -186,7 +186,7 @@ public class HyperV1 extends BaseHC {
         SystemPropTool.setProp("persist.sys.mfz.enable", FALSE);
         hookMethod(MemoryFreezeStubImpl,
             isEnable,
-            returnResult(false).shouldObserveCall(false)
+            returnResult(false)
         );
 
         /*
@@ -194,7 +194,7 @@ public class HyperV1 extends BaseHC {
          *  */
         SystemPropTool.setProp("persist.sys.memory_standard.enable", FALSE);
         chain(MemoryStandardProcessControl, method(isEnable)
-                .returnResult(false).shouldObserveCall(false)
+                .returnResult(false)
 
             // .method(init, Context.class, ActivityManagerService)
             // .returnResult(false) // Changed: 多余的 Hook
@@ -223,7 +223,7 @@ public class HyperV1 extends BaseHC {
              * Changed: 多余的 hook，PROCESS_CLEANER_ENABLED 设置 false 后即可。
              * */
             // .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-            // .doNothing().shouldObserveCall(false)
+            // .doNothing()
         );
 
         chain(ProcessPowerCleaner,
@@ -275,7 +275,7 @@ public class HyperV1 extends BaseHC {
             // .method(checkBackgroundAppException, String.class, int.class)
             // .returnResult(0)
 
-            // .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false).shouldObserveCall(false)
+            // .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false)
         );
 
         // chain(ProcessSceneCleaner,
@@ -342,7 +342,7 @@ public class HyperV1 extends BaseHC {
         setStaticField(MiuiMemoryService, sCompactSingleProcEnable, false);
         setStaticField(MiuiMemReclaimer, RECLAIM_IF_NEEDED, false);
         // Changed: 多余的 Hook。
-        // hookMethod(OomAdjusterImpl, compactBackgroundProcess, ProcessRecord, doNothing().shouldObserveCall(false));
+        // hookMethod(OomAdjusterImpl, compactBackgroundProcess, ProcessRecord, doNothing());
         hookMethod(MiuiMemReclaimer,
             performCompaction,
             String.class, int.class,
@@ -371,7 +371,7 @@ public class HyperV1 extends BaseHC {
          * 禁止预启动。
          * */
         chain(PreloadAppControllerImpl, method(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
-                .doNothing().shouldObserveCall(false)
+                .doNothing()
 
             // Changed: 多余的 Hook。
             // .method(startPreloadApp, PreloadLifecycle)
@@ -380,7 +380,7 @@ public class HyperV1 extends BaseHC {
             //     public void before() {
             //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
             //     }
-            // }).shouldObserveCall(false)
+            // })
         );
 
         CameraOpt.doHook();
