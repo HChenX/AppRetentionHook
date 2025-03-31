@@ -30,6 +30,7 @@ import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.hook.IHook;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * 系统崩溃事件捕捉
@@ -64,19 +65,21 @@ public class CrashEvent extends BaseHC {
                     Context mContext = (Context) getThisField(SystemField.mContext);
                     Object proc = getArgs(0);
                     ApplicationErrorReport.CrashInfo crashInfo = (ApplicationErrorReport.CrashInfo) getArgs(1);
+                    if (crashInfo == null) return;
+
                     String shortMsg = (String) getArgs(2);
                     String longMsg = (String) getArgs(3);
                     String stackTrace = (String) getArgs(4);
-                    long timeMillis = (long) getArgs(5);
-                    int callingPid = (int) getArgs(6);
-                    int callingUid = (int) getArgs(7);
-                    if (crashInfo == null) return;
+                    long timeMillis = (long) Optional.ofNullable(getArgs(5)).orElse(-1);
+                    int callingPid = (int) Optional.ofNullable(getArgs(6)).orElse(-1);
+                    int callingUid = (int) Optional.ofNullable(getArgs(7)).orElse(-1);
+
                     if ("Native crash".equals(crashInfo.exceptionClassName))
                         return; // 跳过 Native crash 事件
 
                     logE(TAG, "A crash event has occurred! Caught! Please note that crashes are not necessarily caused by modules!" +
                         "\n[Crash Package]: " + mContext.getPackageName() + "\n[Proc]: " + proc +
-                        "\n[Time]: " + timeMillis + "ms\n[Calling PID]: " + callingPid + "\n[Calling UID]: " + callingUid +
+                        "\n[Time]: " + timeMillis + " ms\n[Calling PID]: " + callingPid + "\n[Calling UID]: " + callingUid +
                         "\n[Crash Info]: " + crashInfo + "\n[Short Msg]: " + shortMsg + "\n[Long Msg]: " + longMsg + "\n[Stack]: " + stackTrace);
                 }
             }

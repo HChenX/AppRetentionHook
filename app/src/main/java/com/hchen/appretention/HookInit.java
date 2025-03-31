@@ -21,17 +21,18 @@ package com.hchen.appretention;
 import static com.hchen.hooktool.log.XposedLog.logENoSave;
 
 import com.hchen.appretention.hook.EntranceMap;
-import com.hchen.appretention.hook.TestHook;
 import com.hchen.appretention.log.SaveLog;
 import com.hchen.hooktool.BaseHC;
 import com.hchen.hooktool.HCEntrance;
 import com.hchen.hooktool.HCInit;
 import com.hchen.hooktool.tool.additional.DeviceTool;
+import com.hchen.hooktool.tool.additional.SystemPropTool;
 
 import org.luckypray.dexkit.DexKitBridge;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
@@ -93,6 +94,10 @@ public class HookInit extends HCEntrance {
                     }
                 }
 
+                if (Objects.equals(entranceMap.mTargetBrand, "samsung")) {
+                    if (!isEnableOneUi())
+                        return; // 暂时关闭 OneUi 修改
+                }
                 try {
                     Class<?> hookClass = getClass().getClassLoader().loadClass(s);
                     BaseHC baseHC = (BaseHC) hookClass.getDeclaredConstructor().newInstance();
@@ -108,10 +113,14 @@ public class HookInit extends HCEntrance {
                 }
             }
         });
-        if (lpparam.packageName.equals("com.hchen.himiuixdemo")) {
-            HCInit.initLoadPackageParam(lpparam);
-            new TestHook().onLoadPackage();
-        }
+        // if (lpparam.packageName.equals("com.hchen.himiuixdemo")) {
+        //     HCInit.initLoadPackageParam(lpparam);
+        //     new TestHook().onLoadPackage();
+        // }
+    }
+
+    private boolean isEnableOneUi() {
+        return SystemPropTool.getProp("persist.hchen.appretention.oneui.enable", false);
     }
 
     @Deprecated

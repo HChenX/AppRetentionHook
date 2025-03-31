@@ -100,6 +100,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 激进化系统的内存压缩
@@ -132,10 +133,8 @@ public final class CacheCompaction {
         Constructor<?> oomAdjuster = null;
         if (existsConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector)) {
             oomAdjuster = findConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector);
-
         } else if (existsConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread))
             oomAdjuster = findConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread);
-
         if (oomAdjuster == null) {
             logW(TAG, "oomAdjuster is null! can't use CacheCompaction!!");
             return;
@@ -158,14 +157,17 @@ public final class CacheCompaction {
             new IHook() {
                 @Override
                 public void before() {
-                    Boolean enabled = (Boolean) callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", false);
+                    boolean enabled = (boolean) Optional.ofNullable(
+                        callStaticMethod(DeviceConfig, getBoolean, "activity_manager", "use_compaction", false)
+                    ).orElse(false);
 
                     if (Boolean.FALSE.equals(enabled)) {
-                        Boolean result = (Boolean) callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", TRUE, true);
-                        if (result != null && result) {
-                            logD(TAG, "Success to put use_compaction new value 'true'");
-                        } else
-                            logW(TAG, "Failed to put use_compaction value to 'true'");
+                        boolean result = (boolean) Optional.ofNullable(
+                            callStaticMethod(DeviceConfig, setProperty, "activity_manager", "use_compaction", TRUE, true)
+                        ).orElse(false);
+
+                        if (result) logD(TAG, "Success to put use_compaction new value 'true'");
+                        else logW(TAG, "Failed to put use_compaction value to 'true'");
                     }
                 }
             }
@@ -173,7 +175,8 @@ public final class CacheCompaction {
     }
 
     private static void initEnumIfNeed() {
-        if (mCachedAppOptimizer == null || useOldCompactMode) return;
+        if (mCachedAppOptimizer == null) return;
+        if (useOldCompactMode) return;
         if (!existsClass(CachedAppOptimizer$CompactProfile)) {
             useOldCompactMode = true;
             return;
@@ -227,7 +230,8 @@ public final class CacheCompaction {
                     if (Objects.equals(curAdj, setAdj)) return;
 
                     if (setAdj <= PrecessAdjInfo.PERCEPTIBLE_APP_ADJ && (
-                        curAdj == PrecessAdjInfo.PREVIOUS_APP_ADJ || curAdj == PrecessAdjInfo.HOME_APP_ADJ
+                        (curAdj >= PrecessAdjInfo.PREVIOUS_APP_ADJ && curAdj <= PrecessAdjInfo.PREVIOUS_APP_ADJ + 99) ||
+                            (curAdj >= PrecessAdjInfo.HOME_APP_ADJ && curAdj <= PrecessAdjInfo.HOME_APP_ADJ + 99)
                     )) { // 应用从可感知进入后台
                         if (ANON != null && ANON_MORE == null) {
                             compactApp(app, COMPACT_ACTION_ANON, ANON, SHELL, false);

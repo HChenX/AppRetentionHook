@@ -224,6 +224,7 @@ public class SaveLog {
                     logContentData.mLogContent.add(formatLog));
                 return mLogContentDataMap.values().toArray(new LogContentData[0]);
             }
+            return new LogContentData[0];
         }
         LogContentData logContentData = mLogContentDataMap.get(tag);
         if (logContentData != null) {
