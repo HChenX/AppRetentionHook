@@ -95,6 +95,7 @@ import androidx.annotation.NonNull;
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.appretention.data.other.PrecessAdjInfo;
 import com.hchen.hooktool.hook.IHook;
+import com.hchen.hooktool.tool.additional.SystemPropTool;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -127,6 +128,10 @@ public final class CacheCompaction {
     private static final int COMPACT_ACTION_FULL = 3;
 
     public static void init() {
+        if (!isEnabled()) {
+            logD(TAG, "CacheCompaction is disabled!!");
+            return;
+        }
         // compactionAppCache();
         compactionAppCacheNew();
 
@@ -152,6 +157,11 @@ public final class CacheCompaction {
     }
 
     public static void enableCompaction() {
+        if (!isEnabled()) {
+            logD(TAG, "CacheCompaction is disabled!!");
+            return;
+        }
+
         hookMethod(CachedAppOptimizer,
             updateUseCompaction,
             new IHook() {
@@ -172,6 +182,10 @@ public final class CacheCompaction {
                 }
             }
         );
+    }
+
+    private static boolean isEnabled() {
+        return SystemPropTool.getProp("persist.hchen.cache.compaction.enable", true);
     }
 
     private static void initEnumIfNeed() {

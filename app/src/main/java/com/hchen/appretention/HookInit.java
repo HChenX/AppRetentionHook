@@ -120,7 +120,7 @@ public class HookInit extends HCEntrance {
     }
 
     private boolean isEnableOneUi() {
-        return SystemPropTool.getProp("persist.hchen.appretention.oneui.enable", false);
+        return SystemPropTool.getProp("persist.hchen.oneui.enable", false);
     }
 
     @Deprecated

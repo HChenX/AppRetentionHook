@@ -94,6 +94,11 @@ public class HyperV2 extends BaseHC {
     @Override
     public void init() {
         /*
+         * 关闭预加载
+         */
+        SystemPropTool.setProp("persist.sys.prestart.proc", FALSE);
+
+        /*
          * 关闭 spc。
          * */
         SystemPropTool.setProp("persist.sys.spc.enabled", FALSE);

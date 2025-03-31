@@ -104,6 +104,11 @@ public class HyperV1 extends BaseHC {
          * */
 
         /*
+         * 关闭预加载
+         */
+        SystemPropTool.setProp("persist.sys.prestart.proc", FALSE);
+
+        /*
          * 关闭 spc。
          * */
         SystemPropTool.setProp("persist.sys.spc.enabled", FALSE);

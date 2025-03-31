@@ -36,6 +36,7 @@ import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
 import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 import static com.hchen.appretention.data.path.SystemClass.TimingsTraceAndSlog;
+import static com.hchen.hooktool.log.XposedLog.logD;
 import static com.hchen.hooktool.log.XposedLog.logW;
 import static com.hchen.hooktool.tool.CoreTool.callMethod;
 import static com.hchen.hooktool.tool.CoreTool.callStaticMethod;
@@ -60,8 +61,8 @@ import androidx.annotation.NonNull;
 
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.log.XposedLog;
+import com.hchen.hooktool.tool.additional.SystemPropTool;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -90,6 +91,11 @@ public class ApplyAdjOpt {
     private static final int SUB_PROCESS_MAX_ADJ = 799;
 
     public static void init() {
+        if (!isEnabled()) {
+            logD(TAG, "Adj opt is disabled!!");
+            return;
+        }
+
         Constructor<?> oomAdjuster = null;
         if (existsConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector)) {
             oomAdjuster = findConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector);
@@ -174,10 +180,14 @@ public class ApplyAdjOpt {
                         Math.min(SUB_PROCESS_MIN_ADJ + index, SUB_PROCESS_MAX_ADJ);
                     pr.setCurAdj(adj);
                     pr.setCurRawAdj(adj);
-                    AndroidLog.logD(TAG, "update: packageName=" + pr.packageName + ", processName=" + pr.processName + ", adj=" + adj);
+                    // AndroidLog.logD(TAG, "update: packageName=" + pr.packageName + ", processName=" + pr.processName + ", adj=" + adj);
                 }
             }
         );
+    }
+
+    private static boolean isEnabled() {
+        return SystemPropTool.getProp("persist.hchen.adj.opt.enable", true);
     }
 
     private static void updateBackgroundAppList(Object app) {
@@ -238,7 +248,7 @@ public class ApplyAdjOpt {
                         }
                     }
                 });
-                AndroidLog.logD(TAG, "update list=" + mPreviousBackgroundAppList + ", time=" + time);
+                // AndroidLog.logD(TAG, "update list=" + mPreviousBackgroundAppList + ", time=" + time);
             }
         }
     }
@@ -268,7 +278,7 @@ public class ApplyAdjOpt {
                             if (shellSignature != null && shellSignature.length > 0 && signatures != null && signatures.length > 0) {
                                 if (shellSignature[0].toCharsString().equals(signatures[0].toCharsString())) {
                                     mSystemSigningAppMap.add(packageInfo.packageName);
-                                    AndroidLog.logD(TAG, "system signing: " + packageInfo.packageName);
+                                    // AndroidLog.logD(TAG, "system signing: " + packageInfo.packageName);
                                 }
                             }
                         }
