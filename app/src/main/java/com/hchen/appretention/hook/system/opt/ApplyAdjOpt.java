@@ -305,14 +305,6 @@ public class ApplyAdjOpt {
     }
 
     private record ProcessIndexRecord(Object app, int index) {
-
-        @Override
-        public boolean equals(Object object) {
-            if (this == object) return true;
-            if (!(object instanceof ProcessIndexRecord that)) return false;
-            return Objects.equals(app, that.app); // 不关心索引值
-        }
-
         @NonNull
         @Override
         public String toString() {

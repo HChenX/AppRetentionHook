@@ -38,7 +38,7 @@ android {
         minSdk 29
         targetSdk 34
         //noinspection HighAppVersionCode
-        versionCode 2025033102
+        versionCode 2025033103
         versionName "5.2.3-Preview"
         ndk {
             // noinspection ChromeOsAbiSupport
