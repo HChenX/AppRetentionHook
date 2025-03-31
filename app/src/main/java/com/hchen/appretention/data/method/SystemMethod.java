@@ -48,6 +48,7 @@ public class SystemMethod {
     public static final String applyOomAdjLSP = "applyOomAdjLSP";
     public static final String forEachLruProcessesLOSP = "forEachLruProcessesLOSP";
     public static final String removeLruProcessLocked = "removeLruProcessLocked";
+    public static final String updateLruProcessLSP = "updateLruProcessLSP";
     public static final String procStateToImportance = "procStateToImportance";
     public static final String getCurProcState = "getCurProcState";
     public static final String setCurRawAdj = "setCurRawAdj";

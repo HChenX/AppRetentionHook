@@ -20,14 +20,13 @@ package com.hchen.appretention.hook.system.opt;
 
 import static com.hchen.appretention.data.field.SystemField.mContext;
 import static com.hchen.appretention.data.method.SystemMethod.applyOomAdjLSP;
-import static com.hchen.appretention.data.method.SystemMethod.forEachLruProcessesLOSP;
 import static com.hchen.appretention.data.method.SystemMethod.getCurProcState;
+import static com.hchen.appretention.data.method.SystemMethod.getLruProcessesLOSP;
 import static com.hchen.appretention.data.method.SystemMethod.procStateToImportance;
 import static com.hchen.appretention.data.method.SystemMethod.removeLruProcessLocked;
 import static com.hchen.appretention.data.method.SystemMethod.setCurAdj;
 import static com.hchen.appretention.data.method.SystemMethod.setCurRawAdj;
 import static com.hchen.appretention.data.method.SystemMethod.systemReady;
-import static com.hchen.appretention.data.method.SystemMethod.updateLruProcessLocked;
 import static com.hchen.appretention.data.path.HyperClass.ServiceThread;
 import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManager$RunningAppProcessInfo;
@@ -47,6 +46,7 @@ import static com.hchen.hooktool.tool.CoreTool.findMethod;
 import static com.hchen.hooktool.tool.CoreTool.getField;
 import static com.hchen.hooktool.tool.CoreTool.hook;
 import static com.hchen.hooktool.tool.CoreTool.hookMethod;
+import static com.hchen.hooktool.tool.CoreTool.timeConsumption;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -56,11 +56,12 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.content.pm.SigningInfo;
 
+import androidx.annotation.NonNull;
+
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 import com.hchen.hooktool.log.XposedLog;
-import com.hchen.hooktool.tool.ChainTool;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -68,7 +69,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 /**
  * Adj 计算
@@ -77,7 +78,9 @@ import java.util.function.Consumer;
  */
 public class ApplyAdjOpt {
     private static final String TAG = "ApplyAdjOpt";
-    private static final ArrayList<Object> mPreviousBackgroundAppList = new ArrayList<>();
+    private static final ArrayList<ProcessIndexRecord> mPreviousBackgroundAppList = new ArrayList<>();
+    private static final HashSet<Object> mProcessRecordMap = new HashSet<>();
+    private static final HashSet<String> mUserAppMap = new HashSet<>();
     private static final HashSet<String> mSystemSigningAppMap = new HashSet<>();
     private static Object mService;
     private static Object mProcessList;
@@ -90,7 +93,6 @@ public class ApplyAdjOpt {
         Constructor<?> oomAdjuster = null;
         if (existsConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector)) {
             oomAdjuster = findConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread, Injector);
-
         } else if (existsConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread))
             oomAdjuster = findConstructor(OomAdjuster, ActivityManagerService, ProcessList, ActiveUids, ServiceThread);
         if (oomAdjuster == null) {
@@ -104,6 +106,10 @@ public class ApplyAdjOpt {
                 public void after() {
                     mService = getThisField(SystemField.mService);
                     mProcessList = getThisField(SystemField.mProcessList);
+
+                    mPreviousBackgroundAppList.clear();
+                    mUserAppMap.clear();
+                    mSystemSigningAppMap.clear();
                 }
             }
         );
@@ -123,36 +129,43 @@ public class ApplyAdjOpt {
 
         hookSystemReady();
 
-        ChainTool.chain(ProcessList,
-            new ChainTool().method(updateLruProcessLocked,
-                    ProcessRecord, boolean.class, ProcessRecord)
-                .hook(new IHook() {
-                    @Override
-                    public void after() {
-                        updateBackgroundAppList();
-                    }
-                })
+        hookMethod(ProcessList,
+            removeLruProcessLocked,
+            ProcessRecord,
+            new IHook() {
+                @Override
+                public void after() {
+                    if (mService == null) return;
 
-                .method(removeLruProcessLocked,
-                    ProcessRecord)
-                .hook(new IHook() {
-                    @Override
-                    public void after() {
-                        updateBackgroundAppList();
+                    synchronized (mService) {
+                        Object app = getArgs(0);
+                        if (mProcessRecordMap.contains(app)) {
+                            mPreviousBackgroundAppList.removeIf(
+                                processIndexRecord ->
+                                    Objects.equals(processIndexRecord.app, app)
+                            );
+                            mProcessRecordMap.remove(app);
+                        }
                     }
-                })
+                }
+            }
         );
 
         hook(applyOomAdjLSPMethod,
             new IHook() {
                 @Override
                 public void before() {
-                    if (mPreviousBackgroundAppList.isEmpty()) return;
-
                     Object app = getArgs(0);
                     if (app == null) return;
 
-                    int index = mPreviousBackgroundAppList.indexOf(app);
+                    updateBackgroundAppList(app);
+
+                    int index = -1;
+                    for (int i = 0; i < mPreviousBackgroundAppList.size(); i++) {
+                        if (Objects.equals(mPreviousBackgroundAppList.get(i).app, app)) {
+                            index = i;
+                        }
+                    }
                     if (index == -1) return;
 
                     ApplyAdjOpt.ProcessRecord pr = new ApplyAdjOpt.ProcessRecord(app);
@@ -167,33 +180,66 @@ public class ApplyAdjOpt {
         );
     }
 
-    private static void updateBackgroundAppList() {
+    private static void updateBackgroundAppList(Object app) {
         if (mService == null || mProcessList == null) return;
-        synchronized (mService) {
-            mPreviousBackgroundAppList.clear();
+        if (app == null) return;
 
-            callMethod(mProcessList, forEachLruProcessesLOSP, false, new Consumer<Object>() {
-                @Override
-                public void accept(Object pr) {
-                    ApplicationInfo info = (ApplicationInfo) getField(pr, SystemField.info);
-                    if (info != null) {
-                        boolean isSystem = isSystemApp(info);
-                        if (!isSystem) {
-                            Object mState = getField(pr, SystemField.mState);
-                            Integer importance = (Integer) callStaticMethod(
-                                ActivityManager$RunningAppProcessInfo,
-                                procStateToImportance,
-                                callMethod(mState, getCurProcState)
-                            );
-                            if (importance != null) {
-                                if (importance > ImportanceInfo.IMPORTANCE_VISIBLE) { // 假定为后台
-                                    mPreviousBackgroundAppList.add(pr); // 根据 mProcessList 顺序，越不重要越在前面
+        synchronized (mService) {
+            ApplicationInfo info = (ApplicationInfo) getField(app, SystemField.info);
+            if (info == null) return;
+
+            if (mUserAppMap.contains(info.packageName) || !isSystemApp(info)) {
+                mUserAppMap.add(info.packageName);
+
+                long time = timeConsumption(() -> {
+                    Object mState = getField(app, SystemField.mState);
+                    Integer importance = (Integer) callStaticMethod(
+                        ActivityManager$RunningAppProcessInfo,
+                        procStateToImportance,
+                        callMethod(mState, getCurProcState)
+                    );
+                    if (importance != null) {
+                        if (importance > ImportanceInfo.IMPORTANCE_VISIBLE) { // 假定为后台
+                            ArrayList<?> lruProcesses = (ArrayList<?>) callMethod(mProcessList, getLruProcessesLOSP);
+                            if (lruProcesses == null) return;
+
+                            int nowIndex = lruProcesses.indexOf(app);
+                            if (nowIndex == -1) return;
+
+                            if (mPreviousBackgroundAppList.isEmpty())
+                                mPreviousBackgroundAppList.add(new ProcessIndexRecord(app, nowIndex));
+                            else {
+                                if (mProcessRecordMap.contains(app)) {
+                                    mPreviousBackgroundAppList.removeIf(
+                                        processIndexRecord ->
+                                            Objects.equals(processIndexRecord.app, app)
+                                    );
                                 }
+                                mPreviousBackgroundAppList.add(new ProcessIndexRecord(app, nowIndex));
+                                mPreviousBackgroundAppList.sort((o1, o2) -> {
+                                    // nowIndex 越大说明越重要，所以 nowIndex 越大越排在前面。
+                                    if (o1.index > o2.index)
+                                        return -1;
+                                    else if (o1.index < o2.index)
+                                        return 1;
+
+                                    return 0;
+                                });
+                            }
+                            mProcessRecordMap.add(app);
+                        } else {
+                            if (mProcessRecordMap.contains(app)) {
+                                mPreviousBackgroundAppList.removeIf(
+                                    processIndexRecord ->
+                                        Objects.equals(processIndexRecord.app, app)
+                                );
+                                mProcessRecordMap.remove(app);
                             }
                         }
                     }
-                }
-            });
+                });
+                AndroidLog.logD(TAG, "update list=" + mPreviousBackgroundAppList + ", time=" + time);
+            }
         }
     }
 
@@ -238,6 +284,8 @@ public class ApplyAdjOpt {
         if (Objects.isNull(info))
             return true;
 
+        // if (Objects.equals(info.packageName, "com.google.android.webview"))
+        //     return false;
         if (info.uid < 10000)
             return true;
         if ((info.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0)
@@ -246,6 +294,28 @@ public class ApplyAdjOpt {
         return mSystemSigningAppMap.contains(info.packageName);
     }
 
+    private record ProcessIndexRecord(Object app, int index) {
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) return true;
+            if (!(object instanceof ProcessIndexRecord that)) return false;
+            return Objects.equals(app, that.app); // 不关心索引值
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "ProcessIndexRecord{" +
+                "app=" + app +
+                ", index=" + index +
+                '}';
+        }
+    }
+
+    /**
+     * @noinspection FieldCanBeLocal
+     */
     private static class ProcessRecord {
         private final Object instance;
         private final ApplicationInfo info;
@@ -255,18 +325,18 @@ public class ApplyAdjOpt {
         private final boolean isSdkSandbox;
         private final boolean isMainProcess;
         private final int uid;
-        private Object mState;
+        private final Object mState;
 
         private ProcessRecord(Object pr) {
             this.instance = pr;
             this.processName = (String) getField(pr, SystemField.processName);
             this.info = (ApplicationInfo) getField(pr, SystemField.info);
-            if (info != null) {
+            if (info != null)
                 this.packageName = info.packageName;
-            }
-            this.uid = (int) getField(pr, SystemField.uid);
-            this.isolated = (boolean) getField(pr, SystemField.isolated);
-            this.isSdkSandbox = (boolean) getField(pr, SystemField.isSdkSandbox);
+
+            this.uid = (int) Optional.ofNullable(getField(pr, SystemField.uid)).orElse(-1);
+            this.isolated = (boolean) Optional.ofNullable(getField(pr, SystemField.isolated)).orElse(false);
+            this.isSdkSandbox = (boolean) Optional.ofNullable(getField(pr, SystemField.isSdkSandbox)).orElse(false);
             this.isMainProcess = Objects.equals(this.processName, this.packageName);
             this.mState = getField(pr, SystemField.mState);
         }

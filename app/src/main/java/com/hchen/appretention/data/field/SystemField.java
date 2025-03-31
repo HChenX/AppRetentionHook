@@ -63,4 +63,6 @@ public class SystemField {
     public static final String uid = "uid";
     public static final String isolated = "isolated";
     public static final String isSdkSandbox = "isSdkSandbox";
+    public static final String mLruProcessServiceStart = "mLruProcessServiceStart";
+    public static final String isPersistent = "isPersistent";
 }
