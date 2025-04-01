@@ -47,7 +47,6 @@ import static com.hchen.hooktool.tool.CoreTool.findMethod;
 import static com.hchen.hooktool.tool.CoreTool.getField;
 import static com.hchen.hooktool.tool.CoreTool.hook;
 import static com.hchen.hooktool.tool.CoreTool.hookMethod;
-import static com.hchen.hooktool.tool.CoreTool.timeConsumption;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -201,53 +200,53 @@ public class ApplyAdjOpt {
             if (mUserAppMap.contains(info.packageName) || !isSystemApp(info)) {
                 mUserAppMap.add(info.packageName);
 
-                long time = timeConsumption(() -> {
-                    Object mState = getField(app, SystemField.mState);
-                    Integer importance = (Integer) callStaticMethod(
-                        ActivityManager$RunningAppProcessInfo,
-                        procStateToImportance,
-                        callMethod(mState, getCurProcState)
-                    );
-                    if (importance != null) {
-                        if (importance > ImportanceInfo.IMPORTANCE_VISIBLE) { // 假定为后台
-                            ArrayList<?> lruProcesses = (ArrayList<?>) callMethod(mProcessList, getLruProcessesLOSP);
-                            if (lruProcesses == null) return;
+                // long time = timeConsumption(() -> {
+                Object mState = getField(app, SystemField.mState);
+                Integer importance = (Integer) callStaticMethod(
+                    ActivityManager$RunningAppProcessInfo,
+                    procStateToImportance,
+                    callMethod(mState, getCurProcState)
+                );
+                if (importance != null) {
+                    if (importance > ImportanceInfo.IMPORTANCE_VISIBLE) { // 假定为后台
+                        ArrayList<?> lruProcesses = (ArrayList<?>) callMethod(mProcessList, getLruProcessesLOSP);
+                        if (lruProcesses == null) return;
 
-                            int nowIndex = lruProcesses.indexOf(app);
-                            if (nowIndex == -1) return;
+                        int nowIndex = lruProcesses.indexOf(app);
+                        if (nowIndex == -1) return;
 
-                            if (mPreviousBackgroundAppList.isEmpty())
-                                mPreviousBackgroundAppList.add(new ProcessIndexRecord(app, nowIndex));
-                            else {
-                                if (mProcessRecordMap.contains(app)) {
-                                    mPreviousBackgroundAppList.removeIf(
-                                        processIndexRecord ->
-                                            Objects.equals(processIndexRecord.app, app)
-                                    );
-                                }
-                                mPreviousBackgroundAppList.add(new ProcessIndexRecord(app, nowIndex));
-                                mPreviousBackgroundAppList.sort((o1, o2) -> {
-                                    // nowIndex 越大说明越重要，所以 nowIndex 越大越排在前面。
-                                    if (o1.index > o2.index)
-                                        return -1;
-                                    else if (o1.index < o2.index)
-                                        return 1;
-
-                                    return 0;
-                                });
-                            }
-                            mProcessRecordMap.add(app);
-                        } else {
+                        if (mPreviousBackgroundAppList.isEmpty())
+                            mPreviousBackgroundAppList.add(new ProcessIndexRecord(app, nowIndex));
+                        else {
                             if (mProcessRecordMap.contains(app)) {
                                 mPreviousBackgroundAppList.removeIf(
                                     processIndexRecord ->
                                         Objects.equals(processIndexRecord.app, app)
                                 );
-                                mProcessRecordMap.remove(app);
                             }
+                            mPreviousBackgroundAppList.add(new ProcessIndexRecord(app, nowIndex));
+                            mPreviousBackgroundAppList.sort((o1, o2) -> {
+                                // nowIndex 越大说明越重要，所以 nowIndex 越大越排在前面。
+                                if (o1.index > o2.index)
+                                    return -1;
+                                else if (o1.index < o2.index)
+                                    return 1;
+
+                                return 0;
+                            });
+                        }
+                        mProcessRecordMap.add(app);
+                    } else {
+                        if (mProcessRecordMap.contains(app)) {
+                            mPreviousBackgroundAppList.removeIf(
+                                processIndexRecord ->
+                                    Objects.equals(processIndexRecord.app, app)
+                            );
+                            mProcessRecordMap.remove(app);
                         }
                     }
-                });
+                }
+                // });
                 // AndroidLog.logD(TAG, "update list=" + mPreviousBackgroundAppList + ", time=" + time);
             }
         }

@@ -26,6 +26,7 @@ package com.hchen.appretention.data.field;
 public class SystemField {
     public static final String mNextNoKillDebugMessageTime = "mNextNoKillDebugMessageTime";
     public static final String mGlobalMaxNumTasks = "mGlobalMaxNumTasks";
+    public static final String mMinNumVisibleTasks = "mMinNumVisibleTasks";
     public static final String mKillBgRestrictedAndCachedIdle = "mKillBgRestrictedAndCachedIdle";
     public static final String CUR_MAX_CACHED_PROCESSES = "CUR_MAX_CACHED_PROCESSES";
     public static final String CUR_MAX_EMPTY_PROCESSES = "CUR_MAX_EMPTY_PROCESSES";

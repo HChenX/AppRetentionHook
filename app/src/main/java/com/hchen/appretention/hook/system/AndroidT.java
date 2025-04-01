@@ -24,6 +24,7 @@ import static com.hchen.appretention.data.field.SystemField.USE_MODERN_TRIM;
 import static com.hchen.appretention.data.field.SystemField.mGlobalMaxNumTasks;
 import static com.hchen.appretention.data.field.SystemField.mKillBgRestrictedAndCachedIdle;
 import static com.hchen.appretention.data.field.SystemField.mMemFactorOverride;
+import static com.hchen.appretention.data.field.SystemField.mMinNumVisibleTasks;
 import static com.hchen.appretention.data.field.SystemField.mNextNoKillDebugMessageTime;
 import static com.hchen.appretention.data.method.SystemMethod.checkExcessivePowerUsageLPr;
 import static com.hchen.appretention.data.method.SystemMethod.isInVisibleRange;
@@ -204,8 +205,7 @@ public class AndroidT extends BaseHC {
 
         /*
          * 是否使处于可见范围。
-         * 当超过可见范围或非活动时间超出阈值时, 部分任务将会变得不可见。
-         * 且超出可见范围的检查优于时间范围检查，所以使 numVisibleTasks 为 0 即可使其始终处于可见范围。
+         * 设置 mMinNumVisibleTasks 为最大值则可以解除限制。
          * */
         hookMethod(RecentTasks,
             isInVisibleRange,
@@ -213,7 +213,7 @@ public class AndroidT extends BaseHC {
             new IHook() {
                 @Override
                 public void before() {
-                    setArgs(2, 0);
+                    setThisField(mMinNumVisibleTasks, Integer.MAX_VALUE);
                 }
             }
         );
