@@ -79,8 +79,8 @@ import static com.hchen.appretention.data.prop.SystemProp.TRUE;
 import android.app.job.JobParameters;
 
 import com.hchen.collect.HookEntrance;
-import com.hchen.hooktool.BaseHC;
-import com.hchen.hooktool.tool.additional.SystemPropTool;
+import com.hchen.hooktool.HCBase;
+import com.hchen.hooktool.utils.SystemPropTool;
 
 import java.util.List;
 
@@ -90,7 +90,7 @@ import java.util.List;
  * @author 焕晨HChen
  */
 @HookEntrance(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 2.0f, isHyperOS = true)
-public class HyperV2 extends BaseHC {
+public class HyperV2 extends HCBase {
     @Override
     public void init() {
         /*
@@ -185,68 +185,68 @@ public class HyperV2 extends BaseHC {
          *  */
         SystemPropTool.setProp("persist.sys.memory_standard.enable", FALSE);
         SystemPropTool.setProp("persist.sys.memory_standard.appheap.enable", FALSE);
-        chain(MemoryStandardProcessControl, method(isEnable)
-                .returnResult(false)
+        buildChain(MemoryStandardProcessControl)
+            .findMethod(isEnable)
+            .returnResult(false);
 
-            // .method(init, Context.class, ActivityManagerService)
-            // .returnResult(false) // Changed: 多余的 Hook
-        );
+        // .findMethod(init, Context.class, ActivityManagerService)
+        // .returnResult(false) // Changed: 多余的 Hook
 
-        chain(ProcessPowerCleaner,
+        buildChain(ProcessPowerCleaner)
             /*
              * 禁止因温度 kill。
              * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_1
              * */
-            method(handleThermalKillProc, ProcessConfig)
-                .doNothing()
+            .findMethod(handleThermalKillProc, ProcessConfig)
+            .doNothing()
 
-                /*
-                 * REASON_AUTO_SLEEP_CLEAN
-                 * REASON_AUTO_SYSTEM_ABNORMAL_CLEAN
-                 * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2
-                 * */
-                .method(handleKillAll, ProcessConfig, boolean.class)
-                .doNothing()
+            /*
+             * REASON_AUTO_SLEEP_CLEAN
+             * REASON_AUTO_SYSTEM_ABNORMAL_CLEAN
+             * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2
+             * */
+            .findMethod(handleKillAll, ProcessConfig, boolean.class)
+            .doNothing()
 
-                /*
-                 * ProcessPolicy.REASON_AUTO_POWER_KILL
-                 * ProcessPolicy.REASON_AUTO_THERMAL_KILL
-                 * ProcessPolicy.REASON_AUTO_IDLE_KILL
-                 */
-                .method(handleKillApp, ProcessConfig)
-                .returnResult(true)
+            /*
+             * ProcessPolicy.REASON_AUTO_POWER_KILL
+             * ProcessPolicy.REASON_AUTO_THERMAL_KILL
+             * ProcessPolicy.REASON_AUTO_IDLE_KILL
+             */
+            .findMethod(handleKillApp, ProcessConfig)
+            .returnResult(true)
 
-                /*
-                 * 禁止锁屏 kill。
-                 * */
-                .method(handleAutoLockOff).doNothing()
-        );
+            /*
+             * 禁止锁屏 kill。
+             * */
+            .findMethod(handleAutoLockOff).doNothing();
 
         /*
          * 是 MiuiMemoryService 几个核心方法。
          * */
-        chain(ProcessMemoryCleaner, method(scanProcessAndCleanUpMemory, long.class) // Changed: 更好的 Hook 点位。
-                .returnResult(true)
+        buildChain(ProcessMemoryCleaner)
+            .findMethod(scanProcessAndCleanUpMemory, long.class) // Changed: 更好的 Hook 点位。
+            .returnResult(true)
 
-                .method(killPackage, IAppState$IRunningProcess, int.class, String.class)
-                .returnResult(0L)
+            .findMethod(killPackage, IAppState$IRunningProcess, int.class, String.class)
+            .returnResult(0L)
 
-                .method(killProcess, IAppState$IRunningProcess, int.class, String.class)
-                .returnResult(0L)
+            .findMethod(killProcess, IAppState$IRunningProcess, int.class, String.class)
+            .returnResult(0L)
 
-                .method(killProcessByMinAdj, int.class, String.class, List.class)
-                .doNothing()
+            .findMethod(killProcessByMinAdj, int.class, String.class, List.class)
+            .doNothing()
 
-                .method(killAppExceedingHeapThreshold, int.class)
-                .doNothing()
+            .findMethod(killAppExceedingHeapThreshold, int.class)
+            .doNothing();
 
-            // Changed: 多余的 Hook。
-            // .method(checkBackgroundAppException, String.class, int.class)
-            // .returnResult(0)
+        // Changed: 多余的 Hook。
+        // .findMethod(checkBackgroundAppException, String.class, int.class)
+        // .returnResult(0)
 
-            // Changed: 多余的 Hook。
-            // .method(isNeedCompact, IAppState$IRunningProcess).returnResult(false)
-        );
+        // Changed: 多余的 Hook。
+        // .findMethod(isNeedCompact, IAppState$IRunningProcess)
+        // .returnResult(false)
 
         /*
          * 禁止压缩进程。
@@ -293,24 +293,24 @@ public class HyperV2 extends BaseHC {
         /*
          * 禁止预启动。
          * */
-        chain(PreloadAppControllerImpl, method(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
-                .doNothing()
+        buildChain(PreloadAppControllerImpl)
+            .findMethod(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
+            .doNothing();
 
-            // Changed: 多余的 Hook。
-            // .method(startPreloadApp, PreloadLifecycle)
-            // .hook(new IHook() {
-            //     @Override
-            //     public void before() {
-            //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
-            //     }
-            // })
-        );
+        // Changed: 多余的 Hook。
+        // .findMethod(startPreloadApp, PreloadLifecycle)
+        // .hook(new IHook() {
+        //     @Override
+        //     public void before() {
+        //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
+        //     }
+        // })
 
         /*
          * 禁用 SSModel。
          * */
         SystemPropTool.setProp("persist.sys.ssmc.enable", FALSE);
-        hookMethod(SlowStartupSceneMemClean, isSSModelEnable, returnResult(false));
+        hookMethodIfExists(SlowStartupSceneMemClean, isSSModelEnable, returnResult(false));
 
         /*
          * 似乎是 Miui 的回收机制。
@@ -323,30 +323,33 @@ public class HyperV2 extends BaseHC {
          * */
         // Changed: Support HyperV2
         setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
-        chain(SystemPressureController,
+        buildChain(SystemPressureController)
             /*
              * 禁止随屏幕状态启动压力监测器。
              * */
-            method(updateScreenState, boolean.class)
-                .doNothing()
+            .findMethod(updateScreenState, boolean.class)
+            .doNothing()
 
-            /*
-             * 无奖竞猜。
-             *
-             * Changed: 多余的 hook，PROCESS_CLEANER_ENABLED 设置 false 后即可。
-             * */
-            // .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-            // .doNothing()
-        );
+            .findMethodIfExist(nStartPressureMonitor)
+            .hook(doNothing());
+        /*
+         * 无奖竞猜。
+         *
+         * Changed: 多余的 hook，PROCESS_CLEANER_ENABLED 设置 false 后即可。
+         * */
+        // .findMethod(foregroundActivityChangedLocked, ControllerActivityInfo)
+        // .doNothing()
 
         /*
          * 禁止启动内存压力监测器。
          * */
         // Changed: Support HyperV2
-        hookMethod(SystemPressureControllerNative,
-            nStartPressureMonitor,
-            doNothing()
-        );
+        if (existsClass(SystemPressureControllerNative)) {
+            hookMethodIfExists(SystemPressureControllerNative,
+                nStartPressureMonitor,
+                doNothing()
+            );
+        }
 
         CameraOpt.doHook();
     }

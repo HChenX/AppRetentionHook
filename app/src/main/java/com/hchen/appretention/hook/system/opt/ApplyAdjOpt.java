@@ -36,17 +36,17 @@ import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
 import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 import static com.hchen.appretention.data.path.SystemClass.TimingsTraceAndSlog;
+import static com.hchen.hooktool.core.CoreTool.callMethod;
+import static com.hchen.hooktool.core.CoreTool.callStaticMethod;
+import static com.hchen.hooktool.core.CoreTool.existsConstructor;
+import static com.hchen.hooktool.core.CoreTool.existsMethod;
+import static com.hchen.hooktool.core.CoreTool.findConstructor;
+import static com.hchen.hooktool.core.CoreTool.findMethod;
+import static com.hchen.hooktool.core.CoreTool.getField;
+import static com.hchen.hooktool.core.CoreTool.hook;
+import static com.hchen.hooktool.core.CoreTool.hookMethod;
 import static com.hchen.hooktool.log.XposedLog.logD;
 import static com.hchen.hooktool.log.XposedLog.logW;
-import static com.hchen.hooktool.tool.CoreTool.callMethod;
-import static com.hchen.hooktool.tool.CoreTool.callStaticMethod;
-import static com.hchen.hooktool.tool.CoreTool.existsConstructor;
-import static com.hchen.hooktool.tool.CoreTool.existsMethod;
-import static com.hchen.hooktool.tool.CoreTool.findConstructor;
-import static com.hchen.hooktool.tool.CoreTool.findMethod;
-import static com.hchen.hooktool.tool.CoreTool.getField;
-import static com.hchen.hooktool.tool.CoreTool.hook;
-import static com.hchen.hooktool.tool.CoreTool.hookMethod;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -61,7 +61,7 @@ import androidx.annotation.NonNull;
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.XposedLog;
-import com.hchen.hooktool.tool.additional.SystemPropTool;
+import com.hchen.hooktool.utils.SystemPropTool;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -143,7 +143,7 @@ public class ApplyAdjOpt {
                     if (mService == null) return;
 
                     synchronized (mService) {
-                        Object app = getArgs(0);
+                        Object app = getArg(0);
                         if (mProcessRecordMap.contains(app)) {
                             mPreviousBackgroundAppList.removeIf(
                                 processIndexRecord ->
@@ -160,7 +160,7 @@ public class ApplyAdjOpt {
             new IHook() {
                 @Override
                 public void before() {
-                    Object app = getArgs(0);
+                    Object app = getArg(0);
                     if (app == null) return;
 
                     updateBackgroundAppList(app);

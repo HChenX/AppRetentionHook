@@ -22,10 +22,10 @@ import static com.hchen.appretention.data.method.SystemMethod.onLmkdConnect;
 import static com.hchen.appretention.data.method.SystemMethod.updateOomLevels;
 import static com.hchen.appretention.data.method.SystemMethod.writeLmkd;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
-import static com.hchen.hooktool.tool.CoreTool.getField;
-import static com.hchen.hooktool.tool.CoreTool.hookConstructor;
-import static com.hchen.hooktool.tool.CoreTool.hookMethod;
-import static com.hchen.hooktool.tool.CoreTool.setField;
+import static com.hchen.hooktool.core.CoreTool.getField;
+import static com.hchen.hooktool.core.CoreTool.hookConstructor;
+import static com.hchen.hooktool.core.CoreTool.hookMethod;
+import static com.hchen.hooktool.core.CoreTool.setField;
 
 import android.system.Os;
 import android.system.OsConstants;
@@ -125,14 +125,14 @@ public final class OomLevelsOpt {
 
                 @Override
                 public void before() {
-                    ByteBuffer buffer = (ByteBuffer) getArgs(0);
+                    ByteBuffer buffer = (ByteBuffer) getArg(0);
                     if (buffer == null) return;
 
                     ByteBuffer bufCopy = buffer.duplicate();
                     bufCopy.rewind();
                     if (bufCopy.getInt() == 0) {
                         setOomMinFreeBuf(bufCopy);
-                        setArgs(0, buffer);
+                        setArg(0, buffer);
                     }
                 }
 

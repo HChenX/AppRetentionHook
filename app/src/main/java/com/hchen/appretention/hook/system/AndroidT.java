@@ -61,7 +61,7 @@ import com.hchen.appretention.hook.system.opt.ApplyAdjOpt;
 import com.hchen.appretention.hook.system.opt.CacheCompaction;
 import com.hchen.appretention.hook.system.opt.OomLevelsOpt;
 import com.hchen.collect.HookEntrance;
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 import com.hchen.hooktool.hook.IHook;
 
 /**
@@ -70,7 +70,7 @@ import com.hchen.hooktool.hook.IHook;
  * @author 焕晨HChen
  */
 @HookEntrance(targetPackage = "android", targetSdks = 33)
-public class AndroidT extends BaseHC {
+public class AndroidT extends HCBase {
     @Override
     public void init() {
         OomLevelsOpt.init();
@@ -222,8 +222,9 @@ public class AndroidT extends BaseHC {
         /*
          * 各种基本常量设置。
          * */
-        chain(ActivityManagerConstants, constructor(
-            Context.class, ActivityManagerService, Handler.class)
+        buildChain(ActivityManagerConstants)
+            .findConstructor(
+                Context.class, ActivityManagerService, Handler.class)
             .hook(new IHook() {
                 @Override
                 public void after() {
@@ -235,30 +236,29 @@ public class AndroidT extends BaseHC {
                     setThisField(MAX_PHANTOM_PROCESSES, Integer.MAX_VALUE); // 最大虚幻进程数量
                     setThisField(mKillBgRestrictedAndCachedIdle, false); // 禁止 kill 后台受限和缓存空闲的应用
 
-                    if (existsField(mClass, USE_MODERN_TRIM))
+                    if (existsField(getMember().getDeclaringClass(), USE_MODERN_TRIM))
                         setThisField(USE_MODERN_TRIM, true); // 使用现代 trim。Note: AndroidV 删除
                 }
             })
 
             /* 一般情况不会被主动调用，仅保险使用 */
-            .method(updateKillBgRestrictedCachedIdle)
+            .findMethod(updateKillBgRestrictedCachedIdle)
             .doNothing()
 
-            .methodIfExist(updateUseModernTrim) // Note: AndroidV 删除
+            .findMethodIfExist(updateUseModernTrim) // Note: AndroidV 删除
             .doNothing()
 
             /*.method(updateProactiveKillsEnabled)
             .doNothing()*/ // AndroidT 不包含
 
-            .method(updateMaxCachedProcesses)
+            .findMethod(updateMaxCachedProcesses)
             .doNothing()
 
-            .method(updateMaxPhantomProcesses)
+            .findMethod(updateMaxPhantomProcesses)
             .doNothing()
 
-            .methodIfExist(updatePerfConfigConstants) // 高通的东西
-            .doNothing()
-        );
+            .findMethodIfExist(updatePerfConfigConstants) // 高通的东西
+            .doNothing();
 
         /*
          * 禁止主动杀戮。

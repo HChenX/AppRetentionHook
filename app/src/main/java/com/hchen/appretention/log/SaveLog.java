@@ -39,10 +39,10 @@ import com.hchen.appretention.BuildConfig;
 import com.hchen.appretention.hook.system.log.LogServices;
 import com.hchen.hooktool.HCData;
 import com.hchen.hooktool.log.AndroidLog;
-import com.hchen.hooktool.tool.additional.ContextTool;
-import com.hchen.hooktool.tool.additional.DeviceTool;
-import com.hchen.hooktool.tool.additional.InvokeTool;
-import com.hchen.hooktool.tool.additional.SystemPropTool;
+import com.hchen.hooktool.utils.ContextTool;
+import com.hchen.hooktool.utils.DeviceTool;
+import com.hchen.hooktool.utils.InvokeTool;
+import com.hchen.hooktool.utils.SystemPropTool;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -184,12 +184,12 @@ public class SaveLog {
     private static String formatLog(String tag, String log) {
         String formatLog = formatLog(log);
         if (tag.equals("Any")) {
-            if ("android".equals(HCData.getPackageName()) && !isAndroidInitLogPutDown) {
+            if ("android".equals(HCData.getTargetPackageName()) && !isAndroidInitLogPutDown) {
                 isAndroidInitLogPutDown = true;
                 return formatLog;
-            } else if ("android".equals(HCData.getPackageName()) && isAndroidInitLogPutDown) {
+            } else if ("android".equals(HCData.getTargetPackageName()) && isAndroidInitLogPutDown) {
                 return "";
-            } else if (!"android".equals(HCData.getPackageName())) {
+            } else if (!"android".equals(HCData.getTargetPackageName())) {
                 return formatLog;
             }
         }
@@ -214,12 +214,12 @@ public class SaveLog {
         tag = redirectFileName(tag);
         String formatLog = formatLog(log);
         if (tag.equals("Any")) {
-            if ("android".equals(HCData.getPackageName()) && !isAndroidInitLogPutDown) {
+            if ("android".equals(HCData.getTargetPackageName()) && !isAndroidInitLogPutDown) {
                 mLogContentDataMap.forEach((s, logContentData) ->
                     logContentData.mLogContent.add(formatLog));
                 isAndroidInitLogPutDown = true;
                 return mLogContentDataMap.values().toArray(new LogContentData[0]);
-            } else if (!"android".equals(HCData.getPackageName())) {
+            } else if (!"android".equals(HCData.getTargetPackageName())) {
                 mLogContentDataMap.forEach((s, logContentData) ->
                     logContentData.mLogContent.add(formatLog));
                 return mLogContentDataMap.values().toArray(new LogContentData[0]);

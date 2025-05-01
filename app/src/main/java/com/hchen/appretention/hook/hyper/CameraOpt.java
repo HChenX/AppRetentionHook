@@ -38,22 +38,22 @@ import static com.hchen.appretention.data.path.HyperClass.ProcessManagerInternal
 import static com.hchen.appretention.data.path.HyperClass.ServiceThread;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
 import static com.hchen.appretention.data.prop.SystemProp.ZERO;
-import static com.hchen.hooktool.tool.CoreTool.doNothing;
-import static com.hchen.hooktool.tool.CoreTool.existsAnyMethod;
-import static com.hchen.hooktool.tool.CoreTool.existsClass;
-import static com.hchen.hooktool.tool.CoreTool.existsField;
-import static com.hchen.hooktool.tool.CoreTool.findAllMethod;
-import static com.hchen.hooktool.tool.CoreTool.findClass;
-import static com.hchen.hooktool.tool.CoreTool.hook;
-import static com.hchen.hooktool.tool.CoreTool.hookMethod;
-import static com.hchen.hooktool.tool.CoreTool.returnResult;
+import static com.hchen.hooktool.core.CoreTool.doNothing;
+import static com.hchen.hooktool.core.CoreTool.existsAnyMethod;
+import static com.hchen.hooktool.core.CoreTool.existsClass;
+import static com.hchen.hooktool.core.CoreTool.existsField;
+import static com.hchen.hooktool.core.CoreTool.findAllMethod;
+import static com.hchen.hooktool.core.CoreTool.findClass;
+import static com.hchen.hooktool.core.CoreTool.hook;
+import static com.hchen.hooktool.core.CoreTool.hookMethod;
+import static com.hchen.hooktool.core.CoreTool.returnResult;
 
 import android.content.Context;
 
 import com.hchen.appretention.data.field.HyperField;
+import com.hchen.hooktool.core.CoreTool;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.hooktool.tool.CoreTool;
-import com.hchen.hooktool.tool.additional.SystemPropTool;
+import com.hchen.hooktool.utils.SystemPropTool;
 
 import java.lang.reflect.Method;
 

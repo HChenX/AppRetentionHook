@@ -50,7 +50,7 @@ import android.os.Looper;
 
 import com.hchen.appretention.hook.system.opt.CacheCompaction;
 import com.hchen.collect.HookEntrance;
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 import com.hchen.hooktool.hook.IHook;
 
 /**
@@ -61,7 +61,7 @@ import com.hchen.hooktool.hook.IHook;
  * @author 焕晨HChen
  */
 @HookEntrance(targetPackage = "android", targetSdks = 30, downward = true)
-public class AndroidDef extends BaseHC {
+public class AndroidDef extends HCBase {
     @Override
     protected void init() {
         // UpdateOomLevels.init(); // 未做专门适配
@@ -215,8 +215,8 @@ public class AndroidDef extends BaseHC {
         /*
          * 各种基本常量设置。
          * */
-        chain(ActivityManagerConstants, constructor(
-            Context.class, ActivityManagerService, Handler.class)
+        buildChain(ActivityManagerConstants)
+            .findConstructor(Context.class, ActivityManagerService, Handler.class)
             .hook(new IHook() {
                 @Override
                 public void after() {
@@ -235,24 +235,23 @@ public class AndroidDef extends BaseHC {
 
             /* 一般情况不会被主动调用，仅保险使用 */
             // Changed: Android 不包含
-            // .method(updateKillBgRestrictedCachedIdle)
+            // .findMethod(updateKillBgRestrictedCachedIdle)
             // .doNothing()
 
-            // .methodIfExist(updateUseModernTrim) // Note: Android 不包含
+            // .findMethodIfExist(updateUseModernTrim) // Note: Android 不包含
             // .doNothing()
 
             /*.method(updateProactiveKillsEnabled)
             .doNothing()*/ // Android 不包含
 
-            .method(updateMaxCachedProcesses)
+            .findMethod(updateMaxCachedProcesses)
             .doNothing()
 
-            .method(updateMaxPhantomProcesses)
+            .findMethod(updateMaxPhantomProcesses)
             .doNothing()
 
-            .methodIfExist(updatePerfConfigConstants) // 高通的东西
-            .doNothing()
-        );
+            .findMethodIfExist(updatePerfConfigConstants) // 高通的东西
+            .doNothing();
 
         /*
          * 禁止主动杀戮。

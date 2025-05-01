@@ -53,7 +53,7 @@ import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 import android.content.Context;
 
 import com.hchen.collect.HookEntrance;
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 import com.hchen.hooktool.hook.IHook;
 
 /**
@@ -62,7 +62,7 @@ import com.hchen.hooktool.hook.IHook;
  * @author 焕晨HChen
  */
 @HookEntrance(targetPackage = "android", targetBrand = "samsung")
-public class OneUi extends BaseHC {
+public class OneUi extends HCBase {
     @Override
     public void init() {
         LmkdParameter.init();
@@ -187,7 +187,8 @@ public class OneUi extends BaseHC {
         /*
          * 解除最大不被 kill 应用的数量限制。
          * */
-        chain(ActivityManagerServiceExt, method(addLongLivePackageLocked, String.class)
+        buildChain(ActivityManagerServiceExt)
+            .findMethod(addLongLivePackageLocked, String.class)
             .hook(new IHook() {
                 @Override
                 public void before() {
@@ -195,9 +196,8 @@ public class OneUi extends BaseHC {
                 }
             })
 
-            .method(getMaxLongLiveApps)
-            .returnResult(Integer.MAX_VALUE)
-        );
+            .findMethod(getMaxLongLiveApps)
+            .returnResult(Integer.MAX_VALUE);
 
         // ------------------ MARsPolicyManager -------------------------
         /*

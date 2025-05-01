@@ -64,27 +64,24 @@ import static com.hchen.appretention.data.path.SystemClass.OomAdjuster;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
 import static com.hchen.appretention.data.path.SystemClass.ProcessRecord;
 import static com.hchen.appretention.data.prop.SystemProp.TRUE;
-import static com.hchen.hooktool.BaseHC.anyMethod;
-import static com.hchen.hooktool.BaseHC.method;
-import static com.hchen.hooktool.BaseHC.methodIfExist;
+import static com.hchen.hooktool.core.CoreTool.buildChain;
+import static com.hchen.hooktool.core.CoreTool.callMethod;
+import static com.hchen.hooktool.core.CoreTool.callStaticMethod;
+import static com.hchen.hooktool.core.CoreTool.existsClass;
+import static com.hchen.hooktool.core.CoreTool.existsConstructor;
+import static com.hchen.hooktool.core.CoreTool.existsField;
+import static com.hchen.hooktool.core.CoreTool.existsMethod;
+import static com.hchen.hooktool.core.CoreTool.findConstructor;
+import static com.hchen.hooktool.core.CoreTool.findMethod;
+import static com.hchen.hooktool.core.CoreTool.getField;
+import static com.hchen.hooktool.core.CoreTool.getStaticField;
+import static com.hchen.hooktool.core.CoreTool.hook;
+import static com.hchen.hooktool.core.CoreTool.hookAllMethod;
+import static com.hchen.hooktool.core.CoreTool.hookMethod;
+import static com.hchen.hooktool.core.CoreTool.newInstance;
+import static com.hchen.hooktool.core.CoreTool.returnResult;
 import static com.hchen.hooktool.log.XposedLog.logD;
 import static com.hchen.hooktool.log.XposedLog.logW;
-import static com.hchen.hooktool.tool.ChainTool.chain;
-import static com.hchen.hooktool.tool.CoreTool.callMethod;
-import static com.hchen.hooktool.tool.CoreTool.callStaticMethod;
-import static com.hchen.hooktool.tool.CoreTool.existsClass;
-import static com.hchen.hooktool.tool.CoreTool.existsConstructor;
-import static com.hchen.hooktool.tool.CoreTool.existsField;
-import static com.hchen.hooktool.tool.CoreTool.existsMethod;
-import static com.hchen.hooktool.tool.CoreTool.findConstructor;
-import static com.hchen.hooktool.tool.CoreTool.findMethod;
-import static com.hchen.hooktool.tool.CoreTool.getField;
-import static com.hchen.hooktool.tool.CoreTool.getStaticField;
-import static com.hchen.hooktool.tool.CoreTool.hook;
-import static com.hchen.hooktool.tool.CoreTool.hookAllMethod;
-import static com.hchen.hooktool.tool.CoreTool.hookMethod;
-import static com.hchen.hooktool.tool.CoreTool.newInstance;
-import static com.hchen.hooktool.tool.CoreTool.returnResult;
 
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -95,7 +92,7 @@ import androidx.annotation.NonNull;
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.appretention.data.other.PrecessAdjInfo;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.hooktool.tool.additional.SystemPropTool;
+import com.hchen.hooktool.utils.SystemPropTool;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -232,10 +229,10 @@ public final class CacheCompaction {
                     if (mCachedAppOptimizer == null) return;
                     if (isHandlerNotInit) {
                         logW(TAG, "CachedAppOptimizer handler not init! Will cancel hook!!");
-                        removeSelf();
+                        unHookSelf();
                         return;
                     }
-                    Object app = getArgs(0);
+                    Object app = getArg(0);
                     if (app == null) return;
 
                     Integer curAdj = getCurAdj(app);
@@ -265,7 +262,7 @@ public final class CacheCompaction {
             new IHook() {
                 @Override
                 public void before() {
-                    setResult(getArgs(0));
+                    setResult(getArg(0));
                 }
             }
         );
@@ -276,54 +273,54 @@ public final class CacheCompaction {
             returnResult(false)
         );
 
-        chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
-            .returnResult(false) 进程恢复到可感知状态了 */
+        buildChain(CachedAppOptimizer$MemCompactionHandler)
+            /* .findMethod(shouldOomAdjThrottleCompaction, ProcessRecord)
+               .returnResult(false) 进程恢复到可感知状态了 */
 
-            anyMethod(shouldThrottleMiscCompaction)
-                .returnResult(false)
+            .findAllMethod(shouldThrottleMiscCompaction)
+            .returnResult(false)
 
-                .anyMethod(shouldTimeThrottleCompaction)
-                .hook(new IHook() {
-                    @Override
-                    public void before() {
-                        Object opt = getField(getArgs(0), mOptRecord);
-                        Long lastCompactTime = (Long) callMethod(opt, getLastCompactTime);
-                        Long start = (Long) getArgs(1);
-                        if (lastCompactTime == null || start == null)
-                            return;
+            .findAllMethod(shouldTimeThrottleCompaction)
+            .hook(new IHook() {
+                @Override
+                public void before() {
+                    Object opt = getField(getArg(0), mOptRecord);
+                    Long lastCompactTime = (Long) callMethod(opt, getLastCompactTime);
+                    Long start = (Long) getArg(1);
+                    if (lastCompactTime == null || start == null)
+                        return;
 
-                        // 15 秒内不允许再次触发。
-                        if (lastCompactTime != 0) {
-                            if (start - lastCompactTime < 15000) {
-                                setResult(true);
-                                return;
-                            }
-                        }
-                        setResult(false);
-                    }
-                })
-
-                .anyMethod(shouldRssThrottleCompaction)
-                .hook(new IHook() {
-                    @Override
-                    public void before() {
-                        long[] rssBefore = (long[]) getArgs(3);
-                        if (rssBefore == null) return;
-
-                        long anonRssBefore = rssBefore[2];
-                        if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
-                            setResult(true); // 进程可能被杀。
-                            return;
-                        }
-
-                        if (anonRssBefore < (1024 * 6)) {
+                    // 15 秒内不允许再次触发。
+                    if (lastCompactTime != 0) {
+                        if (start - lastCompactTime < 15000) {
                             setResult(true);
                             return;
                         }
-                        setResult(false);
                     }
-                })
-        );
+                    setResult(false);
+                }
+            })
+
+            .findAllMethod(shouldRssThrottleCompaction)
+            .hook(new IHook() {
+                @Override
+                public void before() {
+                    long[] rssBefore = (long[]) getArg(3);
+                    if (rssBefore == null) return;
+
+                    long anonRssBefore = rssBefore[2];
+                    if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
+                        setResult(true); // 进程可能被杀。
+                        return;
+                    }
+
+                    if (anonRssBefore < (1024 * 6)) {
+                        setResult(true);
+                        return;
+                    }
+                    setResult(false);
+                }
+            });
     }
 
     private static void compactApp(@NonNull Object app, int action, Object compactProfile, Object source, Object force) {
@@ -379,8 +376,9 @@ public final class CacheCompaction {
         /*
          * 接管系统的压缩流程，并激进化流程。
          * */
-        chain(CachedAppOptimizer, method(onOomAdjustChanged,
-            int.class, int.class, ProcessRecord).hook(
+        buildChain(CachedAppOptimizer)
+            .findMethod(onOomAdjustChanged,
+                int.class, int.class, ProcessRecord).hook(
                 new IHook() {
                     private static final Object SOME = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.SOME);
                     private static final Object FULL = getStaticField(CachedAppOptimizer$CompactProfile, SystemField.FULL);
@@ -392,7 +390,7 @@ public final class CacheCompaction {
 
                     @Override
                     public void before() {
-                        Object app = getArgs(2);
+                        Object app = getArg(2);
                         if (app == null) return;
                         state = getField(app, mState);
                         optRecord = getField(app, mOptRecord);
@@ -447,15 +445,15 @@ public final class CacheCompaction {
                     }
                 })
 
-            .method(resolveCompactionProfile, CachedAppOptimizer$CompactProfile)
+            .findMethod(resolveCompactionProfile, CachedAppOptimizer$CompactProfile)
             .hook(new IHook() {
                 @Override
                 public void before() {
-                    setResult(getArgs(0));
+                    setResult(getArg(0));
                 }
             })
 
-            .method(updateUseCompaction)
+            .findMethod(updateUseCompaction)
             .hook(new IHook() {
                 @Override
                 public void before() {
@@ -468,7 +466,7 @@ public final class CacheCompaction {
 
                 @Override
                 public void after() {
-                    if (existsField(mClass, mUseBootCompact))
+                    if (existsField(getMember().getDeclaringClass(), mUseBootCompact))
                         setThisField(mUseBootCompact, true);
                     setThisField(mUseCompaction, true);
 
@@ -486,67 +484,66 @@ public final class CacheCompaction {
                 }
             })
 
-            .constructor(ActivityManagerService,
+            .findConstructor(ActivityManagerService,
                 CachedAppOptimizer$PropertyChangedCallbackForTest,
                 CachedAppOptimizer$ProcessDependencies)
             .hook(new IHook() {
                 @Override
                 public void after() {
-                    if (existsField(mClass, mUseBootCompact))
+                    if (existsField(getMember().getDeclaringClass(), mUseBootCompact))
                         setThisField(mUseBootCompact, true);
                     setThisField(mUseCompaction, true);
                 }
-            })
-        );
+            });
 
-        chain(CachedAppOptimizer$MemCompactionHandler, /* method(shouldOomAdjThrottleCompaction, ProcessRecord)
-            .returnResult(false) 进程恢复到可感知状态了 */
+        buildChain(CachedAppOptimizer$MemCompactionHandler)
+            /* .findMethod(shouldOomAdjThrottleCompaction, ProcessRecord)
+               .returnResult(false) 进程恢复到可感知状态了 */
 
-            method(shouldThrottleMiscCompaction, ProcessRecord, int.class)
-                .returnResult(false)
+            .findMethod(shouldThrottleMiscCompaction, ProcessRecord, int.class)
+            .returnResult(false)
 
-                .method(shouldTimeThrottleCompaction, ProcessRecord, long.class, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource)
-                .hook(new IHook() {
-                    @Override
-                    public void before() {
-                        Object opt = getField(getArgs(0), mOptRecord);
-                        long lastCompactTime = (long) callMethod(opt, getLastCompactTime);
-                        long start = (long) getArgs(1);
-                        // 10 秒内不允许再次触发。
-                        if (lastCompactTime != 0) {
-                            if (start - lastCompactTime < 10000) {
-                                setResult(true);
-                                return;
-                            }
-                        }
-                        setResult(false);
-                    }
-                })
-
-                .method(shouldRssThrottleCompaction, CachedAppOptimizer$CompactProfile, int.class, String.class, long[].class)
-                .hook(new IHook() {
-                    @Override
-                    public void before() {
-                        long[] rssBefore = (long[]) getArgs(3);
-                        long anonRssBefore = rssBefore[2];
-                        if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
-                            setResult(true); // 进程可能被杀。
-                            return;
-                        }
-                        if (anonRssBefore < (1024 * 6)) {
+            .findMethod(shouldTimeThrottleCompaction, ProcessRecord, long.class, CachedAppOptimizer$CompactProfile, CachedAppOptimizer$CompactSource)
+            .hook(new IHook() {
+                @Override
+                public void before() {
+                    Object opt = getField(getArg(0), mOptRecord);
+                    long lastCompactTime = (long) callMethod(opt, getLastCompactTime);
+                    long start = (long) getArg(1);
+                    // 10 秒内不允许再次触发。
+                    if (lastCompactTime != 0) {
+                        if (start - lastCompactTime < 10000) {
                             setResult(true);
                             return;
                         }
-                        setResult(false);
                     }
-                })
-        );
+                    setResult(false);
+                }
+            })
 
-        chain(CachedAppOptimizer$DefaultProcessDependencies, methodIfExist(interruptProcCompaction)
+            .findMethod(shouldRssThrottleCompaction, CachedAppOptimizer$CompactProfile, int.class, String.class, long[].class)
+            .hook(new IHook() {
+                @Override
+                public void before() {
+                    long[] rssBefore = (long[]) getArg(3);
+                    long anonRssBefore = rssBefore[2];
+                    if (rssBefore[0] == 0 && rssBefore[1] == 0 && rssBefore[2] == 0 && rssBefore[3] == 0) {
+                        setResult(true); // 进程可能被杀。
+                        return;
+                    }
+                    if (anonRssBefore < (1024 * 6)) {
+                        setResult(true);
+                        return;
+                    }
+                    setResult(false);
+                }
+            });
+
+        buildChain(CachedAppOptimizer$DefaultProcessDependencies)
+            .findMethodIfExist(interruptProcCompaction)
             .doNothing()
 
-            .methodIfExist(setAppStartingMode, boolean.class)
-            .doNothing()
-        );
+            .findMethodIfExist(setAppStartingMode, boolean.class)
+            .doNothing();
     }
 }

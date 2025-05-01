@@ -64,8 +64,8 @@ import android.app.job.JobParameters;
 
 import com.hchen.appretention.hook.hyper.CameraOpt;
 import com.hchen.collect.HookEntrance;
-import com.hchen.hooktool.BaseHC;
-import com.hchen.hooktool.tool.additional.SystemPropTool;
+import com.hchen.hooktool.HCBase;
+import com.hchen.hooktool.utils.SystemPropTool;
 
 import java.util.List;
 
@@ -77,7 +77,7 @@ import java.util.List;
  * @author 焕晨HChen
  */
 @HookEntrance(targetBrand = "Xiaomi", targetPackage = "android", targetOS = 13f, downward = true)
-public class MiuiDef extends BaseHC {
+public class MiuiDef extends HCBase {
     @Override
     public void init() {
         /*
@@ -136,56 +136,55 @@ public class MiuiDef extends BaseHC {
          * 禁止系统压力控制器清理内存。
          * */
         setStaticField(SystemPressureController, IS_ENABLE_RECLAIM, false);
-        chain(SystemPressureController,
+        buildChain(SystemPressureController)
             /*
              * 禁止随屏幕状态启动压力监测器。
              * */
-            method(updateScreenState, boolean.class)
-                .doNothing()
-
-                /*
-                 * 禁止启动内存压力监测器。
-                 * */
-                .method(nStartPressureMonitor)
-                .doNothing()
+            .findMethod(updateScreenState, boolean.class)
+            .doNothing()
 
             /*
-             * 无奖竞猜。
+             * 禁止启动内存压力监测器。
              * */
-            // Changed: Miui14 不包含
-            // .method(foregroundActivityChangedLocked, ControllerActivityInfo)
-            // .doNothing()
-        );
+            .findMethod(nStartPressureMonitor)
+            .doNothing();
 
-        chain(ProcessPowerCleaner,
+        /*
+         * 无奖竞猜。
+         * */
+        // Changed: Miui14 不包含
+        // .findMethod(foregroundActivityChangedLocked, ControllerActivityInfo)
+        // .doNothing()
+
+        buildChain(ProcessPowerCleaner)
             /*
              * 禁止因温度 kill。
              * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_1
              * */
-            method(handleThermalKillProc, ProcessConfig)
-                .doNothing()
+            .findMethod(handleThermalKillProc, ProcessConfig)
+            .doNothing()
 
-                /*
-                 * REASON_AUTO_SLEEP_CLEAN
-                 * REASON_AUTO_SYSTEM_ABNORMAL_CLEAN
-                 * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2
-                 * */
-                .method(handleKillAll, ProcessConfig, boolean.class)
-                .doNothing()
+            /*
+             * REASON_AUTO_SLEEP_CLEAN
+             * REASON_AUTO_SYSTEM_ABNORMAL_CLEAN
+             * REASON_AUTO_THERMAL_KILL_ALL_LEVEL_2
+             * */
+            .findMethod(handleKillAll, ProcessConfig, boolean.class)
+            .doNothing()
 
-                /*
-                 * ProcessPolicy.REASON_AUTO_POWER_KILL
-                 * ProcessPolicy.REASON_AUTO_THERMAL_KILL
-                 * ProcessPolicy.REASON_AUTO_IDLE_KILL
-                 */
-                .method(handleKillApp, ProcessConfig)
-                .returnResult(true)
+            /*
+             * ProcessPolicy.REASON_AUTO_POWER_KILL
+             * ProcessPolicy.REASON_AUTO_THERMAL_KILL
+             * ProcessPolicy.REASON_AUTO_IDLE_KILL
+             */
+            .findMethod(handleKillApp, ProcessConfig)
+            .returnResult(true)
 
-                /*
-                 * 禁止锁屏 kill。
-                 * */
-                .method(handleAutoLockOff).doNothing()
-        );
+            /*
+             * 禁止锁屏 kill。
+             * */
+            .findMethod(handleAutoLockOff)
+            .doNothing();
 
         /*
          * 禁止压缩进程。
@@ -223,39 +222,39 @@ public class MiuiDef extends BaseHC {
         /*
          * 禁止预启动。
          * */
-        chain(PreloadAppControllerImpl, method(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
-                .doNothing()
+        buildChain(PreloadAppControllerImpl)
+            .findMethod(preloadAppEnqueue, String.class, boolean.class, LifecycleConfig)
+            .doNothing();
 
-            // Changed: 多余的 Hook。
-            // .method(startPreloadApp, PreloadLifecycle)
-            // .hook(new IHook() {
-            //     @Override
-            //     public void before() {
-            //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
-            //     }
-            // })
-        );
+        // Changed: 多余的 Hook。
+        // .findMethod(startPreloadApp, PreloadLifecycle)
+        // .hook(new IHook() {
+        //     @Override
+        //     public void before() {
+        //         setResult(getStaticField(PreloadAppControllerImpl, START_PRELOAD_IS_DISABLE));
+        //     }
+        // })
 
         /*
          * 是 MiuiMemoryService 几个核心方法。
          * */
         // Changed: Support Miui14
-        chain(ProcessMemoryCleaner, method(cleanUpMemory, List.class, long.class)
-                .returnResult(true)
+        buildChain(ProcessMemoryCleaner)
+            .findMethod(cleanUpMemory, List.class, long.class)
+            .returnResult(true)
 
-                .method(killPackage, AppStateManager$AppState$RunningProcess, int.class, String.class)
-                .returnResult(0L)
+            .findMethod(killPackage, AppStateManager$AppState$RunningProcess, int.class, String.class)
+            .returnResult(0L)
 
-                .method(killProcess, AppStateManager$AppState$RunningProcess, int.class, String.class)
-                .returnResult(0L)
+            .findMethod(killProcess, AppStateManager$AppState$RunningProcess, int.class, String.class)
+            .returnResult(0L)
 
-                .method(killProcessByMinAdj, int.class, String.class, List.class)
-                .doNothing()
+            .findMethod(killProcessByMinAdj, int.class, String.class, List.class)
+            .doNothing();
 
-            // Changed: 多余的 Hook。
-            // .method(checkBackgroundAppException, String.class, int.class)
-            // .returnResult(0)
-        );
+        // Changed: 多余的 Hook。
+        // .findMethod(checkBackgroundAppException, String.class, int.class)
+        // .returnResult(0)
 
         CameraOpt.doHook();
     }

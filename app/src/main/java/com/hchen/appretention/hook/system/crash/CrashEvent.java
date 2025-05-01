@@ -26,7 +26,7 @@ import android.content.Context;
 
 import com.hchen.appretention.data.field.SystemField;
 import com.hchen.collect.HookEntrance;
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 import com.hchen.hooktool.hook.IHook;
 
 import java.lang.reflect.Method;
@@ -38,7 +38,7 @@ import java.util.Optional;
  * @author 焕晨HChen
  */
 @HookEntrance(targetPackage = "android")
-public class CrashEvent extends BaseHC {
+public class CrashEvent extends HCBase {
     @Override
     public void init() {
         Class<?> appError = findClass(AppErrors);
@@ -63,16 +63,16 @@ public class CrashEvent extends BaseHC {
                 @Override
                 public void after() {
                     Context mContext = (Context) getThisField(SystemField.mContext);
-                    Object proc = getArgs(0);
-                    ApplicationErrorReport.CrashInfo crashInfo = (ApplicationErrorReport.CrashInfo) getArgs(1);
+                    Object proc = getArg(0);
+                    ApplicationErrorReport.CrashInfo crashInfo = (ApplicationErrorReport.CrashInfo) getArg(1);
                     if (crashInfo == null) return;
 
-                    String shortMsg = (String) getArgs(2);
-                    String longMsg = (String) getArgs(3);
-                    String stackTrace = (String) getArgs(4);
-                    long timeMillis = (long) Optional.ofNullable(getArgs(5)).orElse(-1);
-                    int callingPid = (int) Optional.ofNullable(getArgs(6)).orElse(-1);
-                    int callingUid = (int) Optional.ofNullable(getArgs(7)).orElse(-1);
+                    String shortMsg = (String) getArg(2);
+                    String longMsg = (String) getArg(3);
+                    String stackTrace = (String) getArg(4);
+                    long timeMillis = (long) Optional.ofNullable(getArg(5)).orElse(-1);
+                    int callingPid = (int) Optional.ofNullable(getArg(6)).orElse(-1);
+                    int callingUid = (int) Optional.ofNullable(getArg(7)).orElse(-1);
 
                     if ("Native crash".equals(crashInfo.exceptionClassName))
                         return; // 跳过 Native crash 事件

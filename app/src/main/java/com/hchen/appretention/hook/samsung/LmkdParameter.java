@@ -25,16 +25,16 @@ import static com.hchen.appretention.data.path.SystemClass.ActiveUids;
 import static com.hchen.appretention.data.path.SystemClass.ActivityManagerService;
 import static com.hchen.appretention.data.path.SystemClass.PlatformCompat;
 import static com.hchen.appretention.data.path.SystemClass.ProcessList;
+import static com.hchen.hooktool.core.CoreTool.callStaticMethod;
+import static com.hchen.hooktool.core.CoreTool.findClass;
+import static com.hchen.hooktool.core.CoreTool.hookMethod;
 import static com.hchen.hooktool.log.XposedLog.logD;
 import static com.hchen.hooktool.log.XposedLog.logI;
-import static com.hchen.hooktool.tool.CoreTool.callStaticMethod;
-import static com.hchen.hooktool.tool.CoreTool.findClass;
-import static com.hchen.hooktool.tool.CoreTool.hookMethod;
 
 import android.util.Pair;
 
+import com.hchen.hooktool.core.CoreTool;
 import com.hchen.hooktool.hook.IHook;
-import com.hchen.hooktool.tool.CoreTool;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -114,14 +114,14 @@ public final class LmkdParameter {
         if (!isInit)
             init();
 
-        int ordinal = (int) iHook.getArgs(0);
-        int value = (int) iHook.getArgs(1);
+        int ordinal = (int) iHook.getArg(0);
+        int value = (int) iHook.getArg(1);
 
         if (mOrdinalAndParameterMap.get(ordinal) != null) {
             Pair<String, Integer> param = mOrdinalAndParameterMap.get(ordinal);
             assert param != null;
             int newValue = param.second;
-            iHook.setArgs(1, newValue);
+            iHook.setArg(1, newValue);
             logD(TAG, "Lmkd parameter: " + param.first + ", old value: " + value + ", new value: " + newValue);
         }
     }

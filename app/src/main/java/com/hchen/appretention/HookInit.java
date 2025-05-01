@@ -20,15 +20,15 @@ package com.hchen.appretention;
 
 import static com.hchen.hooktool.log.XposedLog.logENoSave;
 
+import androidx.annotation.NonNull;
+
 import com.hchen.appretention.hook.EntranceMap;
 import com.hchen.appretention.log.SaveLog;
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 import com.hchen.hooktool.HCEntrance;
 import com.hchen.hooktool.HCInit;
-import com.hchen.hooktool.tool.additional.DeviceTool;
-import com.hchen.hooktool.tool.additional.SystemPropTool;
-
-import org.luckypray.dexkit.DexKitBridge;
+import com.hchen.hooktool.utils.DeviceTool;
+import com.hchen.hooktool.utils.SystemPropTool;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -44,31 +44,23 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
  */
 public class HookInit extends HCEntrance {
     private static final String TAG = "AppRetention";
-    @Deprecated
-    private static final String[] hookPackages = {
-        "android",
-        "com.miui.powerkeeper",
-        "com.oplus.athena",
-        "com.oplus.battery",
-        "com.android.systemui"
-    };
 
+    @NonNull
     @Override
-    public HCInit.BasicData initHC(HCInit.BasicData basicData) {
-        return basicData.setTag("AppRetention")
+    public HCInit.BasicData initHC(@NonNull HCInit.BasicData basicData) {
+        return basicData
+            .setTag(TAG)
             .setModulePackageName(BuildConfig.APPLICATION_ID)
             .setLogLevel(HCInit.LOG_D)
-            .initLogExpand(new String[]{
-                "com.hchen.appretention"
-            });
+            .setLogExpandPath("com.hchen.appretention.hook");
     }
 
     @Override
-    public void onLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+    public void onLoadPackage(@NonNull XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         EntranceMap.get().forEach(new BiConsumer<>() {
             @Override
             public void accept(String s, EntranceMap entranceMap) {
-                if (!entranceMap.mTargetPackage.equals(lpparam.packageName))
+                if (!entranceMap.mTargetPackage.equals(loadPackageParam.packageName))
                     return;
                 if (!"Any".equals(entranceMap.mTargetBrand) && !DeviceTool.isRightRom(entranceMap.mTargetBrand))
                     return;
@@ -100,12 +92,12 @@ public class HookInit extends HCEntrance {
                 }
                 try {
                     Class<?> hookClass = getClass().getClassLoader().loadClass(s);
-                    BaseHC baseHC = (BaseHC) hookClass.getDeclaredConstructor().newInstance();
-                    String className = baseHC.TAG;
+                    HCBase hcBase = (HCBase) hookClass.getDeclaredConstructor().newInstance();
+                    String className = hcBase.TAG;
                     SaveLog.initLogToFile(className);
                     // SaveLog.initSaveLog(className);
-                    HCInit.initLoadPackageParam(lpparam);
-                    baseHC.onLoadPackage();
+                    HCInit.initLoadPackageParam(loadPackageParam);
+                    hcBase.onLoadPackage();
                 } catch (ClassNotFoundException | NoSuchMethodException |
                          IllegalAccessException |
                          InstantiationException | InvocationTargetException e) {
@@ -113,38 +105,9 @@ public class HookInit extends HCEntrance {
                 }
             }
         });
-        // if (lpparam.packageName.equals("com.hchen.himiuixdemo")) {
-        //     HCInit.initLoadPackageParam(lpparam);
-        //     new TestHook().onLoadPackage();
-        // }
     }
 
     private boolean isEnableOneUi() {
         return SystemPropTool.getProp("persist.hchen.oneui.enable", false);
-    }
-
-    @Deprecated
-    private void initHook(BaseHC baseHC) {
-        baseHC.onLoadPackage();
-    }
-
-    @Deprecated
-    private DexKitBridge mBridge = null;
-
-    @Deprecated
-    public DexKitBridge initDexkit(XC_LoadPackage.LoadPackageParam loadPackageParam) {
-        if (mBridge == null) {
-            System.loadLibrary("dexkit");
-            mBridge = DexKitBridge.create(loadPackageParam.appInfo.sourceDir);
-        }
-        return mBridge;
-    }
-
-    @Deprecated
-    public void closeDexkit() {
-        if (mBridge != null) {
-            mBridge.close();
-            mBridge = null;
-        }
     }
 }

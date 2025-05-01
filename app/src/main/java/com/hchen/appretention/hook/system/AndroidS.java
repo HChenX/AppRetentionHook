@@ -52,7 +52,7 @@ import com.hchen.appretention.hook.system.opt.ApplyAdjOpt;
 import com.hchen.appretention.hook.system.opt.CacheCompaction;
 import com.hchen.appretention.hook.system.opt.OomLevelsOpt;
 import com.hchen.collect.HookEntrance;
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 import com.hchen.hooktool.hook.IHook;
 
 /**
@@ -61,7 +61,7 @@ import com.hchen.hooktool.hook.IHook;
  * @author 焕晨HChen
  */
 @HookEntrance(targetPackage = "android", targetSdks = {32, 31})
-public class AndroidS extends BaseHC {
+public class AndroidS extends HCBase {
     @Override
     protected void init() {
         OomLevelsOpt.init();
@@ -215,8 +215,9 @@ public class AndroidS extends BaseHC {
         /*
          * 各种基本常量设置。
          * */
-        chain(ActivityManagerConstants, constructor(
-            Context.class, ActivityManagerService, Handler.class)
+        buildChain(ActivityManagerConstants)
+            .findConstructor(
+                Context.class, ActivityManagerService, Handler.class)
             .hook(new IHook() {
                 @Override
                 public void after() {
@@ -235,24 +236,23 @@ public class AndroidS extends BaseHC {
 
             /* 一般情况不会被主动调用，仅保险使用 */
             // Changed: AndroidS 不包含
-            // .method(updateKillBgRestrictedCachedIdle)
+            // .findMethod(updateKillBgRestrictedCachedIdle)
             // .doNothing()
 
-            // .methodIfExist(updateUseModernTrim) // Note: AndroidS 不包含
+            // .findMethodIfExist(updateUseModernTrim) // Note: AndroidS 不包含
             // .doNothing()
 
-            /*.method(updateProactiveKillsEnabled)
-            .doNothing()*/ // AndroidS 不包含
+            /* .findMethod(updateProactiveKillsEnabled)
+               .doNothing()*/ // AndroidS 不包含
 
-            .method(updateMaxCachedProcesses)
+            .findMethod(updateMaxCachedProcesses)
             .doNothing()
 
-            .method(updateMaxPhantomProcesses)
+            .findMethod(updateMaxPhantomProcesses)
             .doNothing()
 
-            .methodIfExist(updatePerfConfigConstants) // 高通的东西
-            .doNothing()
-        );
+            .findMethodIfExist(updatePerfConfigConstants) // 高通的东西
+            .doNothing();
 
         /*
          * 禁止主动杀戮。

@@ -18,14 +18,14 @@
  */
 package com.hchen.appretention.hook;
 
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 
 /**
  * 测试
  *
  * @author 焕晨HChen
  */
-public class TestHook extends BaseHC {
+public class TestHook extends HCBase {
     @Override
     public void init() {
     }

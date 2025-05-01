@@ -39,7 +39,7 @@ import android.provider.Settings;
 
 import com.hchen.appretention.BuildConfig;
 import com.hchen.appretention.log.SaveLog;
-import com.hchen.hooktool.BaseHC;
+import com.hchen.hooktool.HCBase;
 import com.hchen.hooktool.hook.IHook;
 import com.hchen.hooktool.log.AndroidLog;
 
@@ -58,7 +58,7 @@ import java.util.concurrent.Executors;
  */
 @Deprecated
 // @HookCondition(targetPackage = "com.android.systemui")
-public class LogPuppet extends BaseHC {
+public class LogPuppet extends HCBase {
     private boolean isRegisterReceiver = false;
     private static boolean isKillEventRecording = false;
     private static final String SETTINGS_KILL_EVENT_LOG_RECORD_ENABLE = "kill_event_log_record_enable";
