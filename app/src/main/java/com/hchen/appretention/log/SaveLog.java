@@ -73,8 +73,8 @@ public class SaveLog {
     public static final String USER_UNLOCKED_COMPLETED_PROP = "persist.sys.user.unlocked.completed";
     @Deprecated
     public static final String SETTINGS_LOG_SERVICE_COMPLETED = "log_service_boot_complete";
-    public static final String LOG_FILE_PATH = "/data/system/AppRetention/";
-    private static final String LOG_OLD_FILE_PATH = "/data/system/AppRetention/old/";
+    public static final String LOG_FILE_PATH = "/data/adb/lspd/log/AppRetention/";
+    private static final String LOG_OLD_FILE_PATH = "/data/adb/lspd/log.old/AppRetention/";
     private static String LOG_FILE_FULL_PATH = "";
     private static final HashMap<String, LogFileStateData> mLogFileStateDataMap = new HashMap<>();
     private static final HashMap<String, LogContentData> mLogContentDataMap = new HashMap<>();
